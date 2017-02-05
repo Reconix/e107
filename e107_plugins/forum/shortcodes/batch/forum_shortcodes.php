@@ -23,43 +23,43 @@ class forum_shortcodes extends e_shortcode
 	// START OF $FVARS
 	function sc_forumtitle()
 	{
-		return e107::pref('forum','title', LAN_PLUGIN_FORUM_NAME);	
+		return e107::pref('forum','title', LAN_PLUGIN_FORUM_NAME);
 	}
 
 // LEGACY shortcodes, to be deprecated & directly handled in template file???
 	function sc_threadtitle()
 	{
-		return LAN_FORUM_0002;	
+		return LAN_FORUM_0002;
 	}
 
 	function sc_replytitle()
 	{
-		return LAN_FORUM_0003;	
+		return LAN_FORUM_0003;
 	}
 
 	function sc_lastpostitle()
 	{
-		return LAN_FORUM_0004;	
+		return LAN_FORUM_0004;
 	}
 
 	function sc_infotitle()
 	{
-		return LAN_FORUM_0009;	
+		return LAN_FORUM_0009;
 	}
 
 	function sc_newthreadtitle()
 	{
-		return LAN_FORUM_0075;	
+		return LAN_FORUM_0075;
 	}
 
 	function sc_postedtitle()
 	{
-		return LAN_FORUM_0074;	
+		return LAN_FORUM_0074;
 	}
 
 	function sc_tracktitle()
 	{
-		return LAN_FORUM_0073;	
+		return LAN_FORUM_0073;
 	}
 
 	function sc_statlink()
@@ -83,12 +83,12 @@ class forum_shortcodes extends e_shortcode
 
 	function sc_logo()
 	{
-		return IMAGE_e;	
+		return IMAGE_e;
 	}
 
 	function sc_newimage()
 	{
-		return IMAGE_new_small;	
+		return IMAGE_new_small;
 	}
 
 	function sc_userinfo()
@@ -519,7 +519,7 @@ class forum_shortcodes extends e_shortcode
 //--		$datestamp = $gen->convert_date($thread['thread_lastpost'], 'forum');
 		$datestamp = $this->gen->convert_date($this->var['thread_lastpost'], 'forum');
 
-  
+
 		if(!$this->var['user_name'])
 		{
 			return $author_name.'<br />'.$datestamp;

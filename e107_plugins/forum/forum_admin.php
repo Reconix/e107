@@ -722,7 +722,7 @@ if(!deftrue('OLD_FORUMADMIN'))
 			}
 		}
 
-		//TODO Add SEF-url generation for forum and threads where missing. 
+		//TODO Add SEF-url generation for forum and threads where missing.
 		function toolsPage()
 		{
 			$sql = e107::getDb();
@@ -1234,11 +1234,11 @@ if(isset($_POST['setMods']))
 		}
 		else
 		{
-			$mes->addError(LAN_UPDATED_FAILED); 
+			$mes->addError(LAN_UPDATED_FAILED);
 		}
 
 	}
-	
+
 	$ns->tablerender($caption, $mes->render().$text);
 }
 
@@ -1360,7 +1360,7 @@ if(isset($_POST['submit_parent']))
 		'forum_postclass'	=> (int)$_POST['forum_postclass'],
 		'forum_threadclass'	=> (int)$_POST['forum_threadclass'],
 	);
-	
+
 	if($sql->insert('forum', $insert))
 	{
 		$mes->addSuccess(LAN_CREATED);
@@ -1369,7 +1369,7 @@ if(isset($_POST['submit_parent']))
 	{
 		$mes->addError(LAN_CREATED_FAILED);
 	}
-	
+
 	$ns->tablerender($caption, $mes->render().$text);
 }
 
@@ -1379,13 +1379,13 @@ if(isset($_POST['update_parent']))
 {
 	unset($update);
 	$update = array(
-		'forum_name' 		=> $tp->toDb($_POST['forum_name']), 
-		'forum_datestamp' 	=> time(), 
-		'forum_class' 		=> (int)$_POST['forum_class'], 
-		'forum_postclass' 	=> (int)$_POST['forum_postclass'], 
-		'forum_threadclass' => (int)$_POST['forum_threadclass'], 
+		'forum_name' 		=> $tp->toDb($_POST['forum_name']),
+		'forum_datestamp' 	=> time(),
+		'forum_class' 		=> (int)$_POST['forum_class'],
+		'forum_postclass' 	=> (int)$_POST['forum_postclass'],
+		'forum_threadclass' => (int)$_POST['forum_threadclass'],
 		'WHERE' 			=> 'forum_id = '.(int)$id
-	); 
+	);
 
 	if($sql->update('forum', $update))
 	{
@@ -1413,7 +1413,7 @@ if(isset($_POST['submit_forum']))
 	$tmp['forum_postclass'] 	= (int)$_POST['forum_postclass'];
 	$tmp['forum_threadclass'] 	= (int)$_POST['forum_threadclass'];
 	$tmp['forum_parent'] 		= (int)$_POST['forum_parent'];
-	
+
 	if($sql->insert('forum', $tmp))
 	{
 		$mes->addSuccess(LAN_CREATED);
@@ -1457,7 +1457,7 @@ if (isset($_POST['update_order']))
 		$sql->update('forum', "forum_order=".$tmp[1]." WHERE forum_id=".$tmp[0]);
 	}
 	$mes->addSuccess(LAN_UPDATED);
-	$ns->tablerender($caption, $mes->render().$text); 
+	$ns->tablerender($caption, $mes->render().$text);
 }
 
 
@@ -1486,7 +1486,7 @@ if (isset($_POST['updateoptions']))
 	$fPref->save(true, true);
 
 	$mes->addSuccess();
-	$ns->tablerender($caption, $mes->render().$text); 
+	$ns->tablerender($caption, $mes->render().$text);
 }
 
 
@@ -1522,11 +1522,11 @@ if (isset($_POST['frsubmit']))
 }
 
 if (vartrue($delete) == 'main') {
-	if ($sql->delete('forum', "forum_id='$del_id' ")) 
+	if ($sql->delete('forum', "forum_id='$del_id' "))
 	{
 		$mes->addSuccess(LAN_DELETED);
 	}
-	else 
+	else
 	{
 		$mes->addError(LAN_DELETED_FAILED);
 	}
@@ -1555,12 +1555,12 @@ if ($delete == 'cat')
 		$mes->addSuccess(LAN_DELETED);
 		$action = 'main';
 	}
-	else 
+	else
 	{
 		$mes->addError(LAN_DELETED_FAILED);
 	}
 
-	$ns->tablerender($caption, $mes->render().$text);	
+	$ns->tablerender($caption, $mes->render().$text);
 }
 
 
@@ -1657,10 +1657,10 @@ class forumAdmin
 
 	function show_options($action)
 	{
-		
+
 		$sql = e107::getDb();
 		if ($action == '') { $action = 'main'; }
-		
+
 		// ##### Display options ---------------------------------------------------------------------------------------------------------
 		$var['main']['text'] = FORLAN_76;
 		$var['main']['link'] = e_SELF;
@@ -1689,7 +1689,7 @@ class forumAdmin
 		show_admin_menu(FORLAN_7, $action, $var);
 	}
 
-	// Initial delete function. Determines which delete routine should be applied. 
+	// Initial delete function. Determines which delete routine should be applied.
 	function delete_item($id)
 	{
 		// If a delete routine is cancelled, redirect back to forum listing
@@ -1701,9 +1701,9 @@ class forumAdmin
 
 		$sql = e107::getDb();
 		$id = (int)$id;
-		
+
 		$confirm = isset($_POST['confirm']) ? true : false;
-		
+
 		if($confirm)
 		{
 			e107::getRender()->tablerender('Forums', e107::getMessage()->render().$txt);
@@ -1733,7 +1733,7 @@ class forumAdmin
 				$txt .= $this->delete_forum($id, $confirm);
 			}
 		}
-		// forum_id not found, should not happen. 
+		// forum_id not found, should not happen.
 		else
 		{
 			$this->show_existing_forums(vartrue($sub_action), vartrue($id));
@@ -1765,7 +1765,7 @@ class forumAdmin
 			}
 			else
 			{
-				$mes->addError(LAN_DELETED_FAILED); 
+				$mes->addError(LAN_DELETED_FAILED);
 			}
 		}
 	}
@@ -1797,7 +1797,7 @@ class forumAdmin
 	// 	return $sql->delete('forum', 'forum_id = '.$forumId);
 	// }
 
-	// delete forum 
+	// delete forum
 	function delete_forum($id, $confirm = false)
 	{
 		$sql = e107::getDb();
@@ -1823,13 +1823,13 @@ class forumAdmin
 			else
 			{
 				$mes->addError(LAN_DELETED_FAILED);
-			} 			
+			}
 		}
 
 		$sql->select('forum', 'forum_name, forum_threads, forum_replies', 'forum_id = '.$id);
 		$row = $sql->fetch();
-	
-		$mes->addInfo("Forum {$id} [".$tp->toHTML($row['forum_name'])."] has {$row['forum_threads']} threads and {$row['forum_replies']} replies."); 
+
+		$mes->addInfo("Forum {$id} [".$tp->toHTML($row['forum_name'])."] has {$row['forum_threads']} threads and {$row['forum_replies']} replies.");
 	}
 
 	function delete_sub($id, $confirm = FALSE)
@@ -1853,15 +1853,15 @@ class forumAdmin
 
 		$sql->select('forum', '*', 'forum_id = '.$id);
 		$row = $sql->fetch();
-		$mes->addInfo("Sub-forum {$id} [".$tp->toHTML($row['forum_name'])."] has {$row['forum_threads']} threads, {$row['forum_replies']} replies."); 
+		$mes->addInfo("Sub-forum {$id} [".$tp->toHTML($row['forum_name'])."] has {$row['forum_threads']} threads, {$row['forum_replies']} replies.");
 	}
 
 	function delete_show_confirm($message)
 	{
 		$mes = e107::getMessage();
-		
+
 		$mes->addInfo($message);
-		
+
 		$text = "
 		<form method='post' action='".e_SELF.'?'.e_QUERY."'>
 		<div align='center'>
@@ -1942,8 +1942,8 @@ class forumAdmin
 		</tr>
 		</table>
 		</form>";
-		
-		$ns->tablerender(LAN_FORUM_0069, $txt); 
+
+		$ns->tablerender(LAN_FORUM_0069, $txt);
 	}
 
 	function show_existing_forums($sub_action, $id, $mode = false)
@@ -2211,7 +2211,7 @@ class forumAdmin
 			$text .= e107::getUserClass()->uc_dropdown('forum_moderators', $fInfo['forum_moderators'], 'admin,classes')."<span class='field-help'>".FORLAN_34."</span>";
 			$text .= "</td>
 		</tr>
-		
+
 		<tr>
 			<td>".FORLAN_23.":</td>
 			<td>".e107::getUserClass()->uc_dropdown('forum_class', $fInfo['forum_class'], 'nobody,public,member,admin,classes')."<span class='field-help'>".FORLAN_24."</span></td>
@@ -2227,7 +2227,7 @@ class forumAdmin
 			<td>".e107::getUserClass()->uc_dropdown('forum_threadclass', $fInfo['forum_threadclass'], 'nobody,public,member,admin,classes')."<span class='field-help'>".FORLAN_185."</span></td>
 		</tr>
 		</table>
-		
+
 		<div class='buttons-bar center'>";
 		if ($sub_action == "edit")
 		{
@@ -2244,13 +2244,13 @@ class forumAdmin
 		$ns->tablerender(LAN_FORUM_1001, $text);
 	}
 
-	
-	// function show_message($message) 
+
+	// function show_message($message)
 	// {
-		
-	// 	e107::getRender();->tablerender('', $message); 
+
+	// 	e107::getRender();->tablerender('', $message);
 	// }
-	
+
 
 	function show_tools()
 	{
@@ -2321,7 +2321,7 @@ class forumAdmin
 	{
 		global $fPref;
 		$ns = e107::getRender();
-		$sql    = e107::getDb(); 
+		$sql    = e107::getDb();
 		//$e107 = e107::getInstance();
 		$frm = e107::getForm();
 		$mes = e107::getMessage();
@@ -2380,7 +2380,7 @@ class forumAdmin
 		</tr>
 
 		<tr>
-			<td>".FORLAN_70.":"; 
+			<td>".FORLAN_70.":";
 
 			if(!$pref['image_post'])
 			{
@@ -2457,7 +2457,7 @@ class forumAdmin
 			<td>".($fPref->get('hilightsticky') ? "<input type='checkbox' name='forum_hilightsticky' value='1' checked='checked' />" : "<input type='checkbox' name='forum_hilightsticky' value='1' />")."<span class='field-help'>".FORLAN_133."</span></td>
 		</tr>
 		</table>
-	
+
 		<div class='buttons-bar center'>
 			".$frm->admin_button('updateoptions', LAN_UPDATE, 'update')."
 		</div>
@@ -2466,11 +2466,11 @@ class forumAdmin
 		$ns->tablerender(FORLAN_7, $mes->render() . $text);
 	}
 
-	function show_reported($sub_action) 
+	function show_reported($sub_action)
 	{
 		$rs = new form;
 		$sql = e107::getDb();
-		$ns = e107::getRender(); 
+		$ns = e107::getRender();
 		$tp = e107::getParser();
 		$mes = e107::getMessage();
 
@@ -2518,7 +2518,7 @@ class forumAdmin
 
 			$ns->tablerender(FORLAN_116, $text);
 
-			} 
+			}
 			else
 			{
 				if ($reported_total = $sql->select("generic", "*", "gen_type='reported_post' OR gen_type='Reported Forum Post'"))
@@ -2531,7 +2531,7 @@ class forumAdmin
 					</tr>";
 					while ($row = $sql->fetch())
 					{
-						$text .= " 
+						$text .= "
 						<tr>
 							<td<a href='".e_SELF."?sr.".$row['gen_id']."'>".FORLAN_171." #".$row['gen_intdata']."</a></td>
 							<td text-align:center; vertical-align:top; white-space: nowrap'>
@@ -2650,7 +2650,7 @@ class forumAdmin
 					$txt .= "
 					<tr>
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;{$s['forum_name']}</td>
-						<td>".e107::getUserClass()->uc_dropdown("mods[{$s['forum_id']}]", $s['forum_moderators'], 'admin,classes')."</td>	
+						<td>".e107::getUserClass()->uc_dropdown("mods[{$s['forum_id']}]", $s['forum_moderators'], 'admin,classes')."</td>
 					</tr>
 					";
 				}
@@ -2662,7 +2662,7 @@ class forumAdmin
 				".$frm->admin_button('setMods', LAN_UPDATE, 'update')."
 			</div>
 			</form>";
-			$ns->tablerender(LAN_FORUM_2003, $txt);  
+			$ns->tablerender(LAN_FORUM_2003, $txt);
 		}
 */
 		//
@@ -2684,7 +2684,7 @@ class forumAdmin
 			list($id, $memberrules, $wm_active5) = $sql->fetch();
 			list($id, $adminrules, $wm_active6) = $sql->fetch();
 			*/
-			
+
 /*
 			if($sql->select('generic','*',"gen_type='forum_rules_guest'"))
 			{
@@ -2714,7 +2714,7 @@ class forumAdmin
 				<td>".WMGLAN_1.": <br />
 				".WMGLAN_6.":";
 				if (vartrue($guest_rules['gen_intdata']))
-				{ 
+				{
 					$text .= "<input type='checkbox' name='guest_active' value='1'  checked='checked' />";
 				}
 				else
@@ -2722,9 +2722,9 @@ class forumAdmin
 					$text .= "<input type='checkbox' name='guest_active' value='1' />";
 				}
 				$text .= "</td>
-				
+
 				<td>
-					".$frm->bbarea('guestrules', $guesttext)." 
+					".$frm->bbarea('guestrules', $guesttext)."
 				</td>
 			</tr>
 
@@ -2740,7 +2740,7 @@ class forumAdmin
 					$text .= "<input type='checkbox' name='member_active' value='1' />";
 				}
 				$text .= "</td>
-				
+
 				<td>
 					".$frm->bbarea('memberrules', $membertext)."
 				</td>
@@ -2761,7 +2761,7 @@ class forumAdmin
 
 				$text .= "</td>
 				<td>
-					".$frm->bbarea('adminrules', $admintext)." 
+					".$frm->bbarea('adminrules', $admintext)."
 				</td>
 			</tr>
 			</table>
