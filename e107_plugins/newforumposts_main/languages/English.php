@@ -1,5 +1,5 @@
 <?php
-	
+
 define("NFPM_LAN_1", "Thread");
 define("NFPM_LAN_2", "Poster");
 define("NFPM_LAN_3", "Views");
@@ -7,7 +7,7 @@ define("NFPM_LAN_4", "Replies");
 define("NFPM_LAN_5", "Lastpost");
 define("NFPM_LAN_6", "Threads");
 define("NFPM_LAN_7", "by");
-	
+
 define("NFPM_L1", "This plugin displays a list of new forum posts on your front page");
 define("NFPM_L2", "Latest Forum Posts");
 define("NFPM_L3", "To configure please click on the link in the plugins section of the admin front page");
@@ -31,6 +31,6 @@ define('NFPM_L20', 'No New Posts');
 define('NFPM_L21', 'Sticky Thread');
 define('NFPM_L22', 'Closed Sticky Thread');
 define('NFPM_L23', 'Announcement');
-define('NFPM_L24', 'Closed Thread');	
-	
+define('NFPM_L24', 'Closed Thread');
+
 ?>

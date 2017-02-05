@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * e107 website system
  *
@@ -39,7 +39,7 @@ $ns->tablerender($caption, $mes->render() . $text);
 
 $text = "
 	<form method='post' action='".e_SELF."?".e_QUERY."' id='menu_conf_form'>
-	<table class='table adminform'>	 
+	<table class='table adminform'>
 	<colgroup span='2'>
 		<col class='col-label' />
 		<col class='col-control' />
@@ -55,11 +55,11 @@ $text = "
 	<tr>
 		<td>".NFPM_L9.": </td>
 		<td>".$frm->text('nfp_amount', $pref['nfp_amount'], '3')."</td>
-	</tr>	 
+	</tr>
 	<tr>
 		<td>".NFPM_L14."</td>
 		<td>".$frm->radio_switch('nfp_posts', $pref['nfp_posts'], LAN_YES, LAN_NO)."<span class='field-help'>".NFPM_L15."</span></td>
-	</tr>	 
+	</tr>
 	<tr>
 		<td>".NFPM_L10."</td>
 		<td>".$frm->radio_switch('nfp_layer', $pref['nfp_layer'], LAN_YES, LAN_NO)."<br />

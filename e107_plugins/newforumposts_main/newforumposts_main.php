@@ -37,7 +37,7 @@ elseif(!isset($NEWFORUMPOSTSTYLE_HEADER))
 		<td style='width:5%; text-align:center' class='forumheader'>".NFPM_LAN_4."</td>
 		<td style='width:25%; text-align:center' class='forumheader'>".NFPM_LAN_5."</td>
 		</tr>";
-		
+
 	$NEWFORUMPOSTSTYLE_MAIN = "
 		<tr>
 		<td style='width:5%; text-align:center' class='forumheader3'>{ICON}</td>
@@ -47,7 +47,7 @@ elseif(!isset($NEWFORUMPOSTSTYLE_HEADER))
 		<td style='width:5%; text-align:center' class='forumheader3'>{REPLIES}</td>
 		<td style='width:25%; text-align:center' class='forumheader3'>{LASTPOST}<br /><span class='smalltext'>{LASTPOSTDATE}&nbsp;</span></td>
 		</tr>";
-		
+
 	$NEWFORUMPOSTSTYLE_FOOTER = "
 		<tr>
 		<td colspan='6' style='text-align:center' class='forumheader2'>
@@ -56,7 +56,7 @@ elseif(!isset($NEWFORUMPOSTSTYLE_HEADER))
 		</tr>
 		</table>
 		</div>";
-		
+
 }
 
 $results = $sql->gen("
@@ -139,40 +139,40 @@ foreach ($forumArray as $forumInfo)
 		}
 	}
 
-	if ($newflag) 
+	if ($newflag)
 	{
-		if ($forumInfo['thread_total_replies'] >= $pref['forum_popular']) 
+		if ($forumInfo['thread_total_replies'] >= $pref['forum_popular'])
 		{
 			$iconfile = 'new_popular.png';
 			$iconalt = NFPM_L17;
 		}
-		else 
+		else
 		{
 			$iconfile = 'new.png';
 			$iconalt = NFPM_L18;
 		}
-	} 
-	else 
+	}
+	else
 	{
-		if ($forumInfo['thread_total_replies'] >= $pref['forum_popular']) 
+		if ($forumInfo['thread_total_replies'] >= $pref['forum_popular'])
 		{
 			$iconfile = 'nonew_popular.png';
 			$iconalt = NFPM_L19;
 		}
-		else 
+		else
 		{
 			$iconfile = 'nonew.png';
 			$iconalt = NFPM_L20;
 		}
-		
+
 		if ($forumInfo['thread_s'] == 1)
 		{
-			if ($forumInfo['thread_active']) 
+			if ($forumInfo['thread_active'])
 			{
 				$iconfile = 'sticky.png';
 				$iconalt = NFPM_L21;
 			}
-			else 
+			else
 			{
 				$iconfile = 'sticky_closed.png';
 				$iconalt = NFPM_L22;
@@ -189,7 +189,7 @@ foreach ($forumArray as $forumInfo)
 			$iconalt = NFPM_L24;
 		}
 	}
-	
+
 	$ICON = "<img src='".e_PLUGIN_ABS."forum/images/".IMODE."/". $iconfile. "' alt='".$iconalt."' title='".$iconalt."' />";
 	$x = explode(chr(1), $thread_user);
 	$tmp = explode(".", $x[0], 2);
@@ -211,14 +211,14 @@ foreach ($forumArray as $forumInfo)
 			$POSTER = NFPM_L16;
 		}
 	}
-	
+
 	$THREAD = "<a href='".$path."forum_viewtopic.php?{$thread_id}.last'>$thread_name</a>";
 	$FORUM = "<a href='".$path."forum_viewforum.php?{$forum_id}'>$forum_name</a>";
-	
+
 	$VIEWS = $thread_views;
 	$REPLIES = $thread_total_replies;
 	$text .= preg_replace("/\{(.*?)\}/e", '$\1', $NEWFORUMPOSTSTYLE_MAIN);
-	
+
 }
 $text .= preg_replace("/\{(.*?)\}/e", '$\1', $NEWFORUMPOSTSTYLE_FOOTER);
 
