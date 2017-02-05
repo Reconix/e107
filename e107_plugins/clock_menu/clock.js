@@ -22,7 +22,7 @@ function tick(e107_datepref,e107_dateformat,e107_datesuff1,e107_datesuff2,e107_d
     timeString= timeString  + e107_datesuff3 + " ";
   } else {
     timeString = timeString  + e107_datesuff4 + " ";
-  } 
+  }
   if (intYear < 2000){
 	intYear += 1900;
   }
@@ -31,7 +31,7 @@ function tick(e107_datepref,e107_dateformat,e107_datesuff1,e107_datesuff2,e107_d
     if (intHours == 0) {
        hours = "12:";
        ap = "am.";
-    } else if (intHours < 12) { 
+    } else if (intHours < 12) {
        hours = intHours+":";
        ap = "am.";
     } else if (intHours == 12) {

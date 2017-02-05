@@ -13,7 +13,7 @@
 
 $eplug_admin = TRUE;
 require_once('../../class2.php');
-if (!getperms('1')) 
+if (!getperms('1'))
 {
 	e107::redirect('admin');
 	 exit ;
@@ -24,18 +24,18 @@ e107::includeLan(e_PLUGIN.'clock_menu/languages/admin/'.e_LANGUAGE.'.php');
 $frm = e107::getForm();
 $mes = e107::getMessage();
 $menu_pref = e107::getConfig('menu')->getPref('');
-	
-if (isset($_POST['update_menu'])) 
+
+if (isset($_POST['update_menu']))
 {
 	$temp = array();
-	while (list($key, $value) = each($_POST)) 
+	while (list($key, $value) = each($_POST))
 	{
-		if ($key != 'update_menu') 
+		if ($key != 'update_menu')
 		{
 			$temp[$key] = $value;
 		}
 	}
-	if ($_POST['clock_format'] != 1) 
+	if ($_POST['clock_format'] != 1)
 	{
 		$temp['clock_format'] = 0;
 	}
@@ -49,7 +49,7 @@ if (isset($_POST['update_menu']))
 		$menuPref->save(false, true, false);
 	}
 }
-	
+
 $ns->tablerender($caption, $mes->render(). $text);
 
 $text = "
@@ -63,7 +63,7 @@ $text = "
 		<td>".CLOCK_AD_L2.": </td>
 		<td><input class='tbox' type='text' name='clock_caption' size='20' value='".$menu_pref['clock_caption']."' maxlength='100' />	</td>
 	</tr>
-	
+
 	<tr>
 		<td>".CLOCK_AD_L5.": </td>
 		<td>".$frm->checkbox('clock_format', 1, varset($menu_pref['clock_format'], 0))."<span class='field-help'>".CLOCK_AD_L6."</span></td>
@@ -73,28 +73,28 @@ $text = "
 		<td>".CLOCK_AD_L7.": </td>
 		<td><input class='tbox' type='text' name='clock_dateprefix' size='10' value='".$menu_pref['clock_dateprefix']."' maxlength='50' /><span class='field-help'>".CLOCK_AD_L8."</span></td>
 	</tr>
-	
+
 	<tr>
 		<td>".CLOCK_AD_L9.": </td>
 		<td><input class='tbox' type='text' name='clock_datesuffix1' size='10' value='".$menu_pref['clock_datesuffix1']."' maxlength='50' /><span class='field-help'>".CLOCK_AD_L13."</span></td>
 	</tr>
-	
+
 	<tr>
 		<td>".CLOCK_AD_L10.": </td>
 		<td><input class='tbox' type='text' name='clock_datesuffix2' size='10' value='".$menu_pref['clock_datesuffix2']."' maxlength='50' /><span class='field-help'>".CLOCK_AD_L13."</span></td>
 	</tr>
-	
+
 	<tr>
 		<td>".CLOCK_AD_L11.": </td>
 		<td><input class='tbox' type='text' name='clock_datesuffix3' size='10' value='".$menu_pref['clock_datesuffix3']."' maxlength='50' /><span class='field-help'>".CLOCK_AD_L13."</span></td>
 	</tr>
-	
+
 	<tr>
 		<td>".CLOCK_AD_L12.": </td>
 		<td><input class='tbox' type='text' name='clock_datesuffix4' size='10' value='".$menu_pref['clock_datesuffix4']."' maxlength='50' /><span class='field-help'>".CLOCK_AD_L13."</span></td>
 	</tr>
 	</table>
-	
+
 	<div class='buttons-bar center'>
 		".$frm->admin_button('update_menu', LAN_UPDATE, 'update')."
 	</div>
