@@ -7,7 +7,7 @@
 |     $Revision$
 |     $Date$
 |     $Author$
-|     Italian Translation: e107 Italian Team http://www.e107it.org	
+|     Italian Translation: e107 Italian Team http://www.e107it.org
 +-----------------------------------------------------------------------------+
 */
 define("XMLRPC_ADMIN_001", "Main Menu");

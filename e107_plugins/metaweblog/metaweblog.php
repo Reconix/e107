@@ -1,8 +1,8 @@
 <?php
 
-ini_set("display_errors", 1); 
+ini_set("display_errors", 1);
 //22/10/2009 9.58.12
-//general list of implementaion and 
+//general list of implementaion and
 // TODO admin log implementation to log out all the traffic
 // TODO error handling (not really sure how can be done, at least in log)
 // TODO better ACL configuration (getperms) and admin panel to configure ACL (example this user has rw access to news?) wraps ACL configuration
@@ -14,7 +14,7 @@ ini_set("display_errors", 1);
 
 //check e107 instance
 if (!defined('e107_INIT'))
-{ 
+{
 	require_once("../../class2.php");
 }
 
@@ -26,7 +26,7 @@ if (!e107::isInstalled('metaweblog'))
 
 
 if((e_QUERY == 'rsd') || isset($_GET['rsd'])) // http://archipelago.phrasewise.com/rsd
-{ 
+{
 	header('Content-Type: text/xml; charset=UTF-8', true);
 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 	<rsd version=\"1.0\" xmlns=\"http://archipelago.phrasewise.com/rsd\">
@@ -42,7 +42,7 @@ if((e_QUERY == 'rsd') || isset($_GET['rsd'])) // http://archipelago.phrasewise.c
 	    </apis>
 	  </service>
 	</rsd>";
-	
+
 	exit;
 }
 
@@ -83,7 +83,7 @@ class xmlrpc_server_methods_container
 function userLogin($username, $password, $area)
 {
 	$sql = e107::getDb();
-	
+
 	$query = 'SELECT user_perms FROM #user WHERE user_loginname = \''.$username.'\' AND user_password = \''.md5($password).'\'';
 
 	$sql->db_Select_gen($query);
@@ -114,7 +114,7 @@ function getUsersBlogs($xmlrpcmsg)
 		'blogName'=> new xmlrpcval(eXMLRPC_BLOG_NAME_LOC, 'string'),
 		'xmlrpc'=> new xmlrpcval(eXMLRPC_BLOG_XMLRPC, 'string')
 		),'struct');
-	
+
 	return new xmlrpcresp(new xmlrpcval($structArray, 'array'));
 }
 
@@ -131,21 +131,21 @@ function newPost($xmlrpcmsg)
 	$blogid = $xmlrpcmsg->getParam(0)->scalarval();
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
-	
+
 	if (userLogin($username, $password, 'H') == true)
 	{
 		$content = $xmlrpcmsg->getParam(3);
 		$title = $content->structMem('title')->scalarval();
-		
+
 		$description = '[html]'.htmlspecialchars_decode($content->structMem('description')->scalarval()).'[/html]';
-		
+
 		//22/10/2009 14.48.04 added mt_text_more ie news_extended
 		//check if we have something...
 		$tempTextMore = checkXmlElementS($content->serialize(), 'mt_text_more');
 		if($tempTextMore == 1){
 				$mt_text_more = '[html]'.$content->structMem('mt_text_more')->scalarval().'[/html]';
 		}
-		
+
 		//if date is null will be replaced with current datetime (wordpress like)
 		//check with simplexml for the parameter dateCreated? XMLRPC-PHP seems to not have such functions??
 		$tempDate = checkXmlElementS($content->serialize(), 'dateCreated');
@@ -158,7 +158,7 @@ function newPost($xmlrpcmsg)
 		{
 			$timestamp = time();
 		}
-		
+
 		//21/10/2009 17.17.46 added $mt_excerpt
 		//add in the news summary
 		//check if we have something...
@@ -166,7 +166,7 @@ function newPost($xmlrpcmsg)
 		if($tempExcerpt == 1){
 				$mt_excerpt = $content->structMem('mt_excerpt')->scalarval();
 		}
-		
+
 		//22/10/2009 11.51.54 added $mt_allow_comments
 		//add the news_allow_comments flag
 		//check if we have something...
@@ -174,14 +174,14 @@ function newPost($xmlrpcmsg)
 		if($tempAllowComments == 1){
 				$mt_allow_comments = $content->structMem('mt_allow_comments')->scalarval();
 		}
-		
+
 		//26/10/2009 14.30.41 added mt_keywords ie tags
 		//check if we have something...
 		$tempKeywords = checkXmlElementS($content->serialize(), 'mt_keywords');
 		if($tempKeywords == 1){
 				$mt_keywords = $content->structMem('mt_keywords')->scalarval();
 		}
-		
+
 		//author from e107
 		$query = 'SELECT u.user_id FROM `#user` AS u WHERE u.user_loginname = \''.$username.'\' AND u.user_password = \''.md5($password).'\'';
 		$sql = e107::getDb();
@@ -200,14 +200,14 @@ function newPost($xmlrpcmsg)
 				$categories = $row['category_id'];
 			}
 		}
-		
+
 		$published = $xmlrpcmsg->getParam(4)->scalarval();
-		
-		
+
+
 		// TODO use:
 		// $ix = new news;
 		// $ret = $ix->submit_item($arrayvalues);
-		
+
 		//post data with new fuctions
 		$data = array();
 		$data['data']['news_title'] = $title;
@@ -243,9 +243,9 @@ function newPost($xmlrpcmsg)
 		$data['_FIELD_TYPES']['news_meta_keywords'] = 'todb';
 		$data['data']['news_meta_description'] = ''; //NOT AVAIBLE MAKE A CUSTOM FIELD?
 		$data['_FIELD_TYPES']['news_meta_description'] = 'todb';
-		
+
 		$postid = $sql->db_Insert('news', $data);
-		
+
 		return new xmlrpcresp( new xmlrpcval($postid, 'string')); // Return the id of the post just inserted into the DB. See mysql_insert_id() in the PHP manual.
 	}
 	else
@@ -267,21 +267,21 @@ function editPost($xmlrpcmsg)
 	$postid = $xmlrpcmsg->getParam(0)->scalarval();
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
-	
+
 	if (userLogin($username, $password, 'H') == true)
 	{
 		$content = $xmlrpcmsg->getParam(3);
 		$title = $content->structMem('title')->scalarval();
-		
+
 		$description = '[html]'.$content->structMem('description')->scalarval().'[/html]';
-		
+
 		//22/10/2009 14.48.04 added mt_text_more ie news_extended
 		//check if we have something...
 		$tempTextMore = checkXmlElementS($content->serialize(), 'mt_text_more');
 		if($tempTextMore == 1){
 				$mt_text_more = '[html]'.$content->structMem('mt_text_more')->scalarval().'[/html]';
 		}
-		
+
 		//if date is null will be replaced with current datetime (wordpress like)
 		//check with simplexml for the parameter dateCreated? XMLRPC-PHP seems to not have such functions??
 		$tempDate = checkXmlElementS($content->serialize(), 'dateCreated');
@@ -294,7 +294,7 @@ function editPost($xmlrpcmsg)
 		{
 			$timestamp = time();
 		}
-		
+
 		//22/10/2009 11.51.54 added $mt_excerpt
 		//add the news summary
 		//check if we have something...
@@ -302,7 +302,7 @@ function editPost($xmlrpcmsg)
 		if($tempExcerpt == 1){
 				$mt_excerpt = $content->structMem('mt_excerpt')->scalarval();
 		}
-		
+
 		//22/10/2009 11.51.54 added $mt_allow_comments
 		//add the news_allow_comments flag
 		//check if we have something...
@@ -310,14 +310,14 @@ function editPost($xmlrpcmsg)
 		if($tempAllowComments == 1){
 				$mt_allow_comments = $content->structMem('mt_allow_comments')->scalarval();
 		}
-		
+
 		//26/10/2009 14.30.41 added mt_keywords ie tags
 		//check if we have something...
 		$tempKeywords = checkXmlElementS($content->serialize(), 'mt_keywords');
 		if($tempKeywords == 1){
 				$mt_keywords = $content->structMem('mt_keywords')->scalarval();
 		}
-		
+
 		//author from e107
 		$query = 'SELECT u.user_id FROM `#user` AS u WHERE u.user_loginname = \''.$username.'\' AND u.user_password = \''.md5($password).'\'';
 		$sql = new db();
@@ -337,11 +337,11 @@ function editPost($xmlrpcmsg)
 			}
 		}
 		$published = $xmlrpcmsg->getParam(4)->scalarval();
-		
+
 		// TODO use:
 		// $ix = new news;
 		// $ret = $ix->submit_item($arrayvalues);
-		
+
 		//edit data with new fuctions
 		$data = array();
 		//to update we need to set news id...
@@ -380,9 +380,9 @@ function editPost($xmlrpcmsg)
 		$data['_FIELD_TYPES']['news_meta_keywords'] = 'todb';
 		$data['data']['news_meta_description'] = ''; //NOT AVAIBLE MAKE A CUSTOM FIELD?
 		$data['_FIELD_TYPES']['news_meta_description'] = 'todb';
-		
+
 		$postid = $sql->db_Update('news', $data);
-		
+
 		return new xmlrpcresp( new xmlrpcval(true, 'boolean'));
 	}
 	else
@@ -404,23 +404,23 @@ function getPost($xmlrpcmsg)
 	$postid = $xmlrpcmsg->getParam(0)->scalarval();
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
-	
+
 	if (userLogin($username, $password, 'H') == true)
 	{
-		$query = 'SELECT n.*, c.category_name FROM `#news` AS n 
-              LEFT JOIN `#news_category` AS c ON c.category_id = n.news_category 
+		$query = 'SELECT n.*, c.category_name FROM `#news` AS n
+              LEFT JOIN `#news_category` AS c ON c.category_id = n.news_category
               WHERE n.news_id=\''.$postid.'\' LIMIT 1';
-		
+
 		//link back to the page important!
 		$link = SITEURL.'news.php?'.$postid;
-		
+
 		$sql = e107::getDb();
 		$sql->db_Select_gen($query);
-		
+
 		while ($row = $sql->db_Fetch())
 		{
 			return new xmlrpcresp( new xmlrpcval(array(
-																									'postid'=> new xmlrpcval($row['news_id'], 'string'), 
+																									'postid'=> new xmlrpcval($row['news_id'], 'string'),
 																									'dateCreated'=> new xmlrpcval(iso8601_encode($row['news_datestamp']),'dateTime.iso8601'),
 																									'title'=> new xmlrpcval($row['news_title'], 'string'),
 																									'mt_excerpt'=> new xmlrpcval($row['news_summary'], 'string'),
@@ -429,7 +429,7 @@ function getPost($xmlrpcmsg)
 																									'description'=> new xmlrpcval(str_replace('[html]', '', str_replace('[/html]', '', $row['news_body'])), 'string'),
 																									'mt_text_more'=> new xmlrpcval(str_replace('[html]', '', str_replace('[/html]', '', $row['news_extended'])), 'string'),
 																									'categories'=> new xmlrpcval(array( new xmlrpcval($row['category_name'], 'string')), 'array'),
-																									'publish'=> new xmlrpcval(1, 'boolean'), //e107 does not have this flag? 
+																									'publish'=> new xmlrpcval(1, 'boolean'), //e107 does not have this flag?
 																									'link'=> new xmlrpcval($link, 'string'), 'permaLink'=> new xmlrpcval($link, 'string')), 'struct'));
 		}
 	}
@@ -438,7 +438,7 @@ function getPost($xmlrpcmsg)
 		return new xmlrpcresp(0, $xmlrpcerruser + 1, 'Login Failed');
 	}
 }
-			
+
 /*
  *************************
  ***** DELETE POST *******
@@ -455,7 +455,7 @@ function deletePost($xmlrpcmsg)
 		$sql = e107::getDb();
 		//22/10/2009 15.06.16 delete news with new methods
 		$sql->db_Delete('news', 'news_id='.$postid);
-		
+
 		return new xmlrpcresp( new xmlrpcval(true, 'boolean'));
 	}
 	else
@@ -481,24 +481,24 @@ function getRecentPosts($xmlrpcmsg)
 	{
 		$numposts = $xmlrpcmsg->getParam(3)->scalarval();
 		$structArray = array();
-		$query = 'SELECT 
+		$query = 'SELECT
                  n.*,
                  c.category_name
-              FROM `#news` AS n 
-              LEFT JOIN `#news_category` AS c ON c.category_id = n.news_category 
-              ORDER BY n.news_datestamp DESC 
+              FROM `#news` AS n
+              LEFT JOIN `#news_category` AS c ON c.category_id = n.news_category
+              ORDER BY n.news_datestamp DESC
               LIMIT '.$numposts;
-			  
+
 		$link = SITEURL.'news.php?'.$postid; //link back to the page important!
-			  
+
 		$sql = e107::getDb();
-		$sql->db_Select_gen($query);		
-		
+		$sql->db_Select_gen($query);
+
 		while ($row = $sql->db_Fetch())
 		{
 			$structArray[] = new xmlrpcval(array(
-			
-				'postid'=> new xmlrpcval($row['news_id'], 'string'), 
+
+				'postid'=> new xmlrpcval($row['news_id'], 'string'),
 				'dateCreated'=> new xmlrpcval(iso8601_encode($row['news_datestamp']),'dateTime.iso8601'),
 				'title'=> new xmlrpcval($row['news_title'], 'string'),
 				'mt_excerpt'=> new xmlrpcval($row['news_summary'], 'string'),
@@ -507,13 +507,13 @@ function getRecentPosts($xmlrpcmsg)
 				'description'=> new xmlrpcval(str_replace('[html]', '', str_replace('[/html]', '', $row['news_body'])), 'string'),
 				'mt_text_more'=> new xmlrpcval(str_replace('[html]', '', str_replace('[/html]', '', $row['news_extended'])), 'string'),
 				'categories'=> new xmlrpcval(array( new xmlrpcval($row['category_name'], 'string')), 'array'),
-				'publish'=> new xmlrpcval(1, 'boolean'), //e107 does not have this flag? 
+				'publish'=> new xmlrpcval(1, 'boolean'), //e107 does not have this flag?
 				'link'=> new xmlrpcval($link, 'string'), 'permaLink'=> new xmlrpcval($link, 'string')
-			
+
 			), 'struct'
 			);
 		}
-		
+
 		return new xmlrpcresp( new xmlrpcval($structArray, 'array')); // Return type is struct[] (array of struct)
 	}
 	else
@@ -528,15 +528,15 @@ function getRecentPosts($xmlrpcmsg)
  ***** GET CATEGORIES  ***
  *************************
  */
- 
- 
+
+
 $getCategories_sig = array(array($xmlrpcArray, $xmlrpcString, $xmlrpcString, $xmlrpcString));
 $getCategories_doc = 'Get the categories on the blog.';
 function getCategories($xmlrpcmsg)
 {
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
-	
+
 	if (userLogin($username, $password, 'H') == 1)
 	{
 		$structArray = array();
@@ -545,7 +545,7 @@ function getCategories($xmlrpcmsg)
 		$sql = e107::getDb();
 		$sql->db_Select_gen($query);
 		while ($row = $sql->db_Fetch())
-		{	
+		{
 			$structArray[] = new xmlrpcval(array(
 			'categoryId'			=> new xmlrpcval($row['category_id'], 'string'),
 			'parentId'				=> new xmlrpcval('', 'string'),
@@ -555,7 +555,7 @@ function getCategories($xmlrpcmsg)
 			'htmlUrl'				=> new xmlrpcval('', 'string'),
 			'rssUrl'				=> new xmlrpcval('', 'string')), 'struct');
 		}
-		
+
 		return new xmlrpcresp( new xmlrpcval($structArray, 'array')); // Return type is struct[] (array of struct)
 	}
 	else
@@ -586,7 +586,7 @@ function newMediaObject($xmlrpcmsg)
 		$bits = $file->structMem('bits')->serialize();
 		$bits = str_replace('<value><base64>', '', $bits);
 		$bits = str_replace('</base64></value>', '', $bits);
-		
+
 		$uploaddir = eXMLRPC_FILES_UPLOAD_PATH; // Make sure this folder has been chmoded to 777.
 		if (fwrite(fopen($uploaddir.$filename, 'xb'), base64_decode($bits)) == false)
 		{
@@ -617,16 +617,16 @@ $getPage_doc = 'Get a page on the blog.';
 function getPage($xmlrpcmsg)
 {
 	$sql = e107::getDb();
-	
+
 	$blog_id = $xmlrpcmsg->getParam(0)->scalarval();
 	$pageid = $xmlrpcmsg->getParam(1)->scalarval();
 	$username = $xmlrpcmsg->getParam(2)->scalarval();
 	$password = $xmlrpcmsg->getParam(3)->scalarval();
-	
+
 	if (userLogin($username, $password, '5') == true)
 	{
 		$query = 'SELECT p.*, u.user_id, u.user_name FROM `#page` AS p LEFT JOIN `#user` AS u ON u.user_id = p.page_author  WHERE p.page_id=\''.$pageid.'\' LIMIT 1';
-		
+
 		$link = SITEURL.'page.php?'.$pageid; //link back to the page important!
 
 		$sql->db_Select_gen($query);
@@ -678,7 +678,7 @@ $getPages_doc = 'Get pages on the blog.';
 function getPages($xmlrpcmsg)
 {
 	$sql = e107::getDb();
-	
+
 	$blogid = $xmlrpcmsg->getParam(0)->scalarval();
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
@@ -686,13 +686,13 @@ function getPages($xmlrpcmsg)
 	{
 		$numpages = $xmlrpcmsg->getParam(3)->scalarval();
 		$structArray = array();
-		$query = 'SELECT 
+		$query = 'SELECT
                  p.*,
                  u.user_id,
                  u.user_name
-              FROM `#page` AS p 
+              FROM `#page` AS p
               LEFT JOIN `#user` AS u ON u.user_id = p.page_author
-              ORDER BY p.page_datestamp DESC 
+              ORDER BY p.page_datestamp DESC
               LIMIT '.$numpages;
 		//link back to the page important!
 		$link = SITEURL.'page.php?'.$pageid;
@@ -747,7 +747,7 @@ $newPage_doc = 'Post a new item to the blog.';
 function newPage($xmlrpcmsg)
 {
 	$sql = e107::getDb();
-		
+
 	$blogid = $xmlrpcmsg->getParam(0)->scalarval();
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
@@ -768,7 +768,7 @@ function newPage($xmlrpcmsg)
 		{
 			$timestamp = time();
 		}
-		
+
 		//21/10/2009 17.17.46 added $wp_password
 		//add password page
 		//check if we have something...
@@ -776,14 +776,14 @@ function newPage($xmlrpcmsg)
 		if($tempPassword == 1){
 				$wp_password = $content->structMem('wp_password')->scalarval();
 		}
-		
+
 		//author from e107
 		$query = 'SELECT u.user_id FROM `#user` AS u WHERE u.user_loginname = \''.$username.'\' AND u.user_password = \''.md5($password).'\'';
 
 		$sql->db_Select_gen($query);
 		$row = $sql->db_Fetch();
 		$author = $row['user_id'];
-		
+
 		//21/08/2009 14.37.49 allow comments
 		//add comments flag
 		//check if we have something...
@@ -791,9 +791,9 @@ function newPage($xmlrpcmsg)
 		if($tempAllowComments == 1){
 				$comments = $content->structMem('mt_allow_comments')->scalarval();
 		}
-		
+
 		$published = $xmlrpcmsg->getParam(4)->scalarval();
-		
+
 		//post data with new fuctions
 		$data['data']['page_title'] = $title;
 		$data['_FIELD_TYPES']['page_title'] = 'todb';
@@ -809,9 +809,9 @@ function newPage($xmlrpcmsg)
 		$data['_FIELD_TYPES']['page_password'] = 'todb';
 		$data['data']['page_class'] = 0;
 		$data['_FIELD_TYPES']['page_class'] = 'int';
-		
+
 		$postid = $sql->db_Insert('page', $data);
-		
+
 		return new xmlrpcresp( new xmlrpcval($postid, 'string')
 		); // Return the id of the post just inserted into the DB. See mysql_insert_id() in the PHP manual.
 	}
@@ -831,8 +831,8 @@ $deletePage_doc = "Delete a page from blog";
 function deletePage($xmlrpcmsg)
 {
 	$sql = e107::getDb();
-	
-	
+
+
 	$blogid = $xmlrpcmsg->getParam(0)->scalarval();
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
@@ -840,12 +840,12 @@ function deletePage($xmlrpcmsg)
 	if (userLogin($username, $password, 'H') == true)
 	{
 		//TODO Use db_Delete();
-		
+
 		//23/10/2009 16.15.15 delete page with new methods
 		$sql->db_Delete('page', 'page_id='.$pageid);
-		
+
 		return new xmlrpcresp( new xmlrpcval(true, 'boolean'));
-	
+
 	}
 	else
 	{
@@ -863,7 +863,7 @@ $editPage_doc = 'Edit a page on the blog.';
 function editPage($xmlrpcmsg)
 {
 	$sql = e107::getDb();
-		
+
 	$blogid = $xmlrpcmsg->getParam(0)->scalarval();
 	$pageid = $xmlrpcmsg->getParam(1)->scalarval();
 	$username = $xmlrpcmsg->getParam(2)->scalarval();
@@ -885,14 +885,14 @@ function editPage($xmlrpcmsg)
 		{
 			$timestamp = time();
 		}
-		
+
 		//author from e107
 		$query = 'SELECT u.user_id FROM `#user` AS u WHERE u.user_loginname = \''.$username.'\' AND u.user_password = \''.md5($password).'\'';
 		$sql->db_Select_gen($query);
 		$row = $sql->db_Fetch();
-		
+
 		$author = $row['user_id'];
-		
+
 		//21/08/2009 14.37.49 allow comments
 		//add comments flag
 		//check if we have something...
@@ -900,9 +900,9 @@ function editPage($xmlrpcmsg)
 		if($tempAllowComments == 1){
 				$comments = $content->structMem('mt_allow_comments')->scalarval();
 		}
-		
+
 		$published = $xmlrpcmsg->getParam(5)->scalarval();
-		
+
 		//edit data with new fuctions
 		$data['data']['page_id'] = $pageid;
 		$data['_FIELD_TYPES']['page_id'] = 'int';
@@ -920,9 +920,9 @@ function editPage($xmlrpcmsg)
 		$data['_FIELD_TYPES']['page_password'] = 'todb';
 		$data['data']['page_class'] = 0;
 		$data['_FIELD_TYPES']['page_class'] = 'int';
-		
+
 		$pageid = $sql->db_Update('page', $data);
-		
+
 		return new	xmlrpcresp( new xmlrpcval(true, 'boolean'));
 	}
 	else
@@ -938,26 +938,26 @@ function editPage($xmlrpcmsg)
 //21/08/2009 15.45.15 uhm... DON'T SURE ABOUT THIS :D
 $getPageList_sig = array(array($xmlrpcArray, $xmlrpcString
 		, $xmlrpcString, $xmlrpcString));
-		
+
 $getPageList_doc = 'Get pages list on the blog.';
 function getPageList($xmlrpcmsg)
 {
 	$sql = e107::getDb();
-	
-	
+
+
 	$blogid = $xmlrpcmsg->getParam(0)->scalarval();
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
 	if (userLogin($username, $password, '5') == true)
 	{
 		$structArray = array();
-		$query = 'SELECT 
+		$query = 'SELECT
                  p.*,
                  u.user_id,
                  u.user_name
-              FROM `#page` AS p 
+              FROM `#page` AS p
               LEFT JOIN `#user` AS u ON u.user_id = p.page_author
-              ORDER BY p.page_datestamp DESC 
+              ORDER BY p.page_datestamp DESC
               LIMIT '.$numpages;
 
 		$sql->db_Select_gen($query);
@@ -989,7 +989,7 @@ $newCategory_doc = 'Create a new category on the blog.';
 function newCategory($xmlrpcmsg)
 {
 	$sql = e107::getDb();
-	
+
 	$blogid = $xmlrpcmsg->getParam(0)->scalarval();
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
@@ -1003,13 +1003,13 @@ function newCategory($xmlrpcmsg)
 		$parentid = (checkXmlElementS($content->serialize(), 'parent_id') == true) ? $content->structMem('parent_id')->scalarval() : '';
 		//21/08/2009 16.20.02 unused at this stage
 		$description = (checkXmlElementS($content->serialize(), 'description') == true) ? $content->structMem('description')->scalarval() : '';
-		
+
 		//post data with new fuctions
 		$data['data']['category_name'] = $name;
 		$data['_FIELD_TYPES']['category_name'] = 'todb';
-		
+
 		$catid = $sql->db_Insert('news_category', $data);
-		
+
 		return new xmlrpcresp( new xmlrpcval($postid, 'string')); // Return the id of the post just inserted into the DB. See mysql_insert_id() in the PHP manual.
 	}
 	else
@@ -1029,18 +1029,18 @@ $deleteCategory_doc = "Delete a page from blog";
 function deleteCategory($xmlrpcmsg)
 {
 	$sql = e107::getDb();
-	
-	
+
+
 	$blogid = $xmlrpcmsg->getParam(0)->scalarval();
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
 	$cateid = $xmlrpcmsg->getParam(3)->scalarval();
 	if (userLogin($username, $password, 'H') == true || userLogin($username, $password, '5') == true)
 	{
-		
+
 		//23/10/2009 16.15.15 delete category with new methods
 		$sql->db_Delete('news_category', 'category_id='.$cateid);
-		
+
 		return new	xmlrpcresp( new xmlrpcval(true, 'boolean'));
 	}
 	else
@@ -1060,27 +1060,27 @@ $getAuthors_doc
 function getAuthors($xmlrpcmsg)
 {
 	$sql = e107::getDb();
-	
-	
+
+
 	$blogid = $xmlrpcmsg->getParam(1)->scalarval();
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
 	if (userLogin($username, $password, '5') == 1)
 	{
 		$structArray = array();
-		$query = 'SELECT 
+		$query = 'SELECT
                       p.page_id,
                       u.user_id,
                       u.user_loginname,
                       u.user_name
-               FROM `#page` AS p 
-               LEFT JOIN `#user` AS u ON u.user_id = p.page_author 
+               FROM `#page` AS p
+               LEFT JOIN `#user` AS u ON u.user_id = p.page_author
                GROUP BY u.user_name';
 
 		$sql->db_Select_gen($query);
 		while ($row = $sql->db_Fetch())
 		{
-	
+
 			$structArray[] = new xmlrpcval(array('user_id'=> new xmlrpcval($row['user_id'], 'string'), 'user_login'=>
 		new xmlrpcval($row['user_loginname'], 'string'), 'display_name'=> new
 		xmlrpcval($row['user_name'], 'string')), 'struct');
@@ -1098,12 +1098,12 @@ function getAuthors($xmlrpcmsg)
  *************************
  */
 $getCategoryList_sig = array(array($xmlrpcArray, $xmlrpcString, $xmlrpcString, $xmlrpcString));
-		
+
 $getCategoryList_doc = 'Get the categories on the blog.';
 function getCategoryList($xmlrpcmsg)
 {
     $sql = e107::getDb();
-	
+
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
 	if (userLogin($username, $password, 'H') == 1)
@@ -1113,7 +1113,7 @@ function getCategoryList($xmlrpcmsg)
 
 		$sql->db_Select_gen($query);
 		while ($row = $sql->db_Fetch())
-		{	
+		{
 			$structArray[] = new xmlrpcval(array('categoryId'=> new xmlrpcval($row['category_id'], 'string'), 'categoryName'=> new xmlrpcval($row['category_name'], 'string')), 'struct');
 		}
 		return new xmlrpcresp( new xmlrpcval($structArray, 'array')); // Return type is struct[] (array of struct)
@@ -1134,7 +1134,7 @@ $setPostCategories_doc = 'Set the categories on blog.';
 function setPostCategories($xmlrpcmsg)
 {
 	$sql = e107::getDb();
-	
+
 	$postid = $xmlrpcmsg->getParam(0)->scalarval();
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
@@ -1145,16 +1145,16 @@ function setPostCategories($xmlrpcmsg)
 		{
 			$content->arrayMem(0)->structMem('categoryId')->scalarval();
 		}
-		
+
 		$data['data']['news_id'] = $postid;
 		$data['_FIELD_TYPES']['news_id'] = 'int';
 		$data['data']['news_category'] = $categories;
 		$data['_FIELD_TYPES']['news_category'] = 'todb';
-		
+
 		$postid = $sql->db_Update('news', $data);
-		
+
 		$sql->db_Select_gen($query);
-		
+
 		return new xmlrpcresp( new xmlrpcval(true, 'boolean'));
 	}
 	else
@@ -1173,30 +1173,30 @@ $getPostCategories_doc
 function getPostCategories($xmlrpcmsg)
 {
 	$sql = e107::getDb();
-	
+
 	$postid = $xmlrpcmsg->getParam(0)->scalarval();
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
-	
+
 	if (userLogin($username, $password, 'H') == true)
 	{
 		// get set post categories
-		$query = 'SELECT 
+		$query = 'SELECT
                  n.*,
                  c.category_name,
                  c.category_id
-              FROM `#news` AS n 
-              LEFT JOIN `#news_category` AS c ON c.category_id = n.news_category 
+              FROM `#news` AS n
+              LEFT JOIN `#news_category` AS c ON c.category_id = n.news_category
               WHERE news_id ='.$postid.'
               LIMIT 1';
-	
+
 		$sql->db_Select_gen($query);
 		while ($row = $sql->db_Fetch())
 		{
 			$structArray[] = new xmlrpcval(array('categoryName'=> new xmlrpcval($row['category_name'], 'string'), 'categoryId'=>
 			new xmlrpcval($row['category_id'], 'string'), 'isPrimary'=> new	xmlrpcval('1', 'string')), 'struct');
 		}
-		
+
 		return new xmlrpcresp( new xmlrpcval($structArray, 'array')); // Return type is struct[] (array of struct)
 	}
 	else
@@ -1214,27 +1214,27 @@ $getTags_doc = 'Set the categories on blog.';
 function getTags($xmlrpcmsg)
 {
 	$sql = e107::getDb();
-	
+
 	$blogid   = $xmlrpcmsg->getParam(0)->scalarval();
 	$username = $xmlrpcmsg->getParam(1)->scalarval();
 	$password = $xmlrpcmsg->getParam(2)->scalarval();
-	
+
 	if (userLogin($username, $password, 'H') == true)
 	{
 		// get set post categories
-		$query = "SELECT 
+		$query = "SELECT
                  GROUP_CONCAT( n.news_meta_keywords SEPARATOR ',') AS meta_keys
-              FROM `#news` AS n 
+              FROM `#news` AS n
               WHERE news_meta_keywords != '' ;";
-		
+
 		$sql->db_Select_gen($query);
 		$row = $sql->db_Fetch();
-		
+
 		//explode data in array and remove duplicates
 		$meta_tags = array();
 		$meta_tags = explode(',', $row['meta_keys']);
 		$meta_tags = array_unique( $meta_tags );
-		
+
 		foreach ($meta_tags as $key => $value)
 		{
 			$structArray[] = new xmlrpcval(array(
@@ -1244,10 +1244,10 @@ function getTags($xmlrpcmsg)
 				'slug'     => new xmlrpcval('1', 'string'), //NOT SENSE IN e107 for now??
 				'html_url' => new xmlrpcval('1', 'string'), //NOT SENSE IN e107 for now??
 				'rss_url'  => new xmlrpcval('1', 'string') //NOT SENSE IN e107 for now??
-				
+
 				), 'struct');
 		}
-		
+
 		return new xmlrpcresp( new xmlrpcval($structArray, 'array')); // Return type is struct[] (array of struct)
 	}
 	else
@@ -1268,9 +1268,9 @@ $a = array(
 	'metaWeblog.getRecentPosts'	=> array('function'=>'getRecentPosts', 'signature'=>$getRecentPosts_sig, 'docstring'=>$getRecentPosts_doc),
 	'metaWeblog.getCategories'	=> array('function'=>'getCategories', 'signature'=>$getCategories_sig, 'docstring'=>$getCategories_doc),
 	'metaWeblog.newMediaObject'	=> array('function'=>'newMediaObject', 'signature'=>$newMediaObject_sig, 'docstring'=>$newMediaObject_doc),
-	
+
 // 	 'blogger.getUserInfo' => array('function' => 'getUserInfo', 'docstring' => 'Returns information about an author in the system.', 'signature' => array(array($xmlrpcStruct, $xmlrpcString, $xmlrpcString, $xmlrpcString)))*/
-	
+
 	'blogger.deletePost'		=> array('function'=>'deletePost', 'docstring'=>'Deletes a post.', 'signature'=>array(array($xmlrpcBoolean, $xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcString, $xmlrpcBoolean))),
 	'wp.getPage'				=> array('function'=>'getPage', 'signature'=>$getPage_sig, 'docstring'=>$getPage_doc),
 	'wp.getPages'				=> array('function'=>'getPages', 'signature'=>$getPages_sig, 'docstring'=>$getPages_doc),
@@ -1280,9 +1280,9 @@ $a = array(
 	'wp.getPageList'			=> array('function'=>'getPageList', 'signature'=>$getPageList_sig, 'docstring'=>$getPageList_doc),
 	'wp.getAuthors'				=> array('function'=>'getAuthors', 'signature'=>$getAuthors_sig, 'docstring'=>$getAuthors_doc),
 	'wp.getCategories'			=>	array('function'=>'getCategories', 'signature'=>$getCategories_sig, 'docstring'=>$getCategories_doc),
-	
-	
-		
+
+
+
 	'wp.getTags' => array(
 	'function' => 'getTags',
 	'signature' => $getTags_sig,
@@ -1428,7 +1428,7 @@ function checkXmlElement($xml, $element)
 //check for element exitence with simplexml
 function checkXmlElementS($string, $element)
 {
-	
+
 	$found = 0;
 	$xml = new SimpleXMLElement($string);
 	//search with xpath the $element name
@@ -1444,7 +1444,7 @@ function checkXmlElementS($string, $element)
 	{
 		return true;
 	}
-	else	
+	else
 	{
 		return false;
 	}

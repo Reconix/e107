@@ -1,7 +1,7 @@
 <?php
 
 if (!defined('e107_INIT'))
-{ 
+{
 	require_once("../../class2.php");
 }
 
@@ -17,7 +17,7 @@ echo "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
 	<supportsKeywords>Yes</supportsKeywords>
 	<supportsGetTags>Yes</supportsGetTags>
   </options>
-  
+
   <weblog>
     <serviceName>e107</serviceName>
     <imageUrl>images/wlw/e107_icon_32.png</imageUrl>
@@ -29,7 +29,7 @@ echo "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
 		]]>
     </adminUrl>
     <postEditingUrl>
-      <![CDATA[ 
+      <![CDATA[
 			".SITEURLBASE.e_ADMIN_ABS."newspost.php?create.edit."."{post-id}
 		]]>
     </postEditingUrl>
@@ -41,7 +41,7 @@ echo "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
       <text>Manage Comments</text>
       <imageUrl>images/wlw/comments_32.png</imageUrl>
       <clickUrl>
-        <![CDATA[ 
+        <![CDATA[
 				". SITEURLBASE.e_ADMIN_ABS."comment.php
 			]]>
       </clickUrl>
