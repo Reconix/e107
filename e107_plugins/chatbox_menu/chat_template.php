@@ -32,5 +32,3 @@ if(empty($CHAT_TABLE_END))
 		$CHAT_TABLE_END = "
 		</table>";
 }
-
-

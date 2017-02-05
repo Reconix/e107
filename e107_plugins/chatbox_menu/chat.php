@@ -9,7 +9,7 @@
  */
 
 require_once('../../class2.php');
-if (!e107::isInstalled('chatbox_menu')) 
+if (!e107::isInstalled('chatbox_menu'))
 {
 	e107::redirect();
 	exit;
@@ -24,7 +24,7 @@ $row = $sql->fetch();
 
 if (!check_class(intval($row['menu_class'])))
 {
-	$mes->addError(CHATBOX_L24); 
+	$mes->addError(CHATBOX_L24);
 	$ns->tablerender(LAN_ERROR, $mes->render());
 	require_once(FOOTERF);
 	exit;
@@ -75,7 +75,7 @@ if(!empty($_POST['moderate']) && CB_MOD)
 
 $fs = false;
 
-if (strstr(e_QUERY, "fs")) 
+if (strstr(e_QUERY, "fs"))
 {
 	$cgtm = intval(str_replace(".fs", "", e_QUERY));
 	$fs = true;
@@ -89,20 +89,20 @@ $chat_total = $sql->count('chatbox');
 $qry_where = (CB_MOD ? "1" : "cb_blocked=0");
 
 // when coming from search.php calculate page number
-if ($fs) 
+if ($fs)
 {
 	$page_count = 0;
 	$row_count = 0;
 	$sql->select("chatbox", "*", "{$qry_where} ORDER BY cb_datestamp DESC");
-	while ($row = $sql->fetch()) 
+	while ($row = $sql->fetch())
 	{
-		if ($row['cb_id'] == $cgtm) 
+		if ($row['cb_id'] == $cgtm)
 		{
 			$from = $page_count;
 			break;
 		}
 		$row_count++;
-		if ($row_count == 30) 
+		if ($row_count == 30)
 		{
 			$row_count = 0;
 			$page_count += 30;

@@ -8,43 +8,43 @@
  *
  *	RSS chatbox feed addon
  */
- 
+
 if (!defined('e107_INIT')) { exit; }
 
-// v2.x Standard 
-class chatbox_menu_rss // plugin-folder + '_rss' 
+// v2.x Standard
+class chatbox_menu_rss // plugin-folder + '_rss'
 {
 	/**
-	 * Admin RSS Configuration 
-	 */		
-	function config() 
+	 * Admin RSS Configuration
+	 */
+	function config()
 	{
 		$config = array();
-	
+
 		$config[] = array(
 			'name'			=> 'Chatbox Posts',
 			'url'			=> 'chatbox',
 			'topic_id'		=> '',
-			'description'	=> 'this is the rss feed for the chatbox entries', // that's 'description' not 'text' 
+			'description'	=> 'this is the rss feed for the chatbox entries', // that's 'description' not 'text'
 			'class'			=> '0',
 			'limit'			=> '9'
 		);
-		
+
 		return $config;
 	}
-	
+
 	/**
 	 * Compile RSS Data
-	 * @param $parms array	url, limit, id 
+	 * @param $parms array	url, limit, id
 	 * @return array
 	 */
 	function data($parms='')
 	{
 		$sql = e107::getDb();
-		
+
 		$rss = array();
 		$i=0;
-					
+
 		if($items = $sql->select('chatbox', "*", "cb_blocked=0 ORDER BY cb_datestamp DESC LIMIT 0,".$parms['limit']))
 		{
 
@@ -52,7 +52,7 @@ class chatbox_menu_rss // plugin-folder + '_rss'
 			{
 				$tmp						= explode(".", $row['cb_nick']);
 				$rss[$i]['author']			= $tmp[1];
-				$rss[$i]['author_email']	= ''; 
+				$rss[$i]['author_email']	= '';
 				$rss[$i]['link']			= "chatbox_menu/chat.php?".$row['cb_id'];
 				$rss[$i]['linkid']			= $row['cb_id'];
 				$rss[$i]['title']			= '';
@@ -66,20 +66,20 @@ class chatbox_menu_rss // plugin-folder + '_rss'
 				$i++;
 			}
 
-		}				
-					
+		}
+
 		return $rss;
 	}
-			
-		
-	
+
+
+
 }
 
 
 
 /*
  * XXX Left here as an example of how to convert from v1.x to v2.x
- *  
+ *
 //##### create feed for admin, return array $eplug_rss_feed --------------------------------
 
 $feed['name']		= 'Chatbox';
@@ -121,4 +121,3 @@ if($items = $sql -> db_Select('chatbox', "*", "cb_blocked=0 ORDER BY cb_datestam
 $eplug_rss_data[] = $rss;
 $eplug_rss_feed[] = $feed;
 */
-

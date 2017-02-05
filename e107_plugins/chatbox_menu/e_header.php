@@ -1,5 +1,5 @@
 <?php
-// $Id$   
+// $Id$
 if (!defined('e107_INIT')) { exit; }
 
 if(vartrue($eMenuActive['chatbox_menu']) && ($pref['cb_layer']==2))

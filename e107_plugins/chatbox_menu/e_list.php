@@ -39,7 +39,7 @@ class list_chatbox_menu
 		$bullet = $this->parent->getBullet($this->parent->settings['icon']);
 
 		if(!$chatbox_posts = $this->parent->e107->sql->gen("SELECT * FROM #chatbox WHERE ".$qry))
-		{ 
+		{
 			$list_data = LIST_CHATBOX_2;
 		}
 		else
@@ -67,8 +67,8 @@ class list_chatbox_menu
 		}
 		//return array with 'records', (global)'caption', 'display'
 		return array(
-			'records'=>$list_data, 
-			'caption'=>$list_caption, 
+			'records'=>$list_data,
+			'caption'=>$list_caption,
 			'display'=>$list_display
 		);
 	}
