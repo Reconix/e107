@@ -17,43 +17,43 @@ class gsitemap_cron // include plugin-folder in the name.
 	function config()
 	{
 		global $pref;
-		
+
 		$cron = array();
-	
+
 		$cron[] = array(
 			'name'			=> "Update Records",
 			'function'		=> "myfunction",
 			'category'		=> '',
 			'description' 	=> "Dummy example."
-		);	
-	
+		);
+
 		$cron[] = array(
 			'name'			=> "Test Email",
 			'function'		=> "sendEmail",
 			'category'		=> 'mail', // mail, user, content, notify, backup
 			'description' 	=> "Sends a test email to ".$pref['siteadminemail']
-		);		
-		
+		);
+
 		return $cron;
 	}
-	
-	
-	function myfunction() 
+
+
+	function myfunction()
 	{
 	    // Whatever code you wish.
 	    e107::getMessage()->add("Executed dummy function within gsitemap/e_cron.php");
 	    return ;
 	}
-	
-	
+
+
 	function sendEmail()
 	{
 
 		$adminEmail = e107::getPref('siteadminemail');
 		$adminName = e107::getPref('siteadmin');
-		
+
 	    require_once(e_HANDLER."mail.php");
-		
+
 		$message = "Your Cron Job worked correctly. Sent at ".date("r").".";
 	    sendemail($adminEmail, "e107 - Crong Test Email", $message, $adminName, $adminEmail, $adminName);
 	}

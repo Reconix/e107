@@ -11,7 +11,7 @@
 */
 require_once("../../class2.php");
 if(!getperms("P") || !e107::isInstalled('gsitemap'))
-{ 
+{
 	e107::redirect('admin');
 	exit();
 }
@@ -32,9 +32,9 @@ class gsitemap
 	function gsitemap()
 	{
 		/* constructor */
-		
+
 		$mes = e107::getMessage();
-		
+
 
 		$this->freq_list = array
 		(
@@ -96,15 +96,15 @@ class gsitemap
 
 	function showList()
 	{
-		
+
 		$mes = e107::getMessage();
 		$sql = e107::getDb();
 		$ns = e107::getRender();
 		$tp = e107::getParser();
 		$frm = e107::getForm();
-		
+
 		$gen = new convert;
-		
+
 		$count = $sql -> select("gsitemap", "*", "gsitemap_id !=0 ORDER BY gsitemap_order ASC");
 
 		if (!$count)
@@ -114,9 +114,9 @@ class gsitemap
 			".GSLAN_39."<br /><br />"
 			.$frm->admin_button('import',LAN_YES,'submit')."
 			</form>";
-			
+
 			$mes->addInfo($text);
-			
+
 			$ns -> tablerender(GSLAN_24, $mes->render());
 			return;
 		}
@@ -174,7 +174,7 @@ class gsitemap
 		}
 
 		$text .= "</tbody></table>\n</form>";
-		
+
 		$ns -> tablerender(GSLAN_24, $mes->render(). $text);
 	}
 
@@ -183,7 +183,7 @@ class gsitemap
 	{
 		$sql = e107::getDb();
 		$tp = e107::getParser();
-		
+
 		$e_idt = array_keys($_POST['edit']);
 
 		if($sql -> select("gsitemap", "*", "gsitemap_id='".$e_idt[0]."' "))
@@ -204,10 +204,10 @@ class gsitemap
 		$sql = e107::getDb();
 		$ns = e107::getRender();
 		$mes = e107::getMessage();
-		
-		
+
+
 		$count = $sql -> select("gsitemap", "*", "gsitemap_id !=0 ORDER BY gsitemap_id ASC");
-		
+
 		$text = "
 		<form action='".e_SELF."' id='form' method='post'>
 		<table class='table adminform'>
@@ -243,7 +243,7 @@ class gsitemap
 			<td>
 				<select class='tbox' name='gsitemap_priority' >\n";
 
-				for ($i=0.1; $i<1.0; $i=$i+0.1) 
+				for ($i=0.1; $i<1.0; $i=$i+0.1)
 				{
 					$sel = ($editArray['gsitemap_priority'] == number_format($i,1))? "selected='selected'" : "";
 					$text .= "<option value='".number_format($i,1)."' $sel>".number_format($i,1)."</option>\n";
@@ -291,10 +291,10 @@ class gsitemap
 		$log = e107::getAdminLog();
 		$sql = e107::getDb();
 		$tp = e107::getParser();
-		
+
 		$gmap = array(
 			'gsitemap_name' 	=> $tp->toDB($_POST['gsitemap_name']),
-			'gsitemap_url' 		=> $tp->toDB($_POST['gsitemap_url']), 
+			'gsitemap_url' 		=> $tp->toDB($_POST['gsitemap_url']),
 			'gsitemap_priority' => $_POST['gsitemap_priority'],
 			'gsitemap_lastmod' 	=> $_POST['gsitemap_lastmod'],
 			'gsitemap_freq' 	=> $_POST['gsitemap_freq'],
@@ -319,9 +319,9 @@ class gsitemap
 
 	function deleteSme()
 	{
-		$log = e107::getAdminLog();	
+		$log = e107::getAdminLog();
 		$sql = e107::getDb();
-		
+
 		$d_idt = array_keys($_POST['delete']);
 		$this -> message = ($sql -> db_Delete("gsitemap", "gsitemap_id='".$d_idt[0]."'")) ? LAN_DELETED : LAN_DELETED_FAILED;
 		$log->log_event('GSMAP_02', $this->message.': '.$d_idt[0], E_LOG_INFORMATIVE,'');
@@ -333,21 +333,21 @@ class gsitemap
 	function importSme()
 	{
 		global $PLUGINS_DIRECTORY;
-		
+
 		$ns = e107::getRender();
 		$sql = e107::getDb();
 		$sql2 = e107::getDb('sql2');
 		$frm = e107::getForm();
 		$mes = e107::getMessage();
-		
-		$existing = array(); 
-		$sql -> select("gsitemap", "*");  
+
+		$existing = array();
+		$sql -> select("gsitemap", "*");
 		while($row = $sql->fetch())
 		{
-			$existing[] = $row['gsitemap_name'];	
+			$existing[] = $row['gsitemap_name'];
 		}
-			
-		
+
+
 		$importArray = array();
 
 		/* sitelinks ... */
@@ -366,15 +366,15 @@ class gsitemap
 				LEFT JOIN #page_chapters as ch ON p.page_chapter = ch.chapter_id
 				LEFT JOIN #page_chapters as b ON ch.chapter_parent = b.chapter_id
 				WHERE page_title !='' ORDER BY page_datestamp ASC";
-				
-		$data = $sql->retrieve($query,true); 
-		
+
+		$data = $sql->retrieve($query,true);
+
 		foreach($data as $row)
 		{
 			if(!in_array($row['page_title'], $existing))
 			{
 				$route = ($row['page_chapter'] == 0) ? "page/view/other" : "page/view/index";
-				
+
 				$importArray[] = array('name' => $row['page_title'], 'url' => e107::getUrl()->create($route, $row, array('full'=>1, 'allow' => 'page_sef,page_title,page_id, chapter_sef, book_sef')), 'type' => "Page");
 			}
 		}
@@ -383,7 +383,7 @@ class gsitemap
 
 		/* forums ... */
 		if(e107::isInstalled('forum'))
-		{ 
+		{
 			$sql -> select("forum", "*", "forum_parent!='0' ORDER BY forum_order ASC");
 			$nfArray = $sql -> db_getList();
 			foreach($nfArray as $row)
@@ -398,7 +398,7 @@ class gsitemap
 
 		/* DEPRECATED content pages ...
 		if(e107::isInstalled('content'))
-		{ 	
+		{
 			$sql -> select("pcontent", "content_id, content_heading", "LEFT(content_parent,1) = '0' ORDER BY content_heading");
 			$nfArray = $sql -> db_getList();
 			foreach($nfArray as $row)
@@ -453,7 +453,7 @@ class gsitemap
 		<td colspan='4' class='center'>
 		<div> ".GSLAN_8." &nbsp; ".GSLAN_9." :&nbsp;<select class='tbox' name='import_priority' >\n";
 
-		for ($i=0.1; $i<1.0; $i=$i+0.1) 
+		for ($i=0.1; $i<1.0; $i=$i+0.1)
 		{
 			$sel = (vartrue($editArray['gsitemap_priority']) == number_format($i,1))? "selected='selected'" : "";
 			$text .= "<option value='".number_format($i,1)."' $sel>".number_format($i,1)."</option>\n";
@@ -472,7 +472,7 @@ class gsitemap
 		$text.="</select> <br /><br />
 
 		</div>
-		
+
 		</td>
 		</tr>
 		</tbody>
@@ -494,7 +494,7 @@ class gsitemap
 		$sql 	= e107::getDb();
 		$tp 	= e107::getParser();
 		$log 	= e107::getAdminLog();
-		
+
 		foreach($_POST['importid'] as $import)
 		{
 			list($name, $url, $type) = explode("^", $import);
@@ -512,23 +512,23 @@ class gsitemap
 	{
 		$mes = e107::getMessage();
 		$ns = e107::getRender();
-		
-		
+
+
 		$LINK_1 = "https://www.google.com/accounts/ServiceLogin?service=sitemaps";
 		$LINK_2 = "http://www.google.com/support/webmasters/?hl=en";
-		
+
 		$srch[0] = "[URL]";
 		$repl[0] = "<a href='".$LINK_1."'>".$LINK_1."</a>";
-		
+
 		$srch[1] = "[URL2]";
 		$repl[1] = "<blockquote><b>".SITEURL."gsitemap.php</b></blockquote>";
-		
+
 		$srch[2] = "[";
 		$repl[2] = "<a href='".e_ADMIN."prefs.php'>";
-		
+
 		$srch[3] = "]";
-		$repl[3] = "</a>";		
-		
+		$repl[3] = "</a>";
+
 		$text = "<b>".GSLAN_33."</b><br /><br />
 		<ul>
 			<li>".GSLAN_34."</li>
@@ -548,7 +548,7 @@ class gsitemap
 require_once(e_ADMIN."footer.php");
 
 
-function admin_config_adminmenu() 
+function admin_config_adminmenu()
 {
 	$action = (e_QUERY) ? e_QUERY : "list";
     $var['list']['text'] = GSLAN_20;
@@ -563,7 +563,7 @@ function admin_config_adminmenu()
 	$var['import']['text'] = GSLAN_23;
 	$var['import']['link'] = e_SELF."?import";
 	$var['import']['perm'] = "0";
-	
+
 	show_admin_menu(LAN_PLUGIN_GSITEMAP_NAME, $action, $var);
 }
 
