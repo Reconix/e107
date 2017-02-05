@@ -161,5 +161,3 @@
 		clickEvent = false;
 	});"
 	);
-
-
