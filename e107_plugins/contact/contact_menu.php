@@ -8,13 +8,13 @@ $head = '<form id="contact-menu" action="'.e_HTTP.'contact.php" method="post" >'
 
 
 //XXX Template must conform to Bootstrap specs: http://twitter.github.com/bootstrap/base-css.html#forms
-//TODO Security Image. 
+//TODO Security Image.
 
 
-$foot = '</form>'; 
+$foot = '</form>';
 
 $template = e107::getCoreTemplate('contact','menu');
-$contact_shortcodes = e107::getScBatch('contact');                
+$contact_shortcodes = e107::getScBatch('contact');
 $text = $tp->parseTemplate($head. $template . $foot, true, $contact_shortcodes);
 
 
