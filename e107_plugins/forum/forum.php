@@ -346,10 +346,12 @@ if(is_array($FORUM_TEMPLATE) && THEME_LEGACY !== true) // new v2.x format.
 		$FORUM_TEMPLATE['main']['end']      = $FORUM_TEMPLATE['main-end'];
 	}
 
-	$FORUM_MAIN_START		= $FORUM_TEMPLATE['main']['start'];
-	$FORUM_MAIN_PARENT 		= $FORUM_TEMPLATE['main']['parent'];
-	$FORUM_MAIN_FORUM		= $FORUM_TEMPLATE['main']['forum'];
-	$FORUM_MAIN_END			= $FORUM_TEMPLATE['main']['end'];
+	$FORUM_MAIN_START				= $FORUM_TEMPLATE['main']['start'];
+	$FORUM_MAIN_PARENT 				= $FORUM_TEMPLATE['main']['parent'];
+	$FORUM_MAIN_FORUM_WRAP_START	= $FORUM_TEMPLATE['main']['wrapstart']; // Exstended Forum Wrapper
+	$FORUM_MAIN_FORUM				= $FORUM_TEMPLATE['main']['forum'];
+	$FORUM_MAIN_FORUM_WRAP_END		= $FORUM_TEMPLATE['main']['wrapend']; // Exstended Forum Wrapper
+	$FORUM_MAIN_END					= $FORUM_TEMPLATE['main']['end'];
 
 	$FORUM_NEWPOSTS_START	= $FORUM_TEMPLATE['main']['start']; // $FORUM_TEMPLATE['new-start'];
 	$FORUM_NEWPOSTS_MAIN 	= $FORUM_TEMPLATE['main']['forum']; // $FORUM_TEMPLATE['new-main'];
@@ -420,6 +422,11 @@ foreach ($forumList['parents'] as $parent)
 			{
 				$forum_string .= parse_forum($f);
 			}
+		}
+		if (isset($FORUM_MAIN_FORUM_WRAP_END))
+		{
+		// Exstended Forum Wrapper
+    	$forum_string .= $tp->parseTemplate($FORUM_MAIN_FORUM_WRAP_END, false, $sc);
 		}
 		if (isset($FORUM_MAIN_PARENT_END))
 		{
@@ -867,8 +874,6 @@ function forum_track()
 
 	e107::getRender()->tablerender(LAN_FORUM_0030, $text, array('forum', 'forum_track'));
 
-
 }
-
 
 ?>
