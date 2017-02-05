@@ -1,9 +1,9 @@
 <?php
 
-// Generated e107 Plugin Admin Area 
+// Generated e107 Plugin Admin Area
 
 require_once('../../class2.php');
-if (!getperms('P')) 
+if (!getperms('P'))
 {
 	e107::redirect('admin');
 	exit;
@@ -15,7 +15,7 @@ e107::lan('pm',true);
 class pm_admin extends e_admin_dispatcher
 {
 
-	protected $modes = array(	
+	protected $modes = array(
 
 		'main'	=> array(
 			'controller' 	=> 'private_msg_ui',
@@ -44,9 +44,9 @@ class pm_admin extends e_admin_dispatcher
 			'uipath' 		=> null
 		),
     */
-	);	
-	
-	
+	);
+
+
 	protected $adminMenu = array(
 
 		'main/prefs' 		=> array('caption'=> LAN_PREFS, 'perm' => 'P'),
@@ -61,7 +61,7 @@ class pm_admin extends e_admin_dispatcher
 
 	//	'block/list'			=> array('caption'=> LAN_MANAGE, 'perm' => 'P'),
 	//	'block/create'		=> array('caption'=> LAN_CREATE, 'perm' => 'P'),
-			
+
 
 
 
@@ -69,9 +69,9 @@ class pm_admin extends e_admin_dispatcher
 	);
 
 	protected $adminMenuAliases = array(
-		'main/edit'	=> 'main/list'				
-	);	
-	
+		'main/edit'	=> 'main/list'
+	);
+
 	protected $menuTitle = LAN_PLUGIN_PM_NAME;
 
 	function init()
@@ -89,10 +89,10 @@ class pm_admin extends e_admin_dispatcher
 
 
 
-				
+
 class private_msg_ui extends e_admin_ui
 {
-			
+
 		protected $pluginTitle		= LAN_PLUGIN_PM_NAME;
 		protected $pluginName		= 'pm';
 		protected $table			= 'private_msg';
@@ -100,7 +100,7 @@ class private_msg_ui extends e_admin_ui
 		protected $perPage 			= 7;
         protected $listQry          = '';
         protected $listOrder        = "p.pm_id DESC";
-			
+
 		protected $fields 		= array (  'checkboxes' =>   array ( 'title' => '', 'type' => null, 'data' => null, 'width' => '5%', 'thclass' => 'center', 'forced' => '1', 'class' => 'center', 'toggle' => 'e-multiselect',  ),
 		  'pm_id'             => array ( 'title' => LAN_ID,       'data' => 'int', 'width' => '5%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 		  'pm_from'           => array ( 'title' => LAN_PLUGIN_PM_FROM,       'type' => 'method', 'noedit'=>true, 'data' => 'int', 'filter'=>true, 'width' => '5%%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
@@ -109,15 +109,15 @@ class private_msg_ui extends e_admin_ui
 		  'pm_subject'        => array ( 'title' => LAN_PLUGIN_PM_SUB,    'type' => 'text', 'data' => 'str', 'width' => '15%', 'help' => '', 'readParms' => '', 'writeParms' => array('size'=>'xlarge'), 'class' => 'left', 'thclass' => 'left',  ),
 		  'pm_text'           => array ( 'title' => LAN_PLUGIN_PM_MESS,    'type' => 'bbarea', 'data' => 'str', 'width' => '40%', 'help' => '', 'readParms' => 'expand=1&truncate=50', 'writeParms' => 'rows=5&size=block&cols=80', 'class' => 'left', 'thclass' => 'left',  ),
 		  'pm_read'           => array ( 'title' => LAN_PLUGIN_PM_READ,       'type' => 'boolean', 'noedit'=>1, 'data' => 'int', 'batch'=>true, 'filter'=>true, 'width' => '5%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'center', 'thclass' => 'center',  ),
-        
+
           'pm_sent_del'       => array ( 'title' => LAN_PLUGIN_PM_DEL,        'type' => 'boolean', 'noedit'=>true, 'data' => 'int', 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'center', 'thclass' => 'center',  ),
 		  'pm_read_del'       => array ( 'title' => LAN_PLUGIN_PM_DEL,        'type' => 'boolean', 'noedit'=>true, 'data' => 'int', 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'center', 'thclass' => 'center',  ),
 		  'pm_attachments'    => array ( 'title' => LAN_PLUGIN_PM_ATTACHMENT, 'type' => 'text', 'noedit'=>true, 'data' => 'str', 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'center', 'thclass' => 'center',  ),
 		  'pm_option'         => array ( 'title' => 'Option',     'type' => 'text', 'noedit'=>true, 'data' => 'str', 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'center', 'thclass' => 'center',  ),
 		  'pm_size'           => array ( 'title' => LAN_PLUGIN_PM_SIZE,       'type' => 'boolean', 'noedit'=>true, 'data' => 'int', 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'center', 'thclass' => 'center',  ),
 		  'options'           => array ( 'title' => LAN_OPTIONS,    'type' => 'method', 'data' => null, 'width' => '10%', 'thclass' => 'center last', 'class' => 'center last', 'forced' => '1',  ),
-		);		
-		
+		);
+
 		protected $fieldpref = array('pm_id', 'pm_from', 'pm_to', 'pm_sent', 'pm_read', 'pm_subject', 'pm_text');
 
 		protected $preftabs = array(LAN_BASIC, LAN_ADVANCED);
@@ -878,7 +878,7 @@ class private_msg_ui extends e_admin_ui
 
 
 
-        
+
         }
 
 		public function beforeCreate($new_data)
@@ -903,21 +903,21 @@ class private_msg_ui extends e_admin_ui
 			'pref_name' 				=> array('title'=> 'name', 'type' => 'text', 'data' => 'string', 'validate' => 'regex', 'rule' => '#^[\w]+$#i', 'help' => 'allowed characters are a-zA-Z and underscore')
 		);
 
-		
 
-	
-		
+
+
+
 		public function customPage()
 		{
 			$ns = e107::getRender();
 			$text = 'Hello World!';
-			$ns->tablerender('Hello',$text);	
-			
+			$ns->tablerender('Hello',$text);
+
 		}
 		*/
-			
+
 }
-				
+
 
 
 class private_msg_form_ui extends e_admin_form_ui
@@ -926,7 +926,7 @@ class private_msg_form_ui extends e_admin_form_ui
 	function send_to_class($value, $mode, $id)
 	{
 		$list = e107::getUserClass()->getClassList('main,admin,member,classes');
-		$list['matchclass'] = ADLAN_PM_89; 
+		$list['matchclass'] = ADLAN_PM_89;
 
 		return $this->select('send_to_class', $list, vartrue($value, e_UC_MEMBER), array('size'=>'xlarge'));
 
@@ -976,20 +976,20 @@ class private_msg_form_ui extends e_admin_form_ui
 
 		return $pmData['fromuser'];
 	}
-}		
-		
+}
+
 /*
 
-				
+
 class private_msg_block_ui extends e_admin_ui
 {
-			
+
 		protected $pluginTitle		= 'Private Messaging';
 		protected $pluginName		= 'pm';
 		protected $table			= 'private_msg_block';
 		protected $pid				= 'pm_block_id';
-		protected $perPage 			= 10; 
-			
+		protected $perPage 			= 10;
+
 		protected $fields 		= array (  'checkboxes' =>   array ( 'title' => '', 'type' => null, 'data' => null, 'width' => '5%', 'thclass' => 'center', 'forced' => '1', 'class' => 'center', 'toggle' => 'e-multiselect',  ),
 		  'pm_block_id' =>   array ( 'title' => 'LAN_ID', 'data' => 'int', 'width' => '5%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 		  'pm_block_from' =>   array ( 'title' => 'From', 'type' => 'boolean', 'data' => 'int', 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'center', 'thclass' => 'center',  ),
@@ -997,12 +997,12 @@ class private_msg_block_ui extends e_admin_ui
 		  'pm_block_datestamp' =>   array ( 'title' => 'LAN_DATESTAMP', 'type' => 'datestamp', 'data' => 'int', 'width' => 'auto', 'filter' => true, 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 		  'pm_block_count' =>   array ( 'title' => 'Count', 'type' => 'boolean', 'data' => 'int', 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'center', 'thclass' => 'center',  ),
 		  'options' =>   array ( 'title' => 'Options', 'type' => null, 'data' => null, 'width' => '10%', 'thclass' => 'center last', 'class' => 'center last', 'forced' => '1',  ),
-		);		
-		
+		);
+
 		protected $fieldpref = array('pm_block_datestamp');
-		
-		
-		
+
+
+
 
 	//	protected  = array(
 	//		'pref_type'	   				=> array('title'=> 'type', 'type'=>'text', 'data' => 'string', 'validate' => true),
@@ -1010,34 +1010,34 @@ class private_msg_block_ui extends e_admin_ui
 	//		'pref_name' 				=> array('title'=> 'name', 'type' => 'text', 'data' => 'string', 'validate' => 'regex', 'rule' => '#^[\w]+$#i', 'help' => 'allowed characters are a-zA-Z and underscore')
 	//	);
 
-		
+
 		// optional
 		public function init()
 		{
-			
+
 		}
-	
-		
+
+
 		public function customPage()
 		{
 			$ns = e107::getRender();
 			$text = 'Hello World!';
-			$ns->tablerender('Hello',$text);	
-			
+			$ns->tablerender('Hello',$text);
+
 		}
-		
-			
+
+
 }
-				
+
 
 
 class private_msg_block_form_ui extends e_admin_form_ui
 {
 
-}		
+}
 	*/
-	
-		
+
+
 new pm_admin();
 
 require_once(e_ADMIN."auth.php");

@@ -21,7 +21,7 @@ class pmbox_manager
 	{
 		$this->pmDB = e107::getDb();
 		// $this->pmPrefs = $prefs;
-		
+
 		$this->pmPrefs = e107::pref('pm');
 	}
 
@@ -40,7 +40,7 @@ class pmbox_manager
 	 *	@param	string $which = inbox|outbox|clear
 	 *
 	 *	@return	array
-	 *	
+	 *
 	 */
 	function pm_getInfo($which = 'inbox')
 	{

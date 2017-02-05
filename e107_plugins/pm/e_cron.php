@@ -66,14 +66,14 @@ class pm_cron // include plugin-folder in the name.
 			);
 		return $cron;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Logging routine - writes lines to a text file
 	 *
 	 * Auto-opens log file (if necessary) on first call
-	 * 
+	 *
 	 * @param string $logText - body of text to write
 	 * @param boolean $closeAfter - if TRUE, log file closed before exit; otherwise left open
 	 *
@@ -86,20 +86,20 @@ class pm_cron // include plugin-folder in the name.
 		$logFilename = e_LOG.'pm_bulk.txt';
 		if ($this->logHandle == NULL)
 		{
-			if (!($this->logHandle = fopen($logFilename, "a"))) 
+			if (!($this->logHandle = fopen($logFilename, "a")))
 			{ // Problem creating file?
 				echo "File open failed!<br />";
-				$this->logRequirement = 0; 
-				return; 
+				$this->logRequirement = 0;
+				return;
 			}
 		}
-	  
-		if (fwrite($this->logHandle,($addTimeDate ? date('D j M Y G:i:s').': ' : '').$logText."\r\n") == FALSE) 
+
+		if (fwrite($this->logHandle,($addTimeDate ? date('D j M Y G:i:s').': ' : '').$logText."\r\n") == FALSE)
 		{
-			$this->logRequirement = 0; 
+			$this->logRequirement = 0;
 			echo 'File write failed!<br />';
 		}
-	  
+
 		if ($closeAfter)
 		{
 			fclose($this->logHandle);
@@ -107,11 +107,11 @@ class pm_cron // include plugin-folder in the name.
 		}
 	}
 
-	
-	
+
+
 	/**
 	 * Called to process outstanding PMs (which are always bulk lists)
-	 * 
+	 *
 	 * Emails are added to the queue.
 	 * Various events are logged in a text file
 	 *

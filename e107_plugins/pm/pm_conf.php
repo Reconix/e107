@@ -109,8 +109,8 @@ if ($savePMP)
 */
 
 //include_lan(e_PLUGIN.'pm/languages/admin/'.e_LANGUAGE.'.php');
-	
-if (isset($_POST['update_prefs'])) 
+
+if (isset($_POST['update_prefs']))
 {
 	$temp = array();
 	foreach($_POST as $k => $v)
@@ -198,7 +198,7 @@ if(isset($_POST['addlimit']))
 		else
 		{
 			e107::getLog()->log_event('PM_ADM_08', '');
-			$mes->addError(ADLAN_PM_7); 
+			$mes->addError(ADLAN_PM_7);
 		}
 	}
 }
@@ -297,10 +297,10 @@ function show_options($pm_prefs)
 	</tr>
 	<tr>
 		<td>".ADLAN_PM_88."</td>
-		<td>"; 
+		<td>";
 
 	$list = e107::getUserClass()->getClassList('nobody,main,admin,member,classes');
-	$list['matchclass'] = ADLAN_PM_89; 
+	$list['matchclass'] = ADLAN_PM_89;
 
 	//$txt .= print_a($list,true);
 	$txt .= $frm->select('pm_option-send_to_class', $list, varset($pm_prefs['send_to_class'], e_UC_MEMBER));
@@ -385,7 +385,7 @@ function show_limits($pm_prefs)
 {
 	$sql = e107::getDb();
 	$frm = e107::getForm();
-	
+
 	if (!isset($pm_prefs['pm_limits'])) { $pm_prefs['pm_limits'] = 0; }
 
 	if($sql->db_Select('generic', "gen_id as limit_id, gen_datestamp as limit_classnum, gen_user_id as inbox_count, gen_ip as outbox_count, gen_intdata as inbox_size, gen_chardata as outbox_size", "gen_type = 'pm_limit'"))
@@ -413,7 +413,7 @@ function show_limits($pm_prefs)
 		</thead>
 		<tbody>
 		<tr>
-			<td colspan='3' style='text-align:left'>".ADLAN_PM_45." 
+			<td colspan='3' style='text-align:left'>".ADLAN_PM_45."
 			<select name='pm_limits' class='tbox'>
 		";
 		$sel = ($pm_prefs['pm_limits'] == 0 ? "selected='selected'" : "");
@@ -426,15 +426,15 @@ function show_limits($pm_prefs)
 		$txt .= "<option value='2' {$sel}>".ADLAN_PM_35."</option>\n";
 
 		$txt .= "</select>\n";
-		
+
 		$txt .= '&nbsp;&nbsp;'.ADLAN_PM_77."
 			</td>
 		</tr>
-	
+
 	";
 
-	if (isset($limitList)) 
-	{ 
+	if (isset($limitList))
+	{
 		foreach($limitList as $row)
 		{
 			$txt .= "
@@ -451,8 +451,8 @@ function show_limits($pm_prefs)
 			</tr>
 			";
 		}
-	} 
-	else 
+	}
+	else
 	{
 		$txt .= "
 		<tr>
@@ -479,7 +479,7 @@ function add_limit($pm_prefs)
 {
 	$sql = e107::getDb();
 	$frm = e107::getForm();
-	
+
 	if($sql->db_Select('generic', "gen_id as limit_id, gen_datestamp as limit_classnum, gen_user_id as inbox_count, gen_ip as outbox_count, gen_intdata as inbox_size, gen_chardata as outbox_size", "gen_type = 'pm_limit'"))
 	{
 		while($row = $sql->db_Fetch())
@@ -593,7 +593,7 @@ function show_maint($pmPrefs)
  *	Data is sorted into time stamp order
  *
  *	@param array $results - array of arrays as returned from doMaint()
- *	@param array|boolean $extra - optional additional information which is sorted into the main result according to keys - so use low numbers 
+ *	@param array|boolean $extra - optional additional information which is sorted into the main result according to keys - so use low numbers
  *	to make the entry appear at the beginning, and text strings to add to the end.
  */
 function makeLogEntry($results, $extra = FALSE)
@@ -811,10 +811,10 @@ function doMaint($opts, $pmPrefs)
 
 
 
-function pm_conf_adminmenu() 
+function pm_conf_adminmenu()
 {
 	global $action;
-	
+
 	if ($action == '') { $action = 'main'; }
 
 	$var['main']['text'] = ADLAN_PM_54;

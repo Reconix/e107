@@ -83,7 +83,7 @@ $pm_prefs = e107::getPlugPref('pm');
 //if(!isset($pm_prefs['perpage']))
 //{
 //	$pm_prefs = $sysprefs->getArray('pm_prefs');
-	
+
 //}
 
 require_once(e_PLUGIN.'pm/pm_func.php');
@@ -137,7 +137,7 @@ if(!isset($pm_menu_template))
 	{PM_BLOCKED_SENDERS_MANAGE}
 	";
 	*/
-	
+
 	$pm_menu_template = "
 	<a href='".e_PLUGIN_ABS."pm/pm.php?inbox'>".PM_INBOX_ICON."</a>
 	<a href='".e_PLUGIN_ABS."pm/pm.php?inbox'>".LAN_PLUGIN_PM_INBOX."</a>
@@ -158,14 +158,14 @@ if(check_class($pm_prefs['pm_class']))
 {
 	$tp = e107::getParser();
 	$sc = e107::getScBatch('pm',TRUE, 'pm');
-	
+
 	$pm_inbox = $pmManager->pm_getInfo('inbox');
 
 	$txt = "\n".$tp->parseTemplate($pm_menu_template, TRUE, $sc);
-	
+
 	if($pm_inbox['inbox']['new'] > 0 && $pm_prefs['popup'] && strpos(e_SELF, 'pm.php') === FALSE && $_COOKIE['pm-alert'] != 'ON')
 	{
-		
+
 		$txt .= pm_show_popup($pm_inbox, $pm_prefs['popup_delay']);
 	}
 

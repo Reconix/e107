@@ -93,7 +93,7 @@ class pm_shortcodes extends e_shortcode
 		{
 			$parm = array('user'=>$parm);
 		}
-		
+
 		$pm_prefs = e107::getPlugPref('pm');
 
 		$url = e107::url('pm','index').'?send.'.$parm['user'];

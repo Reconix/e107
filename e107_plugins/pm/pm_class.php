@@ -47,7 +47,7 @@ class private_message
 	 *	@param	array $pm_info - PM details
 	 *
 	 *	@return	none
-	 *	
+	 *
 	 *	@todo - 'read_delete' pref doesn't exist - remove code? Or support?
 	 */
 	function pm_mark_read($pm_id, $pm_info)
@@ -155,12 +155,12 @@ class private_message
 
 			$pm_subject = trim($tp->toDB($vars['pm_subject']));
 			$pm_message = trim($tp->toDB($vars['pm_message']));
-			
+
 			if (!$pm_subject && !$pm_message && !$attachlist)
 			{  // Error - no subject, no message body and no uploaded files
 				return LAN_PM_65;
 			}
-			
+
 			// Most of the pm info is fixed - just need to set the 'to' user on each send
 			$info = array(
 				'pm_from' => $vars['from_id'],
@@ -258,7 +258,7 @@ class private_message
 					$ret .= LAN_PM_41.'<br />';
 				}
 			}
-			
+
 		}
 		else
 		{	// Sending to a single person
@@ -528,7 +528,7 @@ class private_message
 			{  // Don't allow block of main admin
 				return LAN_PM_64;
 			}
-		  
+
 			if(!$sql->count('private_msg_block', '(*)', 'WHERE pm_block_from = '.$from." AND pm_block_to = '".e107::getParser()->toDB($to)."'"))
 			{
 				if($sql->insert('private_msg_block', array(
@@ -766,7 +766,7 @@ class private_message
 
 		ORDER BY pm.pm_sent DESC
 		LIMIT ".$from.', '.$limit;
-		
+
 		if($sql->gen($qry))
 		{
 			$total_messages = $sql->total_results;		// Total number of messages
@@ -886,7 +886,7 @@ class private_message
 
 
 
-	
+
 	function updateTemplate($template)
 	{
 		$array = array(
@@ -906,19 +906,19 @@ class private_message
 
 		'SEND_PM_LINK'		=> 'PM_SEND_PM_LINK',
 		'NEWPM_ANIMATE'		=> 'PM_NEWPM_ANIMATE',
-	
+
 		'BLOCKED_SENDERS_MANAGE'		=> 'PM_BLOCKED_SENDERS_MANAGE',
 		'DELETE_BLOCKED_SELECTED'		=> 'DELETE_BLOCKED_SELECTED'
-		);	
-		
-		
+		);
+
+
 		foreach($array as $old => $new)
-		{	
+		{
 			$template = str_replace("{".$old."}", "{".$new."}", $template);
 		}
-		
+
 		return $template;
-		
+
 	}
 
 }

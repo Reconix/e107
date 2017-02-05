@@ -26,7 +26,7 @@ if (!defined('e107_INIT'))
 }
 
 
-if (!e107::isInstalled('pm')) 
+if (!e107::isInstalled('pm'))
 {
 	e107::redirect();
 	exit;
@@ -171,7 +171,7 @@ class pm_extended extends private_message
 			}
 		}
 		//echo "Show_send: {$to_uid} from {$pm_info['from_name']} is happening<br />";
-			
+
 		if($pm_outbox['outbox']['filled'] >= 100)
 		{
 			return str_replace('{PERCENT}', $pm_outbox['outbox']['filled'], LAN_PM_13);
@@ -180,12 +180,12 @@ class pm_extended extends private_message
 		include_once(is_readable($tpl_file) ? $tpl_file : e_PLUGIN.'pm/pm_template.php');
 		$enc = (check_class($this->pmPrefs['attach_class']) ? "enctype='multipart/form-data'" : '');
 	//	setScVar('pm_handler_shortcodes','pmInfo', $pm_info);
-		
+
 		$sc = e107::getScBatch('pm',true, 'pm');
 		$sc->setVars($pm_info);
-		
+
 		$PM_SEND_PM = $this->updateTemplate($PM_SEND_PM);
-		
+
 		$text = "<form {$enc} method='post' action='".e_SELF."' id='dataform'>
 		<div><input type='hidden' name='numsent' value='{$pm_outbox['outbox']['total']}' />".
 		e107::getParser()->parseTemplate($PM_SEND_PM, TRUE, $sc).
@@ -204,33 +204,33 @@ class pm_extended extends private_message
 	function show_inbox($start = 0)
 	{
 		$tp = e107::getParser();
-		
+
 		$tpl_file = THEME.'pm_template.php';
 		include(is_readable($tpl_file) ? $tpl_file : e_PLUGIN.'pm/pm_template.php');
-		
+
 		$pm_blocks = $this->block_get();
 		$pmlist = $this->pm_get_inbox(USERID, $start, $this->pmPrefs['perpage']);
 
 	//	setScVar('pm_handler_shortcodes', 'pmNextPrev', array('start' => $start, 'total' => $pmlist['total_messages']));
-		
+
 		$sc = e107::getScBatch('pm',true, 'pm');
 		$sc->pmNextPrev = array('start' => $start, 'total' => $pmlist['total_messages']);
-		
-		
+
+
 		$PM_INBOX_HEADER = $this->updateTemplate($PM_INBOX_HEADER);
 		$PM_INBOX_TABLE = $this->updateTemplate($PM_INBOX_TABLE);
 		$PM_INBOX_EMPTY = $this->updateTemplate($PM_INBOX_EMPTY);
 		$PM_INBOX_FOOTER = $this->updateTemplate($PM_INBOX_FOOTER);
-		
+
 		$txt = "<form method='post' action='".e_REQUEST_SELF."?".e_QUERY."'>";
 		$txt .= $tp->parseTemplate($PM_INBOX_HEADER, true, $sc);
-		
+
 		if($pmlist['total_messages'])
 		{
 			foreach($pmlist['messages'] as $rec)
 			{
 				if(trim($rec['pm_subject']) == '') { $rec['pm_subject'] = '['.LAN_PM_61.']'; }
-				$sc->setVars($rec);	
+				$sc->setVars($rec);
 				$txt .= $tp->parseTemplate($PM_INBOX_TABLE, true, $sc);
 			}
 		}
@@ -238,7 +238,7 @@ class pm_extended extends private_message
 		{
 			$txt .= $tp->parseTemplate($PM_INBOX_EMPTY, true, $sc);
 		}
-		
+
 		$txt .= $tp->parseTemplate($PM_INBOX_FOOTER, true, $sc);
 		$txt .= "</form>";
 
@@ -256,21 +256,21 @@ class pm_extended extends private_message
 	function show_outbox($start = 0)
 	{
 		$tp = e107::getParser();
-		
+
 		$tpl_file = THEME.'pm_template.php';
 		include(is_readable($tpl_file) ? $tpl_file : e_PLUGIN.'pm/pm_template.php');
 		$pmlist = $this->pm_get_outbox(USERID, $start, $this->pmPrefs['perpage']);
 	//	setScVar('pm_handler_shortcodes', 'pmNextPrev', array('start' => $start, 'total' => $pmlist['total_messages']));
-		
+
 		$sc = e107::getScBatch('pm', true, 'pm');
 		$sc->pmNextPrev = array('start' => $start, 'total' => $pmlist['total_messages']);
-		
+
 		$PM_OUTBOX_HEADER = $this->updateTemplate($PM_OUTBOX_HEADER);
 		$PM_OUTBOX_TABLE = $this->updateTemplate($PM_OUTBOX_TABLE);
 		$PM_OUTBOX_EMPTY = $this->updateTemplate($PM_OUTBOX_EMPTY);
-		$PM_OUTBOX_FOOTER = $this->updateTemplate($PM_OUTBOX_FOOTER);	
-		
-		
+		$PM_OUTBOX_FOOTER = $this->updateTemplate($PM_OUTBOX_FOOTER);
+
+
 		$txt = "<form method='post' action='".e_SELF."?".e_QUERY."'>";
 		$txt .= $tp->parseTemplate($PM_OUTBOX_HEADER, true, $sc);
 		if($pmlist['total_messages'])
@@ -279,7 +279,7 @@ class pm_extended extends private_message
 			{
 				if(trim($rec['pm_subject']) == '') { $rec['pm_subject'] = '['.LAN_PM_61.']'; }
 			//	setScVar('pm_handler_shortcodes','pmInfo', $rec);
-				$sc->setVars($rec);	
+				$sc->setVars($rec);
 				$txt .= $tp->parseTemplate($PM_OUTBOX_TABLE, true, $sc);
 			}
 		}
@@ -309,7 +309,7 @@ class pm_extended extends private_message
 		$pm_info = $this->pm_get($pmid);
 
 		$sc = e107::getScBatch('pm',true, 'pm');
-		$sc->setVars($pm_info);	
+		$sc->setVars($pm_info);
 
 		if($pm_info['pm_to'] != USERID && $pm_info['pm_from'] != USERID)
 		{
@@ -344,7 +344,7 @@ class pm_extended extends private_message
 
 		if (!$comeFrom)
 		{
-			if ($pm_info['pm_from'] == USERID) { $comeFrom = 'outbox'; } 
+			if ($pm_info['pm_from'] == USERID) { $comeFrom = 'outbox'; }
 		}
 
 		// Need to show inbox or outbox from start
@@ -354,7 +354,7 @@ class pm_extended extends private_message
 			$caption = '';
 			if(!deftrue('BOOTSTRAP')){  $caption .= LAN_PM." - ".LAN_PLUGIN_PM_OUTBOX; }
 			$ns->tablerender($caption, $this->show_outbox(), 'PM');
-		} 
+		}
 		else
 		{	// Show Inbox
 			$caption = '';
@@ -378,21 +378,21 @@ class pm_extended extends private_message
 		$pmBlocks = $this->block_get_user();			// TODO - handle pagination, maybe (is it likely to be necessary?)
 
 		$sc = e107::getScBatch('pm',TRUE, 'pm');
-		$sc->pmBlocks = $pmBlocks; 
-	
+		$sc->pmBlocks = $pmBlocks;
+
 		$PM_BLOCKED_HEADER = $this->updateTemplate($PM_BLOCKED_HEADER);
 		$PM_BLOCKED_TABLE  = $this->updateTemplate($PM_BLOCKED_TABLE);
 		$PM_BLOCKED_EMPTY  = $this->updateTemplate($PM_BLOCKED_EMPTY);
 		$PM_BLOCKED_FOOTER  = $this->updateTemplate($PM_BLOCKED_FOOTER);
-	
-	
+
+
 		$txt = "<form method='post' action='".e_SELF."?".e_QUERY."'>";
 		$txt .= $tp->parseTemplate($PM_BLOCKED_HEADER, true, $sc);
 		if($pmTotalBlocked = count($pmBlocks))
 		{
 			foreach($pmBlocks as $pmBlocked)
 			{
-				$sc->pmBlocked = $pmBlocked; 
+				$sc->pmBlocked = $pmBlocked;
 			//	setScVar('pm_handler_shortcodes','pmBlocked', $pmBlocked);
 				$txt .= $tp->parseTemplate($PM_BLOCKED_TABLE, true, $sc);
 			}
@@ -415,7 +415,7 @@ class pm_extended extends private_message
 	function post_pm()
 	{
 		// print_a($_POST);
-				
+
 		if(!check_class($this->pmPrefs['pm_class']))
 		{
 			return LAN_PM_12;
@@ -766,7 +766,7 @@ if(isset($_POST['postpm']))
 $mes = e107::getMessage();
 
 if($message != '')
-{	
+{
 	$mes->add($message);
 //	$ns->tablerender('', "<div class='alert alert-block'>". $message."</div>");
 }

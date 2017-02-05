@@ -69,7 +69,7 @@ $sc_style['PM_RECEIPT']['post'] = "</td></tr>";
 $sc_style['PM_REPLY']['pre'] = "<tr>
 	<td class='forumheader' style='text-align:center' colspan='2'>
 ";
-	
+
 $sc_style['PM_REPLY']['post'] = "</td>
 	</tr>
 ";
@@ -281,4 +281,3 @@ $PM_NOTIFY =
 <a class='btn btn-primary btn-lg' href='{PM_URL}'>".LAN_PM_113."</a></td></tr>
 </table>
 ";
-
