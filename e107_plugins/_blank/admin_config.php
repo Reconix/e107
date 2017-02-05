@@ -35,7 +35,7 @@ class plugin_blank_admin extends e_admin_dispatcher
 	 */
 	protected $modes = array(
 		'main'		=> array('controller' => 'plugin_blank_admin_ui',
-		'path' 		=> null, 
+		'path' 		=> null,
 		'ui' 		=> 'plugin_blank_admin_form_ui', 'uipath' => null)
 	);
 
@@ -264,7 +264,7 @@ class plugin_blank_admin_ui extends e_admin_ui
     	protected  $fields = array(
 			'checkboxes'				=> array('title'=> '', 					'type' => null,			'data' => null,			'width'=>'5%', 		'thclass' =>'center', 'forced'=> TRUE,  'class'=>'center', 'toggle' => 'e-multiselect'),
 			'blank_id'					=> array('title'=> LAN_ID, 					'type' => 'number',		'data' => 'int',		'width'=>'5%',		'thclass' => '',  'class'=>'center',	'forced'=> TRUE, 'primary'=>TRUE/*, 'noedit'=>TRUE*/), //Primary ID is not editable
-           	'blank_icon'				=> array('title'=> LAN_ICON, 			'type' => 'icon',		'data' => 'str',		'width'=>'5%',		'thclass' => '',	'forced'=> TRUE, 'primary'=>TRUE/*, 'noedit'=>TRUE*/), //Primary ID is not editable          
+           	'blank_icon'				=> array('title'=> LAN_ICON, 			'type' => 'icon',		'data' => 'str',		'width'=>'5%',		'thclass' => '',	'forced'=> TRUE, 'primary'=>TRUE/*, 'noedit'=>TRUE*/), //Primary ID is not editable
             'blank_type'	   			=> array('title'=> LAN_TYPE, 				'type' => 'method', 	'data' => 'str',		'width'=>'auto',	'thclass' => '', 'batch' => TRUE, 'filter'=>TRUE),
 			'blank_folder' 				=> array('title'=> 'Folder', 			'type' => 'text', 		'data' => 'str',		'width' => 'auto',	'thclass' => ''),
 			'blank_name' 				=> array('title'=> 'Name', 				'type' => 'text', 		'data' => 'str',		'width' => 'auto',	'thclass' => ''),
@@ -300,26 +300,26 @@ class plugin_blank_admin_ui extends e_admin_ui
 		public function init()
 		{
 		}
-		
-		
+
+
 		public function customPage()
 		{
 			$ns = e107::getRender();
 			$text = "Hello World!";
-			$ns->tablerender("Hello",$text);	
-			
+			$ns->tablerender("Hello",$text);
+
 		}
 }
 
 class plugin_blank_admin_form_ui extends e_admin_form_ui
 {
-	
+
 	function blank_type($curVal,$mode) // not really necessary since we can use 'dropdown' - but just an example of a custom function.
 	{
 		$frm = e107::getForm();
-		
+
 		$types = array('type_1'=>"Type 1", 'type_2' => 'Type 2');
-		
+
 		if($mode == 'read')
 		{
 			return vartrue($types[$curVal]).' (custom!)';
@@ -337,7 +337,7 @@ class plugin_blank_admin_form_ui extends e_admin_form_ui
 
 		return $frm->select('blank_type', $types, $curVal);
 	}
-	
+
 }
 
 
@@ -367,7 +367,7 @@ e107::getAdminUI()->runPage();
 require_once(e_ADMIN."footer.php");
 
 /* OBSOLETE - see admin_shortcodes::sc_admin_menu()
-function admin_config_adminmenu() 
+function admin_config_adminmenu()
 {
 	//global $rp;
 	//$rp->show_options();

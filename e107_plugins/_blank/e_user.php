@@ -10,17 +10,17 @@
 
 if (!defined('e107_INIT')) { exit; }
 
-// v2.x Standard 
+// v2.x Standard
 class _blank_user // plugin-folder + '_user'
-{		
-		
+{
+
 	function profile($udata)  // display on user profile page.
 	{
 
 		$var = array(
 			0 => array('label' => "Label", 'text' => "Some text to display", 'url'=> e_PLUGIN_ABS."_blank/blank.php")
 		);
-		
+
 		return $var;
 	}
 
@@ -39,5 +39,5 @@ class _blank_user // plugin-folder + '_user'
 	}
 
 
-	
+
 }

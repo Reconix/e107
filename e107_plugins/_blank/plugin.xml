@@ -24,7 +24,7 @@
 		<pref name="blank_pref_2">[more...]</pref>
 	</pluginPrefs>
 	<userClasses>
-		<class name="blank_userclass" description="Blank Userclass Description" />		
+		<class name="blank_userclass" description="Blank Userclass Description" />
 	</userClasses>
 	<extendedFields>
 		<field name="custom" type='EUF_TEXTAREA' default='0' active="true" />

@@ -67,7 +67,7 @@ $_blankFront = new _blank_front;
 require_once(HEADERF); 					// render the header (everything before the main content area)
 $_blankFront->run();
 require_once(FOOTERF);					// render the footer (everything after the main content area)
-exit; 
+exit;
 
 // For a more elaborate plugin - please see e107_plugins/gallery
 

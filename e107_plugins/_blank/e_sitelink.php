@@ -17,7 +17,7 @@
 
 if (!defined('e107_INIT')) { exit; }
 /*if(!e107::isInstalled('_blank'))
-{ 
+{
 	return;
 }*/
 
@@ -28,9 +28,9 @@ class _blank_sitelink // include plugin-folder in the name.
 	function config()
 	{
 		global $pref;
-		
+
 		$links = array();
-			
+
 		$links[] = array(
 			'name'			=> "Drop-Down Links",
 			'function'		=> "myCategories"
@@ -41,11 +41,11 @@ class _blank_sitelink // include plugin-folder in the name.
 			'name'          => 'Drop-Down MegaMenu',
 			'function'      => 'megaMenu'
 		);
-		
-		
+
+
 		return $links;
 	}
-	
+
 
 	function megaMenu() // http://bootsnipp.com/snippets/33gmp
 	{
@@ -77,9 +77,9 @@ class _blank_sitelink // include plugin-folder in the name.
 		$sql = e107::getDb();
 		$tp = e107::getParser();
 		$sublinks = array();
-		
+
 		$sql->select("blank","*","blank_id != '' ");
-		
+
 		while($row = $sql->fetch())
 		{
 			$sublinks[] = array(
@@ -94,9 +94,9 @@ class _blank_sitelink // include plugin-folder in the name.
 				'link_class'		=> e_UC_PUBLIC
 			);
 		}
-		
+
 		return $sublinks;
-	    
+
 	}
-	
+
 }
