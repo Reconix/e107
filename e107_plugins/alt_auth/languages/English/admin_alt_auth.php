@@ -10,9 +10,9 @@
  *
  * $URL$
  * $Id$
- * 
+ *
  */
- 
+
 /**
  *	e107 Alternate authorisation plugin
  *
@@ -125,7 +125,7 @@ define('LAN_ALT_UPDATED','Settings updated');
 define('LAN_ALT_AUTH_HELP', 'These are the settings common to all authentication methods, and determine the actions to be taken<br /><br />
 	The Extended User Field selection determines which <i>may</i> be added/updated when a user logs in - further configuration is required
 	for the specific authentication method.');
-define('LAN_ALT_VALIDATE_HELP', 'You can check the settings by using the \'Test Database Access\' section to try and validate a user - this uses exactly 
+define('LAN_ALT_VALIDATE_HELP', 'You can check the settings by using the \'Test Database Access\' section to try and validate a user - this uses exactly
 	the same process as when a user tries to log in, and confirms whether your settings are correct.<br />
 	If you have configured some parameters to be copied to the user table on successful login, these are also listed.
 	');

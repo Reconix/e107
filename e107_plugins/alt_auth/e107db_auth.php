@@ -22,10 +22,10 @@
  *	This connects to a 'foreign' e107 user database to validate the user
  */
 
-/* 
+/*
 	return values
 	AUTH_NOCONNECT 		= unable to connect to db
-	AUTH_NOUSER			= user not found	
+	AUTH_NOUSER			= user not found
 	AUTH_BADPASSWORD	= supplied password incorrect
 
 	AUTH_SUCCESS 		= valid login
@@ -37,7 +37,7 @@ class auth_login extends alt_auth_base
 	public	$ErrorText;				// e107 error string on exit
 	private $conf;					// Configuration parameters
 
-	
+
 	/**
 	 *	Read configuration, initialise connection to remote e107 database
 	 *
@@ -94,7 +94,7 @@ class auth_login extends alt_auth_base
 			return AUTH_NOCONNECT;
 		}
 		if ($connect_only) return AUTH_SUCCESS;		// Test mode may just want to connect to the DB
-	  
+
 		$sel_fields = array();
 		// Make an array of the fields we want from the source DB
 		foreach($this->conf as $k => $v)
@@ -138,7 +138,7 @@ class auth_login extends alt_auth_base
 		$pass_check = new ExtendedPasswordHandler();
 
 		$passMethod = $pass_check->passwordMapping($this->conf['e107db_password_method']);
-		if ($passMethod === FALSE) 
+		if ($passMethod === FALSE)
 		{
 			$this->makeErrorText('Password error - invalid method');
 			return AUTH_BADPASSWORD;

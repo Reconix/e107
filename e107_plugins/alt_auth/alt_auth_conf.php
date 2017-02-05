@@ -10,7 +10,7 @@
  *
  * $URL$
  * $Id$
- * 
+ *
  */
 
 /**
@@ -32,7 +32,7 @@ require_once('../../class2.php');
 if(!getperms('P') || !e107::isInstalled('alt_auth'))
 {
 	e107::redirect('admin');
-	exit(); 
+	exit();
 }
 require_once(e_HANDLER.'form_handler.php');
 $frm = e107::getForm();

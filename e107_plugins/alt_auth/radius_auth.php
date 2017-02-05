@@ -179,7 +179,7 @@ class auth_login extends alt_auth_base
 			default:						// Catch-all
 				$this->makeErrorText('RADIUS validation error: ') ;
 				return AUTH_NOUSER;
-		}			
+		}
 
 // User accepted here.
 
@@ -190,9 +190,9 @@ class auth_login extends alt_auth_base
 
 		// See if we get any attributes - not really any use to us unless we implement CHAP, so disabled ATM
 		$attribs = array();
-		while ($resa = radius_get_attr($this->connection)) 
+		while ($resa = radius_get_attr($this->connection))
 		{
-			if (!is_array($resa)) 
+			if (!is_array($resa))
 			{
 				$this->makeErrorText("Error getting attribute: ");
 				exit;

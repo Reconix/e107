@@ -44,7 +44,7 @@ class alt_auth_e107db extends alt_auth_admin
 	public function showForm()
 	{
 		$ns = e107::getRender();
-		
+
 		$parm = $this->altAuthGetParams('e107db');
 
 		$frm = new form;
@@ -77,7 +77,7 @@ class alt_auth_e107db extends alt_auth_admin
 		$text .= $frm -> form_close();
 
 		$ns->tablerender(E107DB_LAN_10, $text);
-		
+
 		$ns->tablerender(LAN_ALT_40.LAN_ALT_41,$this->alt_auth_test_form('e107db',$frm));
 	}
 }

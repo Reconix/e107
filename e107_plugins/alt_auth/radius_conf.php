@@ -42,7 +42,7 @@ class alt_auth_radius extends alt_auth_admin
 		$this->radius = $this->altAuthGetParams('radius');
 	}
 
-	
+
 	public function showForm($mes)
 	{
 		$ns = e107::getRender();

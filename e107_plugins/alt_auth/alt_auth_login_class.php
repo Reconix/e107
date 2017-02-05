@@ -10,7 +10,7 @@
  *
  * $URL$
  * $Id$
- * 
+ *
  */
 
 /**
@@ -112,7 +112,7 @@ class alt_login
 			$userMethods = new UserHandler;
 			$db_vals = array('user_password' => $aa_sql->escape($userMethods->HashPassword($userpass,$username)));
 			$xFields = array();					// Possible extended user fields
-			
+
 			// See if any of the fields need processing before save
 			if (isset($_login->copyMethods) && count($_login->copyMethods))
 			{
@@ -143,7 +143,7 @@ class alt_login
 			{	// We're going to have to do something with extended fields as well - make sure there's an object
 				require_once (e_HANDLER.'user_extended_class.php');
 				$ue = new e107_user_extended;
-				$q = 
+				$q =
 				$qry = "SELECT u.user_id,u.".implode(',u.',array_keys($db_vals)).", ue.user_extended_id, ue.".implode(',ue.',array_keys($xFields))." FROM `#user` AS u
 						LEFT JOIN `#user_extended` AS ue ON ue.user_extended_id = u.user_id
 						WHERE ".$ulogin->getLookupQuery($username, FALSE, 'u.');
@@ -160,7 +160,7 @@ class alt_login
 				{
 					if ($row[$k] == $v) unset($db_vals[$k]);
 				}
-				if (count($db_vals)) 
+				if (count($db_vals))
 				{
 					$newUser = array();
 					$newUser['data'] = $db_vals;
@@ -197,7 +197,7 @@ class alt_login
 			}
 			else
 			{  // Just add a new user
-				
+
 				if (AA_DEBUG) $this->e107->admin_log->e_log_event(10,debug_backtrace(),"DEBUG","Alt auth login","Add new user: ".print_r($db_vals,TRUE)."[!br!]".print_r($xFields,TRUE),FALSE,LOG_TO_ROLLING);
 				if (!isset($db_vals['user_name'])) $db_vals['user_name'] = $username;
 				if (!isset($db_vals['user_loginname'])) $db_vals['user_loginname'] = $username;
@@ -211,9 +211,9 @@ class alt_login
 				$newUser['data'] = $db_vals;
 				$userMethods->addNonDefaulted($newUser);
 				validatorClass::addFieldTypes($userMethods->userVettingInfo,$newUser);
-				
+
 				$newID = $aa_sql->insert('user',$newUser);
-				
+
 				if ($newID !== FALSE)
 				{
 					if (count($xFields))

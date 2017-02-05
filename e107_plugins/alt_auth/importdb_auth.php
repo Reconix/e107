@@ -20,10 +20,10 @@
  *	@version 	$Id$;
  */
 
-/* 
+/*
 	return values
 	AUTH_NOCONNECT 		= unable to connect to db
-	AUTH_NOUSER			= user not found	
+	AUTH_NOUSER			= user not found
 	AUTH_BADPASSWORD	= supplied password incorrect
 
 	AUTH_SUCCESS 		= valid login
@@ -37,7 +37,7 @@ class auth_login extends alt_auth_base
 	public	$ErrorText;				// e107 error string on exit
 	private $conf;					// Configuration parameters
 
-	
+
 	/**
 	 *	Read configuration
 	 *
@@ -49,8 +49,8 @@ class auth_login extends alt_auth_base
 		$this->conf = $this->altAuthGetParams('importdb');
 		$this->Available = TRUE;
 	}
-	
-	
+
+
 	private function makeErrorText($extra = '')
 	{
 		$this->ErrorText = $extra;
@@ -75,7 +75,7 @@ class auth_login extends alt_auth_base
 
 		// See if the user's in the E107 database - otherwise they can go away
 		global $sql, $tp;
-		if (!$sql->db_Select('user', 'user_loginname, user_password', "user_loginname = '".$tp -> toDB($uname)."'")) 
+		if (!$sql->db_Select('user', 'user_loginname, user_password', "user_loginname = '".$tp -> toDB($uname)."'"))
 		{	// Invalid user
 			$this->makeErrorText('User not found');
 			return AUTH_NOUSER;
@@ -93,7 +93,7 @@ class auth_login extends alt_auth_base
 		$pass_check = new ExtendedPasswordHandler();
 
 		$passMethod = $pass_check->passwordMapping($this->conf['importdb_password_method']);
-		if ($passMethod === FALSE) 
+		if ($passMethod === FALSE)
 		{
 			$this->makeErrorText('Password error - invalid method');
 			return AUTH_BADPASSWORD;

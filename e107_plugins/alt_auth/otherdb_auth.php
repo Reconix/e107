@@ -10,9 +10,9 @@
  *
  * $URL$
  * $Id$
- * 
+ *
  */
- 
+
 /**
  *	e107 Alternate authorisation plugin
  *
@@ -21,10 +21,10 @@
  *	@version 	$Id$;
  */
 
-/* 
+/*
 	return values
 	AUTH_NOCONNECT 		= unable to connect to db
-	AUTH_NOUSER			= user not found	
+	AUTH_NOUSER			= user not found
 	AUTH_BADPASSWORD	= supplied password incorrect
 
 	AUTH_SUCCESS 		= valid login
@@ -36,7 +36,7 @@ class auth_login extends alt_auth_base
 	public	$Available = FALSE;		// Flag indicates whether DB connection available
 	public	$ErrorText;				// e107 error string on exit
 	private $conf;					// Configuration parameters
-	
+
 
 
 	/**
@@ -83,7 +83,7 @@ class auth_login extends alt_auth_base
 	{
 		/* Begin - Deltik's PDO Workaround (part 1/2) */
 		$dsn = 'mysql:dbname=' . $this->conf['otherdb_database'] . ';host=' . $this->conf['otherdb_server'];
-		
+
 		try
 		{
 			$dbh = new PDO($dsn, $this->conf['otherdb_username'], $this->conf['otherdb_password']);
@@ -94,7 +94,7 @@ class auth_login extends alt_auth_base
 			return AUTH_NOCONNECT;
 		}
 		/* End - Deltik's PDO Workaround (part 1/2) */
-		
+
 		/** Ancient code that breaks e107's ability to use the original MySQL resource
 		//Attempt to open connection to sql database
 		if(!$res = mysql_connect($this->conf['otherdb_server'], $this->conf['otherdb_username'], $this->conf['otherdb_password']))
@@ -110,7 +110,7 @@ class auth_login extends alt_auth_base
 			return AUTH_NOCONNECT;
 		}
 		*/
-		
+
 		if ($connect_only) return AUTH_SUCCESS;		// Test mode may just want to connect to the DB
 		$sel_fields = array();
 		// Make an array of the fields we want from the source DB
@@ -131,7 +131,7 @@ class auth_login extends alt_auth_base
 		//Get record containing supplied login name
 		$qry = "SELECT ".implode(',',$sel_fields)." FROM {$this->conf['otherdb_table']} WHERE {$user_field} = '{$uname}'";
 //	  echo "Query: {$qry}<br />";
-		
+
 		/* Begin - Deltik's PDO Workaround (part 2/2) */
 		if (!$r1 = $dbh->query($qry))
 		{
@@ -144,7 +144,7 @@ class auth_login extends alt_auth_base
 			return AUTH_NOUSER;
 		}
 		/* End - Deltik's PDO Workaround (part 2/2) */
-		
+
 		/** Ancient code that breaks e107's ability to use the original MySQL resource
 		if(!$r1 = mysql_query($qry))
 		{
@@ -166,7 +166,7 @@ class auth_login extends alt_auth_base
 		$pass_check = new ExtendedPasswordHandler();
 
 		$passMethod = $pass_check->passwordMapping($this->conf['otherdb_password_method']);
-		if ($passMethod === FALSE) 
+		if ($passMethod === FALSE)
 		{
 			$this->makeErrorText('Password error - invalid method');
 			return AUTH_BADPASSWORD;

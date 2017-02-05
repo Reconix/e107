@@ -10,9 +10,9 @@
  *
  * $URL$
  * $Id$
- * 
+ *
  */
- 
+
 /**
  *	e107 Alternate authorisation plugin
  *
@@ -59,7 +59,7 @@ class alt_auth_otherdb extends alt_auth_admin
 
 		$text .= $this->alt_auth_get_db_fields('otherdb', $frm, $parm, 'server|uname|pwd|db|table|ufield|pwfield|salt');
 		$text .= "<tr><td>".OTHERDB_LAN_9."</td><td>";
-		
+
 		$text .= $this->altAuthGetPasswordSelector('otherdb_password_method', $frm, $parm['otherdb_password_method'], TRUE);
 
 		$text .= "</td></tr>";
@@ -76,7 +76,7 @@ class alt_auth_otherdb extends alt_auth_admin
 		$text .= $frm -> form_close();
 
 		$ns -> tablerender(OTHERDB_LAN_10, $text);
-		
+
 		$ns->tablerender(LAN_ALT_40.LAN_ALT_41, $this->alt_auth_test_form('otherdb',$frm));
 	}
 }

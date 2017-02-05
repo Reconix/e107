@@ -10,9 +10,9 @@
  *
  * $URL$
  * $Id$
- * 
+ *
  */
- 
+
 /**
  *	e107 Alternate authorisation plugin
  *
@@ -45,7 +45,7 @@ class alt_auth_otherdb extends alt_auth_admin
 	public function showForm()
 	{
 		$ns = e107::getRender();
-		
+
 		$parm = $this->altAuthGetParams('importdb');
 
 		$frm = new form;

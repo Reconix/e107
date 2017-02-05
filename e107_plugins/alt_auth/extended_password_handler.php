@@ -21,7 +21,7 @@
  */
 
 /**
-EXTENDED PASSWORD HANDLER CLASS 
+EXTENDED PASSWORD HANDLER CLASS
 	- supports many password formats used on other systems
 	- implements checking of existing passwords only
 
@@ -84,7 +84,7 @@ class ExtendedPasswordHandler extends UserHandler
 		$this->random_state = md5($this->random_state.microtime().mt_rand(0,10000));  // This will 'auto seed'
 
 		$output = '';
-		for ($i = 0; $i < $count; $i += 16) 
+		for ($i = 0; $i < $count; $i += 16)
 		{	// Only do this loop once unless we need more than 16 bytes
 		  $this->random_state = md5(microtime() . $this->random_state);
 		  $output .= pack('H*', md5($this->random_state));		// Becomes an array of 16 bytes
@@ -105,9 +105,9 @@ class ExtendedPasswordHandler extends UserHandler
 		/*
 		$output = '';
 		$i = 0;
-		do 
+		do
 		{
-		  $value = ord($input[$i++]);	
+		  $value = ord($input[$i++]);
 		  $output .= $this->itoa64[$value & 0x3f];
 		  if ($i < $count) $value |= ord($input[$i]) << 8;
 		  $output .= $this->itoa64[($value >> 6) & 0x3f];
@@ -177,7 +177,7 @@ class ExtendedPasswordHandler extends UserHandler
 		# quicker to crack (by non-PHP code).
 		// Get raw binary output (always 16 bytes) - we assume PHP5 here
 		$hash = md5($salt.$password, TRUE);
-		do 
+		do
 		{
 			$hash = md5($hash.$password, TRUE);
 		} while (--$count);
@@ -198,9 +198,9 @@ class ExtendedPasswordHandler extends UserHandler
 		$vals = array('md5' => IMPORTDB_LAN_7,'e107_salt' => IMPORTDB_LAN_8);		// Methods supported in core
 		if ($includeExtended)
 		{
-			$vals = array_merge($vals,array( 
-				'plaintext' 		=> IMPORTDB_LAN_2, 
-				'joomla_salt'		=> IMPORTDB_LAN_3, 
+			$vals = array_merge($vals,array(
+				'plaintext' 		=> IMPORTDB_LAN_2,
+				'joomla_salt'		=> IMPORTDB_LAN_3,
 				'mambo_salt'		=> IMPORTDB_LAN_4,
 				'smf_sha1'			=> IMPORTDB_LAN_5,
 				'sha1'				=> IMPORTDB_LAN_6,
@@ -218,9 +218,9 @@ class ExtendedPasswordHandler extends UserHandler
 	 */
 	public function passwordMapping($ptype)
 	{
-		$maps = array( 
-				'plaintext' 		=> PASSWORD_PLAINTEXT, 
-				'joomla_salt' 		=> PASSWORD_JOOMLA_SALT, 
+		$maps = array(
+				'plaintext' 		=> PASSWORD_PLAINTEXT,
+				'joomla_salt' 		=> PASSWORD_JOOMLA_SALT,
 				'mambo_salt' 		=> PASSWORD_MAMBO_SALT,
 				'smf_sha1' 			=> PASSWORD_GENERAL_SHA1,
 				'sha1' 				=> PASSWORD_GENERAL_SHA1,
@@ -273,28 +273,28 @@ class ExtendedPasswordHandler extends UserHandler
 					return PASSWORD_INVALID;
 				}
 				// Mambo/Joomla salted hash - should be 32-character md5 hash, ':', 16-character salt (but could be 8-char salt, maybe)
-				list($hash, $salt) = explode(':', $stored_hash); 
+				list($hash, $salt) = explode(':', $stored_hash);
 				$pwHash = md5($pword.$salt);
 				$stored_hash = $hash;
 				break;
-				
+
 
 			case PASSWORD_MAGENTO_SALT :
 				$hash = $salt = '';
 				if ((strpos($stored_hash, ':') !== false))
 				{
-					list($hash, $salt) = explode(':', $stored_hash); 
+					list($hash, $salt) = explode(':', $stored_hash);
 				}
 				// Magento salted hash - should be 32-character md5 hash, ':', 2-character salt, but could be also only md5 hash
-				else 
+				else
 				{
 					$hash = $stored_hash;
-				} 
-				if(strlen($hash) !== 32) 
+				}
+				if(strlen($hash) !== 32)
 				{
 					//return PASSWORD_INVALID;
 				}
-				
+
 				$pwHash = $salt ? md5($salt.$pword) : md5($pword);
 				$stored_hash = $hash;
 				break;

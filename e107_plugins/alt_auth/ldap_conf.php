@@ -19,7 +19,7 @@
  *	@subpackage	alt_auth
  *	@version 	$Id$;
  */
- 
+
 $eplug_admin = true;
 require_once('../../class2.php');
 require_once(e_ADMIN.'auth.php');

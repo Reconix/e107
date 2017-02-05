@@ -10,9 +10,9 @@
  *
  * $URL$
  * $Id$
- * 
+ *
  */
- 
+
  /**
  *	e107 Alternate authorisation plugin
  *
@@ -32,8 +32,8 @@
 //define('IMPORTDB_LAN_8', 'E107 salted (option 2.0 on)');
 define('IMPORTDB_LAN_9', 'Password Method:');
 define('IMPORTDB_LAN_10', 'Configure imported database password type');
-define('IMPORTDB_LAN_11', 'This option is to be used when you have imported some other user-based system into E107. 
-							It allows you to accept passwords encoded in the selected non-standard format. 
+define('IMPORTDB_LAN_11', 'This option is to be used when you have imported some other user-based system into E107.
+							It allows you to accept passwords encoded in the selected non-standard format.
 							Each user\'s password is converted to E107 format when they log in.');
 //define('IMPORTDB_LAN_12', 'PHPBB2/PHPBB3 salted');
 //define('IMPORTDB_LAN_13', 'WordPress salted');
