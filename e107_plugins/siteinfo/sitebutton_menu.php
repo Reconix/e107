@@ -17,17 +17,17 @@
 if (!defined('e107_INIT')) { exit; }
 // echo "parm=".$parm; //FIXME - just for testing only.
 
-if(strstr(SITEBUTTON, "://")) // external url. 
+if(strstr(SITEBUTTON, "://")) // external url.
 {
 	$path = SITEBUTTON;
-} 
-elseif(basename(SITEBUTTON) == SITEBUTTON) // v1.x BC Fix. - no path included. 
+}
+elseif(basename(SITEBUTTON) == SITEBUTTON) // v1.x BC Fix. - no path included.
 {
 	$path = e_IMAGE_ABS.SITEBUTTON;
 }
-else // v2.x format:  {e_IMAGE}whatever.png 
+else // v2.x format:  {e_IMAGE}whatever.png
 {
-	$path = SITEBUTTON; 	
+	$path = SITEBUTTON;
 }
 
 $ns->tablerender(SITEBUTTON_MENU_L1, "<div style='text-align:center'>\n<a href='".SITEURL."'><img src='".$path."' alt='".SITEBUTTON_MENU_L1."' style='border: 0px; max-width:100%' /></a>\n</div>", 'sitebutton');

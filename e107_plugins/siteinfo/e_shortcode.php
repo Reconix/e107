@@ -6,16 +6,16 @@
 */
 if (!defined('e107_INIT')) { exit; }
 
-class siteinfo_shortcodes // must match the folder name of the plugin. 
+class siteinfo_shortcodes // must match the folder name of the plugin.
 {
 	function sc_sitebutton($parm=null)
 	{
-		
+
 		if($_POST['sitebutton'] && $_POST['ajax_used'])
 		{
 			$path = e107::getParser()->replaceConstants($_POST['sitebutton']);
 		}
-		else 
+		else
 		{
 			$path = (strstr(SITEBUTTON, 'http:') ? SITEBUTTON : e_IMAGE.SITEBUTTON);
 		}
@@ -53,7 +53,7 @@ class siteinfo_shortcodes // must match the folder name of the plugin.
 
 		return e107::getParser()->toHtml($text, true, 'SUMMARY');
 	}
-	
+
 	function sc_siteurl($parm='')
 	{
 		if(strlen(deftrue('SITEURL')) < 3 ) //fixes CLI/cron
@@ -61,9 +61,9 @@ class siteinfo_shortcodes // must match the folder name of the plugin.
 			return e107::getPref('siteurl');
 		}
 
-		return SITEURL;	
+		return SITEURL;
 	}
-	
+
 
 	function sc_sitename($parm='')
 	{
@@ -80,10 +80,10 @@ class siteinfo_shortcodes // must match the folder name of the plugin.
 	{
 		return SITETAG;
 	}
-	
+
 	function sc_sitelogo($parm='')
 	{
-		return $this->sc_logo($parm);	
+		return $this->sc_logo($parm);
 	}
 
 	function sc_logo($parm = '')
@@ -110,8 +110,8 @@ class siteinfo_shortcodes // must match the folder name of the plugin.
 			elseif(is_readable(THEME."images/login_logo.png"))
 			{
 
-				$logo = THEME_ABS."images/login_logo.png";	
-				$path = THEME."images/login_logo.png";	
+				$logo = THEME_ABS."images/login_logo.png";
+				$path = THEME."images/login_logo.png";
 			}
 			else
 			{
@@ -123,11 +123,11 @@ class siteinfo_shortcodes // must match the folder name of the plugin.
 				{
 					$parm['w'] = 330;
 				}
-			}	
+			}
 		}
-		else 
+		else
 		{
-			
+
 			if(vartrue($logopref) && is_readable($logop))
 			{
 				$logo = $tp->replaceConstants($logopref,'abs');
@@ -143,20 +143,20 @@ class siteinfo_shortcodes // must match the folder name of the plugin.
 				$logo = THEME_ABS.'images/e_logo.png';		// HTML path
 				$path = THEME.'images/e_logo.png';			// PHP path
 			}
-			elseif(varset($parm['fallback']) == 'sitename') // fallback to 
+			elseif(varset($parm['fallback']) == 'sitename') // fallback to
 			{
-				return $this->sc_sitename($parm); 	
+				return $this->sc_sitename($parm);
 			}
 			else
 			{
 				$logo = '{e_IMAGE}logoHD.png';				// HTML path
 				$path = e_IMAGE.'logoHD.png';					// PHP path
 			}
-			
+
 		}
 
 		$dimensions = array();
-		
+
 		if((isset($parm['w']) || isset($parm['h'])))
 		{
 			//

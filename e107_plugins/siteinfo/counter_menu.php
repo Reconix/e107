@@ -5,7 +5,7 @@
  * Copyright (C) 2008-2014 e107 Inc (e107.org)
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
- * 
+ *
  * https://github.com/e107inc/e107
  */
 
@@ -15,7 +15,7 @@ $text = "";
 
 $pref = e107::getPref();
 
-if (isset($pref['statActivate']) && $pref['statActivate'] == true) 
+if (isset($pref['statActivate']) && $pref['statActivate'] == true)
 {
 	//$pageName = preg_replace("/(\?.*)|(\_.*)|(\.php)/", "", basename (e_SELF));
 
@@ -39,12 +39,12 @@ if (isset($pref['statActivate']) && $pref['statActivate'] == true)
 		$siteUnique = 1;
 		$totalever = 1;
 		$uniqueever = 1;
-	} 
-	else 
+	}
+	else
 	{
 		$text = "";
 		require($logfile);
-		
+
 		if($sql->select("logstats", "*", "log_id='statTotal' OR log_id='statUnique' OR log_id='pageTotal'"))
 		{
 			while($row = $sql->fetch())
@@ -67,7 +67,7 @@ if (isset($pref['statActivate']) && $pref['statActivate'] == true)
 				}
 			}
 		}
-		
+
 		$total = ($pageInfo[$pageName]['ttl'] ? $pageInfo[$pageName]['ttl'] : 0);
 		$unique = ($pageInfo[$pageName]['unq'] ? $pageInfo[$pageName]['unq'] : 0);
 		$totalever = ($pageInfo[$pageName]['ttlv'] ? $pageInfo[$pageName]['ttlv'] : 0) + $totalPageEver + $total;

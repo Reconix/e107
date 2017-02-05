@@ -26,7 +26,7 @@ $text = "
 ";
 
 
-if(!deftrue("BOOTSTRAP")) // Old Legacy Code. 
+if(!deftrue("BOOTSTRAP")) // Old Legacy Code.
 {
 	$text = "
 	<div style='text-align: center'>

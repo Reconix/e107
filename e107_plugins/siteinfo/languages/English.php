@@ -9,7 +9,7 @@
 |     $Author$
 +----------------------------------------------------------------------------+
 */
-	
+
 define("COMPLIANCE_L1", "W3C Compliance");
 define("SITEBUTTON_MENU_L1", "Link to us");
 define("POWEREDBY_L1", "Powered by");
