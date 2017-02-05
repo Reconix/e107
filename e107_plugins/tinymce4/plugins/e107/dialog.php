@@ -4,7 +4,7 @@ define("e_ADMIN_AREA", true);
 require_once("../../../../class2.php");
 //e107::lan('core','admin',TRUE);
 define("e_IFRAME",true);
-//require_once(e_ADMIN."auth.php");			
+//require_once(e_ADMIN."auth.php");
 
 
 if(!USER || check_class($pref['post_html']) == FALSE){
@@ -15,14 +15,14 @@ e107::css('inline',"
 
 	.selectEmote 		{ display:inline-block; cursor:pointer;margin:3px }
 	body				{ text-align:center }
-	.area				{  
-					 	  margin-top:-1px; padding:20px; 
+	.area				{
+					 	  margin-top:-1px; padding:20px;
 						}
 	span.badge			{ cursor: pointer }
 	span.label			{ cursor: pointer }
 	ul.glyphicons		{ list-style:none; margin-left:0px; font-size:120%}
 	ul.glyphicons  li	{ float:left;  cursor:pointer; width:190px; padding:5px; }
-	a, li					{  outline: 0; }    
+	a, li					{  outline: 0; }
 
 ");
 
@@ -33,49 +33,49 @@ e107::js('inline',"
 $(document).ready(function()
 {
 		$('#insertButton').click(function () {
-						
+
 			var buttonType = $('input:radio[name=buttonType]:checked').val();
 			var buttonSize = $('input:radio[name=buttonSize]:checked').val();
-					
+
 			var buttonText = $('#buttonText').val();
 			var buttonUrl = $('#buttonUrl').val();
-			
+
 			var buttonClass = (buttonType != '') ? 'btn-'+buttonType : '';
-					
+
 
 			var html = '<a class=\"btn ' + buttonClass + ' ' + buttonSize + '\" href=\"' + buttonUrl + '\" >' + buttonText + '</a>  ';
-		//	alert(html);		
+		//	alert(html);
 			tinyMCEPopup.editor.execCommand('mceInsertContent', false, html);
 			tinyMCEPopup.close();
 		});
-		
-		
+
+
 		$('span.label, span.badge').click(function () {
                 var cls = $(this).attr('class');
                 var html = '<span class=\"' + cls + '\">' + $(this).text() + '</span>&nbsp;';
 				tinyMCEPopup.editor.execCommand('mceInsertContent', false, html);
 				tinyMCEPopup.close();
 		});
-		
-	
+
+
 		$('ul.glyphicons li, #glyph-save').click(function () {
-		
-				var color = $('#glyph-color').val();	
-				var custom = $('#glyph-custom').val();			
-                var cls = (custom != '') ? custom : $(this).find('i').attr('class');	
-	
+
+				var color = $('#glyph-color').val();
+				var custom = $('#glyph-custom').val();
+                var cls = (custom != '') ? custom : $(this).find('i').attr('class');
+
                 var html = '<i class=\"' + cls + '\"></i>&nbsp;';
-				
+
 			//	alert(html);
 				tinyMCEPopup.editor.execCommand('mceInsertContent', false, html);
 				tinyMCEPopup.close();
 		});
-	
-		$('#bbcodeInsert').click(function () 
+
+		$('#bbcodeInsert').click(function ()
 		{
 				s = $('#bbcodeValue').val();
 				s = s.trim(s);
-	
+
 				var html = $.ajax({
 					type: 'POST',
 					url: './parser.php',
@@ -93,17 +93,17 @@ alert(html);
 				tinyMCEPopup.editor.execCommand('mceInsertContent', false, html);
 				tinyMCEPopup.close();
 		});
-	
+
 		$('a.bbcodeSelect').click(function () {
-			var html = $(this).html();	
+			var html = $(this).html();
 			$('#bbcodeValue').val(html);
 		});
-		
+
 		$('#e-cancel').click(function () {
-					
+
 			tinyMCEPopup.close();
 		});
-		
+
 });
 
 
@@ -112,89 +112,89 @@ alert(html);
 
 class e_bootstrap
 {
-				
+
 	private $styleClasses = array(''=>'Default', 'primary'=>"Primary", 'success'=>"Success", 'info'=>"Info", 'warning'=>"Warning",'danger'=>"Danger",'inverse'=>"Inverse");
-			
-		
-	
+
+
+
 	function init()
 	{
 		$ns = e107::getRender();
-		
-		
+
+
 		if(e_QUERY == 'bbcode')
 		{
-			echo $this->bbcodeForm();		
+			echo $this->bbcodeForm();
 			return;
 		}
-					
-				
-			
-		
+
+
+
+
 		$text = "<div class='alert alert-warning'>Warning: These will only work if you have a bootstrap-based theme installed</div>";
-		
-		
+
+
 		$text .= '
 		<ul class="nav nav-tabs">';
-		
+
 		$text .= '<li class="active" ><a href="#mbuttons" data-toggle="tab">Buttons</a></li>';
-		
+
 		$text .= '<li><a href="#badges" data-toggle="tab">Labels &amp; Badges</a></li>';
-	
-		$text .= '<li><a href="#glyphs" data-toggle="tab">Glyphicons</a></li>';	
-		
+
+		$text .= '<li><a href="#glyphs" data-toggle="tab">Glyphicons</a></li>';
+
 		$text .= '</ul>';
-		 
+
 		$text .= '<div class="tab-content">';
-		
+
 		$text .= '<div class="tab-pane active left" id="mbuttons">'.$this->buttonForm().'</div>';
-		
+
 		$text .= '<div class="tab-pane left" id="badges">'.$this->badgeForm().'</div>';
-		
+
 		$text .= '<div class="tab-pane left" id="glyphs">'.$this->glyphicons().'</div>';
-		
-	
+
+
 		$text .= '</div>';
 
 		echo $text;
-			
+
 	}
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	function buttonForm()
 	{
 		$frm = e107::getForm();
-		
+
 		$buttonSizes = array(''=>'Default', 'btn-mini'=>"Mini", 'btn-small'=>"Small", 'btn-large' => "Large");
-		
+
 		$buttonTypes = $this->styleClasses;
-			
+
 		$butSelect = "";
-		$butSelect .= "<div class='form-inline' style='padding:5px'>";	
+		$butSelect .= "<div class='form-inline' style='padding:5px'>";
 		foreach($buttonTypes as $type=>$diz)
 		{
-			
+
 			$label = '<button class="btn btn-'.$type.'" >'.$diz.'</button>';
 			$butSelect .= $frm->radio('buttonType', $type, false, array('label'=>$label));
-			
+
 		}
-		$butSelect .= "</div>";		
-		
-		$butSize = "<div class='form-inline' style='padding:5px'>";	
-		
+		$butSelect .= "</div>";
+
+		$butSize = "<div class='form-inline' style='padding:5px'>";
+
 		foreach($buttonSizes as $size=>$label)
 		{
 			$selected = ($size == '') ? true : false;
-			$butSize .= $frm->radio('buttonSize', $size, $selected, array('label'=>$label));	
+			$butSize .= $frm->radio('buttonSize', $size, $selected, array('label'=>$label));
 		}
-		$butSize .= "</div>";		
-		
-		
-		
+		$butSize .= "</div>";
+
+
+
 		$text = "
 		<table class='table area'>
 		<tr>
@@ -204,7 +204,7 @@ class e_bootstrap
 		<tr>
 			<td>Button Size</td>
 			<td><p>".$butSize."</p></td>
-		</tr>	
+		</tr>
 		<tr>
 			<td>Button Text</td>
 			<td><p>".$frm->text('buttonText',$value,50)."</p></td>
@@ -213,17 +213,17 @@ class e_bootstrap
 			<td>Button Url</td>
 			<td><p>".$frm->text('buttonUrl','',255,'size=xxlarge')."</p></td>
 		</tr>
-			
-				
+
+
 		</table>
 
 		<div class='center'>". $frm->admin_button('insertButton','save','other',"Insert") ."
 		<button class='btn btn-default ' id='e-cancel'>".LAN_CANCEL."</button>
 		</div>";
-		
-		
+
+
 		return $text;
-		
+
 	}
 
 
@@ -231,26 +231,26 @@ class e_bootstrap
 	function badgeForm()
 	{
 		unset($this->styleClasses['primary']);
-		
+
 		foreach($this->styleClasses as $key=>$type)
 		{
 			$classLabel = ($key != '') ? " label-".$key : "";
-			$classBadge = ($key != '') ? " badge-".$key : "";	
-			
+			$classBadge = ($key != '') ? " badge-".$key : "";
+
 			$text .= '<div class="area"><span class="label'.$classLabel.'">'.$type.'</span>&nbsp;';
 			$text .= '<span class="badge'.$classBadge.'">'.$type.'</span>';
 			$text .= "</div>";
-		} 
-		
-		return $text;      
-	
+		}
+
+		return $text;
+
 	}
-	
-	
+
+
 	function bbcodeForm()
 	{
 		$list = e107::getPref('bbcode_list');
-		
+
 		$text .= "
 		<h4>e107 Bbcodes</h4>
 		<div class='well'>
@@ -263,7 +263,7 @@ class e_bootstrap
 		{
 			$text .= "<tr><td>".$plugin."</td>
 			<td>";
-			
+
 			foreach($val as $bb=>$v)
 			{
 				$text .= "<a href='#' class='bbcodeSelect' style='cursor:pointer'>[".$bb."][/".$bb."]</a>";
@@ -271,22 +271,22 @@ class e_bootstrap
 			$text .= "</td>
 			</tr>";
 		}
-			
+
 		$text .= "</table>
 		</div>";
-			
+
 		$frm = e107::getForm();
 		$text .= $frm->text('bbcodeValue','',false,'size=xlarge');
 		$text .= $frm->button('bbcodeInsert','go','other','Insert');
-			
-		
+
+
 		return $text;
-				
-		
+
+
 	}
-				
-	
-			
+
+
+
 	function glyphicons()
 	{
 		$icons = array(
@@ -433,44 +433,44 @@ class e_bootstrap
             "icon-filter",
             "icon-briefcase",
             "icon-fullscreen"
-       );					
+       );
 
 		$frm = e107::getForm();
-		$sel = array(''=>'Dark Gray','icon-white'=>'White');	
-			
+		$sel = array(''=>'Dark Gray','icon-white'=>'White');
+
 		$text .= "<div  class='area'>";
-		$text .= "<div class='inline-form'>Color: ".$frm->select('glyph-color',$sel)."     Custom: ".$frm->text('glyph-custom','').$frm->button('glyph-save','Go')."</div>";	
-					
+		$text .= "<div class='inline-form'>Color: ".$frm->select('glyph-color',$sel)."     Custom: ".$frm->text('glyph-custom','').$frm->button('glyph-save','Go')."</div>";
+
 		$text .= "<ul class='glyphicons well clearfix'>";
-		
+
 		$inverse = (e107::getPref('admincss') == "admin_dark.css") ? " icon-white" : "";
-		
+
 		foreach($icons as $ic)
 		{
 			$text .= '<li><i class="'.$ic.$inverse.'"></i> '.$ic.'</li>';
 			$text .= "\n";
 		}
-					
-		$text .= "</ul>";	
+
+		$text .= "</ul>";
 		$text .= "</div>";
 
 		return $text;
 
 }
-					
-				
-			
-			
-		
-		
 
 
-	
-	
+
+
+
+
+
+
+
+
 }
 
-       
-require_once(e_ADMIN."auth.php");			
+
+require_once(e_ADMIN."auth.php");
 //e107::lan('core','admin',TRUE);
 
 

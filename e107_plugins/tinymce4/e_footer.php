@@ -46,14 +46,14 @@ if((e107::wysiwyg() === true && check_class($pref['post_html'])) || strpos(e_SEL
 				}
 			');
 		}
-		
+
 	}
 	else
 	{
 	//	e107::js('tinymce4','plugins/compat3x/tiny_mce_popup.js');
 	//	e107::js('tinymce','tiny_mce_popup.js','jquery');
 	}
-	
+
 	if(ADMIN)
 	{
 	    $insert = "$('#'+id).after('<div>";
@@ -64,23 +64,23 @@ if((e107::wysiwyg() === true && check_class($pref['post_html'])) || strpos(e_SEL
             $insert .= "&nbsp;&nbsp;<a href=\"#\" class=\"btn btn-mini tinyInsert\" data-value=\"|USERNAME|\" >".LAN_MAILOUT_16."<\/a>";
             $insert .= "<a href=\"#\" class=\"btn btn-mini tinyInsert\"     data-value=\"|DISPLAYNAME|\" >".LAN_MAILOUT_14."<\/a>";
             $insert .= "<a href=\"#\" class=\"btn btn-mini tinyInsert\"     data-value=\"|SIGNUP_LINK|\" >".LAN_MAILOUT_17."<\/a>";
-            $insert .= "<a href=\"#\" class=\"btn btn-mini tinyInsert\"     data-value=\"|USERID|\" >".LAN_MAILOUT_18."<\/a>";           
+            $insert .= "<a href=\"#\" class=\"btn btn-mini tinyInsert\"     data-value=\"|USERID|\" >".LAN_MAILOUT_18."<\/a>";
         }
-        
+
 	    $insert .= "</div>');";
-        
-		define("SWITCH_TO_BB",$insert);	
-	
+
+		define("SWITCH_TO_BB",$insert);
+
     }
-	else 
+	else
 	{
 		define("SWITCH_TO_BB","");
 	}
-    	
+
 //	print_a($_POST);
-	
+
 	// <div><a href='#' class='e-wysiwyg-switch' onclick=\"tinyMCE.execCommand('mceToggleEditor',false,'".$tinyMceID."');expandit('".$toggleID."');\">Toggle WYSIWYG</a></div>
-	
+
 
 	e107::js('footer-inline',"
 

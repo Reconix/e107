@@ -101,7 +101,7 @@ require_once (e_HANDLER.'message_handler.php');
 $frm = new e_form(true);
 
 $ef = new tinymce;
-//TODO save prefs to separate config row. 
+//TODO save prefs to separate config row.
 // List all forms of access, and allow the user to choose between simple/advanced or 'custom' settings.
 
 
@@ -118,14 +118,14 @@ if(varset($_POST['delete']))
 	$_GET['mode'] = "list";
 }
 
-if(isset($_POST['edit']) || $id) // define after db changes and before header loads. 
+if(isset($_POST['edit']) || $id) // define after db changes and before header loads.
 {
 	$id = (isset($_POST['edit'])) ? key($_POST['edit']) : $id;
 	define("TINYMCE_CONFIG",$id);
 }
 else
 {
-	define("TINYMCE_CONFIG",FALSE);	
+	define("TINYMCE_CONFIG",FALSE);
 }
 
 
@@ -138,7 +138,7 @@ if(varset($_GET['mode'])=='create')
 	{
 		$id = $_POST['record_id'];
 	}
-	$ef->createRecord($id);	
+	$ef->createRecord($id);
 }
 else
 {
@@ -167,37 +167,37 @@ class tinymce
 
 	function __construct()
 	{
-	
+
     	$this->fields = array(
 			'tinymce_id'		=> array('title'=> ID, 'width'=>'5%', 'forced'=> TRUE, 'primary'=>TRUE),
 			'tinymce_name'	   	=> array('title'=> 'name', 'width'=>'auto','type'=>'text'),
-			'tinymce_userclass' => array('title'=> 'class', 'type' => 'array', 'method'=>'tinymce_class', 'width' => 'auto'),	
-			'tinymce_plugins' 	=> array('title'=> 'plugins', 'type' => 'array', 'method'=>'tinymce_plugins', 'width' => 'auto'),	
+			'tinymce_userclass' => array('title'=> 'class', 'type' => 'array', 'method'=>'tinymce_class', 'width' => 'auto'),
+			'tinymce_plugins' 	=> array('title'=> 'plugins', 'type' => 'array', 'method'=>'tinymce_plugins', 'width' => 'auto'),
 			'tinymce_buttons1' 	=> array('title'=> 'buttons1', 'type' => 'text', 'method'=>'tinymce_buttons', 'methodparms'=>1, 'width' => 'auto'),
 			'tinymce_buttons2' 	=> array('title'=> 'buttons2', 'type' => 'text', 'method'=>'tinymce_buttons', 'methodparms'=>2, 'width' => 'auto'),
-			'tinymce_buttons3' 	=> array('title'=> 'buttons3', 'type' => 'text', 'method'=>'tinymce_buttons', 'methodparms'=>3, 'width' => 'auto', 'thclass' => 'left first'), 
-         	'tinymce_buttons4' 	=> array('title'=> 'buttons4', 'type' => 'text', 'method'=>'tinymce_buttons', 'methodparms'=>4, 'width' => 'auto', 'thclass' => 'left first'), 
-            'tinymce_custom' 	=> array('title'=> 'custom', 'type' => 'text', 'width' => 'auto'),	 	
-			'tinymce_prefs' 	=> array('title'=> 'prefs', 'type' => 'text', 'width' => '10%', 'thclass' => 'center' ),	 
+			'tinymce_buttons3' 	=> array('title'=> 'buttons3', 'type' => 'text', 'method'=>'tinymce_buttons', 'methodparms'=>3, 'width' => 'auto', 'thclass' => 'left first'),
+         	'tinymce_buttons4' 	=> array('title'=> 'buttons4', 'type' => 'text', 'method'=>'tinymce_buttons', 'methodparms'=>4, 'width' => 'auto', 'thclass' => 'left first'),
+            'tinymce_custom' 	=> array('title'=> 'custom', 'type' => 'text', 'width' => 'auto'),
+			'tinymce_prefs' 	=> array('title'=> 'prefs', 'type' => 'text', 'width' => '10%', 'thclass' => 'center' ),
 			'options' 			=> array('title'=> LAN_OPTIONS, 'forced'=>TRUE, 'width' => '10%', 'thclass' => 'center last')
 		);
-		
+
 		$this->fieldpref = (varset($user_pref['admin_tinymce_columns'])) ? $user_pref['admin_tinymce_columns'] : array_keys($this->fields);
 		$this->table = "tinymce";
 		$this->listQry = "SELECT * FROM #tinymce ORDER BY tinymce_id";
 		$this->editQry = "SELECT * FROM #tinymce WHERE tinymce_id = {ID}";
 		$this->primary = "tinymce_id";
 		$this->pluginTitle = "Tinymce";
-		
+
 		$this->listCaption = "Tinymce Configs";
 		$this->createCaption = LAN_CREATE."/".LAN_EDIT;
-		
+
 	}
 
 
 // --------------------------------------------------------------------------
 	/**
-	 * Generic DB Record Listing Function. 
+	 * Generic DB Record Listing Function.
 	 *
 	 * @param object $mode [optional] - reserved
 	 * @return void
@@ -207,10 +207,10 @@ class tinymce
 		$ns = e107::getRender();
 		$sql = e107::getDb();
 		$frm = e107::getForm();
-		
-		
+
+
 		global $pref;
-		
+
 		$emessage = eMessage::getInstance();
 
         $text = "<form method='post' action='".e_SELF."?mode=create'>
@@ -235,11 +235,11 @@ class tinymce
 			{
 				$text .= "<tr>\n";
 				foreach($this->fields as $key=>$att)
-				{	
-					$class = vartrue($this->fields[$key]['thclass']) ? "class='".$this->fields[$key]['thclass']."'" : "";		
-					$text .= (in_array($key,$this->fieldpref) || $att['forced']==TRUE) ? "\t<td ".$class.">".$this->renderValue($key,$field)."</td>\n" : "";						
+				{
+					$class = vartrue($this->fields[$key]['thclass']) ? "class='".$this->fields[$key]['thclass']."'" : "";
+					$text .= (in_array($key,$this->fieldpref) || $att['forced']==TRUE) ? "\t<td ".$class.">".$this->renderValue($key,$field)."</td>\n" : "";
 				}
-				$text .= "</tr>\n";				
+				$text .= "</tr>\n";
 			}
 		}
 
@@ -262,9 +262,9 @@ class tinymce
 	 */
 	function renderValue($key, $row)
 	{
-		$att = $this->fields[$key];	
-		$frm = e107::getForm();	
-		
+		$att = $this->fields[$key];
+		$frm = e107::getForm();
+
 		if($key == "options")
 		{
 			$id = $this->primary;
@@ -272,30 +272,30 @@ class tinymce
 			$text .= "<input type='image' class='action delete' name='delete[{$row[$id]}]' src='".ADMIN_DELETE_ICON_PATH."' title='".LAN_DELETE." [ ID: {$row[$id]} ]' />";
 			return $text;
 		}
-		
+
 		if($key == "tinymce_userclass")
 		{
-			return $frm->uc_label($row[$key]);	
+			return $frm->uc_label($row[$key]);
 		}
-		
+
 		if($key == "tinymce_plugins")
 		{
-			return str_replace(",","<br />",$row[$key]);	
+			return str_replace(",","<br />",$row[$key]);
 		}
-		
+
 		switch($att['type'])
 		{
 			case 'url':
 				return "<a href='".$row[$key]."'>".$row[$key]."</a>";
 			break;
-					
+
 			default:
 				return $row[$key];
 			break;
-		}	
-		return $row[$key] .$att['type'];	
+		}
+		return $row[$key] .$att['type'];
 	}
-	
+
 	/**
 	 * Render Form Element (edit page)
 	 *
@@ -307,8 +307,8 @@ class tinymce
 	{
 		$frm = e107::getForm();
 		$att = $this->fields[$key];
-		$value = $row[$key];	
-		
+		$value = $row[$key];
+
 		if($att['method'])
 		{
 			$meth = $att['method'];
@@ -318,10 +318,10 @@ class tinymce
 			}
 			return $this->$meth($value);
 		}
-		
-	
+
+
 		return $frm->text($key, $row[$key], 50);
-			
+
 	}
 
 
@@ -363,9 +363,9 @@ class tinymce
 			</td>
 			<td>".$this->tinymce_preview()."</td>
 			</tr>";
-						
-		
-			
+
+
+
 		foreach($this->fields as $key=>$att)
 		{
 			if($att['forced']!==TRUE)
@@ -376,56 +376,56 @@ class tinymce
 						<td>".$this->renderElement($key,$row)."</td>
 					</tr>";
 			}
-							
+
 		}
 
 		$text .= "
 			</tbody>
-			</table>	
+			</table>
 		<div class='buttons-bar center'>";
-					
+
 					if($id)
 					{
 						$text .= $frm->admin_button('update', LAN_UPDATE, 'update');
-						$text .= "<input type='hidden' name='record_id' value='".$id."' />";						
-					}	
+						$text .= "<input type='hidden' name='record_id' value='".$id."' />";
+					}
 					else
 					{
-						$text .= $frm->admin_button('create', LAN_CREATE, 'create');	
+						$text .= $frm->admin_button('create', LAN_CREATE, 'create');
 					}
-					
+
 		$text .= "
 			</div>
 			</fieldset>
-		</form>";	
-		
+		</form>";
+
 		$ns->tablerender($this->pluginTitle." :: ".$this->createCaption,$mes->render(). $text);
 	}
-	
-	
+
+
 	function tinymce_buttons($curVal,$id)
 	{
-		return "<input class='tbox' style='width:97%' type='text' name='tinymce_buttons".$id."' value='".$curVal."' />\n";	
+		return "<input class='tbox' style='width:97%' type='text' name='tinymce_buttons".$id."' value='".$curVal."' />\n";
 	}
-	
-	
+
+
 	function tinymce_preview()
 	{
 		return "<textarea id='content' class='e-wysiwyg tbox' rows='10' cols='10' name='preview'  style='width:80%'>     </textarea>";
-		
+
 	}
-	
+
 	function tinymce_plugins($curVal)
 	{
 		$fl = e107::getFile();
-		
+
 		$curArray = explode(",",$curVal);
-	
+
 		if($plug_array = $fl->get_dirs(e_PLUGIN."tinymce/plugins/"))
 	    {
 	    	sort($plug_array);
-	    }	
-		
+	    }
+
 		$text = "<div style='width:80%'>";
 
 	    foreach($plug_array as $mce_plg)
@@ -433,9 +433,9 @@ class tinymce
 			$checked = (in_array($mce_plg,$curArray)) ? "checked='checked'" : "";
 	    	$text .= "<div style='width:25%;float:left'><input type='checkbox' name='tinymce_plugins[]' value='".$mce_plg."' $checked /> $mce_plg </div>";
 		}
-		
-		$text .= "</div>";		
-		return $text;	
+
+		$text .= "</div>";
+		return $text;
 	}
 
 
@@ -460,50 +460,50 @@ class tinymce
 	{
 		global $sql, $tp, $e107cache, $admin_log, $e_event;
 		$emessage = eMessage::getInstance();
-		
+
 		$insert_array = array();
-		
+
 		foreach($this->fields as $key=>$att)
 		{
 			if($att['forced']!=TRUE)
 			{
 				$insert_array[$key] = $_POST[$key];
 			}
-			
+
 			if($att['type']=='array')
 			{
-				$insert_array[$key] = implode(",",$_POST[$key]);	
+				$insert_array[$key] = implode(",",$_POST[$key]);
 			}
 		}
-			
+
 		$xml = new SimpleXMLElement('<tinymce/>');
 		$insertXml = array_flip($insert_array);
 		array_walk_recursive($insertXml, array ($xml, 'addChild'));
 		$save =  $xml->asXML();
 
 		file_put_contents(e_SYSTEM."admin.xml",$save);
-		
+
 	//	echo htmlentities($save);
-			
-			
+
+
 		if($id)
 		{
 			$insert_array['WHERE'] = $this->primary." = ".$id;
 			$status = $sql->db_Update($this->table,$insert_array) ? E_MESSAGE_SUCCESS : E_MESSAGE_FAILED;
-			$message = LAN_UPDATED;	
-			
-			
-			
+			$message = LAN_UPDATED;
+
+
+
 
 		}
 		else
 		{
 			$status = $sql->db_Insert($this->table,$insert_array) ? E_MESSAGE_SUCCESS : E_MESSAGE_FAILED;
-			$message = LAN_CREATED;	
+			$message = LAN_CREATED;
 		}
-		
 
-		$emessage->add($message, $status);		
+
+		$emessage->add($message, $status);
 	}
 
 	function deleteRecord($id)
@@ -512,14 +512,14 @@ class tinymce
 		{
 			return;
 		}
-		
+
 		$emessage = eMessage::getInstance();
 		$sql = e107::getDb();
-		
+
 		$query = $this->primary." = ".$id;
 		$status = $sql->db_Delete($this->table,$query) ? E_MESSAGE_SUCCESS : E_MESSAGE_FAILED;
 		$message = LAN_DELETED;
-		$emessage->add($message, $status);		
+		$emessage->add($message, $status);
 	}
 
 	function optionsPage()
@@ -621,10 +621,10 @@ if($_POST['save_settings'])   // Needs to be saved before e_meta.php is loaded b
 	$tpref['plugins'] = $_POST['mce_plugins'];
 
 	e107::getPlugConfig('tinymce')->setPref($tpref);
-	e107::getPlugConfig('tinymce')->save(); 
+	e107::getPlugConfig('tinymce')->save();
 }
 
-	$tpref = e107::getPlugConfig('tinymce')->getPref(); 
+	$tpref = e107::getPlugConfig('tinymce')->getPref();
 
 
 
@@ -660,8 +660,8 @@ function edit_theme()
 {
 	$ns = e107::getRender();
 
-	
-	
+
+
  $text = "<div style='text-align:center'>
     <form method='post' action='".e_SELF."'>
 	<fieldset id='plugin-tinymce-config'>

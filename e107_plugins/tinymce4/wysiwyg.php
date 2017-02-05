@@ -91,7 +91,7 @@ tinymce.init({
         "e107" : "{e_PLUGIN_ABS}tinymce4/plugins/e107/plugin.js"
     },
     menubar: "edit view format insert table tools",
-    
+
     toolbar1: "undo redo | styleselect | bold italic forecolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | e107-image e107-video e107-glyph | preview",
 
     image_advtab: true,
@@ -133,7 +133,7 @@ if(ini_get("zlib.output_compression")=='' && function_exists("gzencode"))
 
 if(ADMIN && e_QUERY == 'debug' || !empty($_GET['debug']))
 {
-	define('e_IFRAME', true); 
+	define('e_IFRAME', true);
 	require_once(HEADERF);
 
 	echo "<table class='table'><tr>";
@@ -145,7 +145,7 @@ if(ADMIN && e_QUERY == 'debug' || !empty($_GET['debug']))
 
 	echo "<br />Browser gZip support: ".$compression_browser_support;
 	echo "<br />Server gZip support: ". $compression_server_support;
-	
+
 	require_once(FOOTERF);
 
 }
@@ -169,7 +169,7 @@ else
 	header('Content-type: text/javascript', TRUE);
 	echo $gen;
 }
-	
+
 exit;
 
 
@@ -186,7 +186,7 @@ class wysiwyg
 
 	function renderConfig($config='')
 	{
-		$this->getConfig($config);	
+		$this->getConfig($config);
 		$text = "\n /* TinyMce Config: ".$this->configName." */\n\n";
 		$text .= "tinymce.init({\n";
 /*
@@ -207,7 +207,7 @@ class wysiwyg
 
 		return stripslashes($text);
 	}
-	
+
 
 
 	function __construct($config=FALSE)
@@ -347,13 +347,13 @@ class wysiwyg
 		}
 
 
-			
-			
+
+
 		return json_encode($ext);
 	}
-		
-		
-				
+
+
+
 	function convertBoolean($string)
 	{
 
@@ -366,36 +366,36 @@ class wysiwyg
 		{
 			return $string;
 		}
-	
+
 		if(is_string($string))
 		{
-			$string = trim($string); 
+			$string = trim($string);
 			$string = str_replace("\n","",$string);
 		}
-		
+
 		if($string === true)
 		{
-			return 'true';	
+			return 'true';
 		}
-		
+
 		if($string === false)
 		{
-			return 'false';	
+			return 'false';
 		}
-		
+
 		if($string === 'true' || $string === 'false' || $string[0] == '[')
 		{
-			return $string; 
+			return $string;
 		}
-						
+
 		return '"'.$string.'"';
-	}			
-		
+	}
+
 
 
 	function getConfig($config=false)
 	{
-		$tp = e107::getParser();	
+		$tp = e107::getParser();
 		$fl = e107::getFile();
 
 		if($config !== false)
@@ -429,9 +429,9 @@ class wysiwyg
 			$template = 'public.xml';
 		}
 
-		
+
 		$configPath = (is_readable(THEME."templates/tinymce/".$template)) ? THEME."templates/tinymce/".$template : e_PLUGIN."tinymce4/templates/".$template;
-		$config 	= e107::getXml()->loadXMLfile($configPath, true); 
+		$config 	= e107::getXml()->loadXMLfile($configPath, true);
 
 		//TODO Cache!
 
@@ -452,8 +452,8 @@ class wysiwyg
 		{
 	//		$ret['skin_url']     = e_PLUGIN_ABS.'tinymce4/skins/eskin';
 		}
-		
-		// Loop thru XML parms. 
+
+		// Loop thru XML parms.
 		foreach($config as $k=>$xml)
 		{
 			if($k == 'plugins')
@@ -760,10 +760,10 @@ class wysiwyg
 
 	//	$ret['table_default_attributes'] = json_encode(array('class'=>'table table-striped' ));
 
-		
+
 		if(!empty($ret['templates']))
 		{
-			$ret['templates']				 = $tp->replaceConstants($ret['templates'],'abs'); // $this->getTemplates(); 
+			$ret['templates']				 = $tp->replaceConstants($ret['templates'],'abs'); // $this->getTemplates();
 		}
 
 		if(ADMIN)
@@ -776,28 +776,28 @@ class wysiwyg
 
 
 		//	$this->config['verify_css_classes']	= 'false';
-		
+
 		$text = array();
 		foreach($ret as $k=>$v)
 		{
 			if($k == 'external_plugins')
 			{
-				$text[] = 'external_plugins: '. $this->getExternalPlugins($v); 
-				continue;		
+				$text[] = 'external_plugins: '. $this->getExternalPlugins($v);
+				continue;
 			}
-			$text[] = $k.': '.$this->convertBoolean($v);	
+			$text[] = $k.': '.$this->convertBoolean($v);
 		}
 
 
-		
-		$this->config = implode(",\n",$text); 
-		
-		
-		return; 
+
+		$this->config = implode(",\n",$text);
+
+
+		return;
 
 		// -------------------------------------------------------------------------------------
-		
-		
+
+
 /*
 
 
@@ -812,21 +812,21 @@ class wysiwyg
 	//		'theme_advanced_toolbar_align'		=> 'left',
 	//		'theme_advanced_blockformats' 		=> 'p,h2,h3,h4,h5,h6,blockquote,pre,code',
 	//		'theme_advanced_styles'				=> str_replace(array("+")," ",http_build_query($content_styles)),  //'Bootstrap Button=btn btn-primary;Bootstrap Table=table;border=border;fborder=fborder;tbox=tbox;caption=caption;fcaption=fcaption;forumheader=forumheader;forumheader3=forumheader3',
-		
+
 			// 'theme_advanced_resize_vertical' 		=> 'true',
-			'dialog_type' 						=> "modal",		
+			'dialog_type' 						=> "modal",
 		//	'theme_advanced_source_editor_height' => '400',
-            
-            // ------------- html5 Stuff. 
-		
+
+            // ------------- html5 Stuff.
+
 		    //  'visualblocks_default_state'   => 'true',
 
                 // Schema is HTML5 instead of default HTML4
            //     'schema'     => "html5",
-        
+
                 // End container block element when pressing enter inside an empty block
            //     'end_container_on_empty_block' => true,
-        
+
                 // HTML5 formats
 
                 'style_formats' => "[
@@ -848,21 +848,21 @@ class wysiwyg
                 ]",
 
 	       // --------------------------------
-		
-			
+
+
 	//		'theme_advanced_statusbar_location'	=> 'bottom',
 			'theme_advanced_resizing'			=> 'true',
 			'remove_linebreaks'					=> 'false',
-			'extended_valid_elements'			=> vartrue($config['extended_valid_elements']), 
-	//		'pagebreak_separator'				=> "[newpage]", 
+			'extended_valid_elements'			=> vartrue($config['extended_valid_elements']),
+	//		'pagebreak_separator'				=> "[newpage]",
 			'apply_source_formatting'			=> 'true',
 			'invalid_elements'					=> 'font,align,script,applet',
 			'auto_cleanup_word'					=> 'true',
 		//	'cleanup'							=> 'true',
 			'convert_fonts_to_spans'			=> 'true',
 	//		'content_css'						=> $tp->replaceConstants($content_css),
-			'popup_css'							=> 'false', 
-			
+			'popup_css'							=> 'false',
+
 			'trim_span_elements'				=> 'true',
 			'inline_styles'						=> 'true',
 			'auto_resize'						=> 'false',
@@ -871,14 +871,14 @@ class wysiwyg
 			'media_strict'						=> 'false',
 			'width'								=> vartrue($config['width'],'100%'),
 		//	'height'							=> '90%', // higher causes padding at the top?
-			'forced_root_block'					=> 'false', //remain as false or it will mess up some theme layouts. 
-		
+			'forced_root_block'					=> 'false', //remain as false or it will mess up some theme layouts.
+
 			'convert_newlines_to_brs'			=> 'true', // will break [list] if set to true
 		//	'force_p_newlines'					=> 'false',
 			'entity_encoding'					=> 'raw',
 			'convert_fonts_to_styles'			=> 'true',
 			'remove_script_host'				=> 'true',
-			'relative_urls'						=> 'false', //Media Manager prefers it like this. 
+			'relative_urls'						=> 'false', //Media Manager prefers it like this.
 			'preformatted'						=> 'true',
 			'document_base_url'					=> SITEURL,
 			'verify_css_classes'				=> 'false'
@@ -887,7 +887,7 @@ class wysiwyg
 
 	//	if(!in_array('e107bbcode',$plug_array))
 		{
-	//		$this->config['cleanup_callback'] = 'tinymce_e107Paths';										
+	//		$this->config['cleanup_callback'] = 'tinymce_e107Paths';
 		}
 
 		$paste_plugin = false; // (strpos($config['tinymce_plugins'],'paste')!==FALSE) ? TRUE : FALSE;
@@ -899,7 +899,7 @@ class wysiwyg
 				'paste_text_sticky'						=> 'true',
 				'paste_text_sticky_default'				=> 'true',
 				'paste_text_linebreaktype'				=> 'br',
-		
+
 				'remove_linebreaks'						=> 'false', // remove line break stripping by tinyMCE so that we can read the HTML
  				'paste_create_paragraphs'				=> 'false',	// for paste plugin - double linefeeds are converted to paragraph elements
  				'paste_create_linebreaks'				=> 'true',	// for paste plugin - single linefeeds are converted to hard line break elements
@@ -923,10 +923,10 @@ class wysiwyg
 	function getTemplates()
 	{
 	//	$templatePath = (is_readable(THEME."templates/tinymce/".$template)) ? THEME."templates/tinymce/".$template : e_PLUGIN."tinymce4/templates/".$template;
-		
-		
-		
-		
+
+
+
+
 	}
 
 

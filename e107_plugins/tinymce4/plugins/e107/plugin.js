@@ -12,12 +12,12 @@
 
 (function() {
 	tinymce.create('tinymce.plugins.e107Plugin', {
-		
+
 		init : function(ed,url) {
 
 			var t = this, dialect = ed.getParam('bbcode_dialect', 'e107').toLowerCase();
 
-	
+
 			ed.on('beforeSetContent', function(e) {
 				e.content = t['_' + dialect + '_bbcode2html'](e.content, url);
 			});
@@ -40,15 +40,15 @@
 
 
 			});
-			
+
 		/*
-		// Emoticons 
+		// Emoticons
 			ed.addButton('e107-bbcode', {
 				text: 'bbcode',
 				icon: 'emoticons',
 				onclick: function() {
 					// Open window
-										
+
 					ed.windowManager.open({
 						title: 'Example plugin',
 						body: [
@@ -62,15 +62,15 @@
 					});
 				}
 			});
-			
+
 			*/
-			// Media Manager Button 
+			// Media Manager Button
 			ed.addButton('e107-image', {
 				text: '',
 				title: 'Insert Media-Manager Image',
 				icon: 'image',
 				onclick: function() {
-					
+
 					ed.windowManager.open({
 						title: 'Media Manager',
 						url: url + '/mediamanager.php?image',
@@ -80,8 +80,8 @@
 					});
 				}
 			});
-			
-					// Media Manager Button 
+
+					// Media Manager Button
 			ed.addButton('e107-video', {
 				text: '',
 				title: 'Insert Media-Manager Video',
@@ -89,9 +89,9 @@
 				resizable : 'no',
                 inline : 'yes',
                 close_previous : 'no',
-                
+
 				onclick: function() {
-					
+
 					ed.windowManager.open({
 						title: 'Media Manager',
 						url: url + '/mediamanager.php?video',
@@ -101,13 +101,13 @@
 					});
 				}
 			});
-			
+
 			ed.addButton('e107-glyph', {
 				text: '',
 				title: 'Insert Media-Manager Glyph',
 				icon: 'charmap',
 				onclick: function() {
-					
+
 					ed.windowManager.open({
 						title: 'Media Manager',
 						url: url + '/mediamanager.php?glyph',
@@ -118,8 +118,8 @@
 					});
 				}
 			});
-			
-			
+
+
 		},
 
 		getInfo: function() {
@@ -138,7 +138,7 @@
 			s = tinymce.trim(s);
 
 		//	return s;
-		
+
 			var p = $.ajax({
 					type: "POST",
 					url: url + "/parser.php",
@@ -153,7 +153,7 @@
 
 			return p;
 
-			
+
 		},
 
 		// BBCode -> HTML from PunBB dialect
@@ -176,7 +176,7 @@
 
 				return p;
 
-			
+
 		}
 	});
 
