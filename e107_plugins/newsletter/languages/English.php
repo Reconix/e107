@@ -23,7 +23,7 @@ define("NLLAN_67", "Archive overview");
 define("NLLAN_68", "Invalid parameter defined");
 define("NLLAN_69", "No sent newsletters available.");
 define("NLLAN_70", "Selected newsletter does not exist");
-//define("NLLAN_71", "Back"); 
+//define("NLLAN_71", "Back");
 define("NLLAN_72", "View archive");
 
 define("NLLAN_73", "Enter your Email");

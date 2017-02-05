@@ -12,7 +12,7 @@
 
 
 require_once('../../class2.php');
-if (!getperms('P')) 
+if (!getperms('P'))
 {
 	e107::redirect('admin');
 	exit;
@@ -24,7 +24,7 @@ require_once(e_HANDLER.'ren_help.php');
 
 $mes = e107::getMessage();
 
-if (e_QUERY) 
+if (e_QUERY)
 {
 	list($action, $id, $key) = explode('.', e_QUERY);
 	$key = intval($key);
@@ -142,7 +142,7 @@ class newsletter
 			</tr>
 			";
 
-			$nlArray = $sql->db_getList(); 
+			$nlArray = $sql->db_getList();
 			foreach($nlArray as $data)
 			{
 				$text .= "
@@ -202,7 +202,7 @@ class newsletter
 					<td>[ ".$data['newsletter_parent']." ] ".$data['newsletter_title']."</td>
 					<td>".($data['newsletter_flag'] ? LAN_YES : "<input class='btn btn-default button' type='submit' name='nlmailnow_".$data['newsletter_id']."' value='".NLLAN_17."' onclick=\"return jsconfirm('".$tp->toJS(NLLAN_18)."') \" />")."</td>
 					<td><a class='btn btn-large' href='".e_SELF."?edit.".$data['newsletter_id']."'>".ADMIN_EDIT_ICON."</a><input type='image' title='".LAN_DELETE."' name='delete[issue_".$data['newsletter_id']."]' src='".ADMIN_DELETE_ICON_PATH."' onclick=\"return jsconfirm('".$tp->toJS(NLLAN_19." [ID: ".$data['newsletter_id']." ]")."') \"/>
-				
+
 				</td>
 				</tr>
 				";
@@ -254,9 +254,9 @@ class newsletter
 		<tr>
 			<td>".NLLAN_24."</td>
 			<td><textarea class='tbox' id='data' name='newsletter_footer' cols='80' rows='5'>{$newsletter_footer}</textarea></td>
-		</tr>	
+		</tr>
 		</table>
-		
+
 		<div class='buttons-bar center'>
 		".($edit ? $frm->admin_button('createNewsletter', LAN_UPDATE, 'update')."\n<input type='hidden' name='editid' value='{$edit['newsletter_id']}' />" : $frm->admin_button('createNewsletter', LAN_CREATE, 'create'))."
 		</div>
@@ -323,7 +323,7 @@ class newsletter
 			//$this -> message = NLLAN_05;
 			$mes->addInfo(NLLAN_05);
 		}
-		else 
+		else
 		{
 		$nlArray = $sql -> db_getList();
 
@@ -468,7 +468,7 @@ class newsletter
 		{
 				// TODO: Handle error
 		}
-  
+
 
 		$mailer->mailInitCounters($mailMainID);			// Initialise counters for emails added
 
@@ -590,7 +590,7 @@ class newsletter
 
 		$var['make']['text'] = NLLAN_46;
 		$var['make']['link'] = e_SELF."?make";
-	
+
 		show_admin_menu(NLLAN_47, $action, $var);
 	}
 
@@ -608,15 +608,15 @@ class newsletter
 
 
 		if(!$nl_sql->db_Select('newsletter', '*', 'newsletter_id='.$p_id))// Check if newsletter id is available
-		{	
+		{
 			$mes->addError(NLLAN_56);
 			$vs_text .= "<div class='buttons-bar center'>
 							<input class='btn btn-default button' type=button value='".LAN_BACK."' onClick=\"window.location='".e_SELF."'\">
 						</div>";
 			$ns -> tablerender(NLLAN_65.' '.$p_id, $mes->render() . $vs_text);
 			return;
-		} 
-		else 
+		}
+		else
 		{
 		  $vs_text .= "
 			<form action='".e_SELF."' id='newsletterform' method='post'>
@@ -641,7 +641,7 @@ class newsletter
 				sort($subscriber_list);
 				$subscribers_total_count = count($subscribers_list) - 1;	// Get a null entry as well
 			}
-			if ($subscribers_total_count<1) 
+			if ($subscribers_total_count<1)
 			{
 				header("location:".e_SELF);
 				exit;
@@ -672,7 +672,7 @@ class newsletter
 							$_last_subscriber = $val;
 						}
 					}
-					else 
+					else
 					{	// Duplicate user id found in the subscribers_list array!
 						newsletter::remove_subscribers($p_id, $val);	// removes all entries for this user id
 						$newsletterArray[$p_id]['newsletter_subscribers'] = chr(1).$val;	// keep this single value in the list
@@ -691,20 +691,20 @@ class newsletter
 		 </table>
 			 <div class='buttons-bar center'>
 			 	".$frm->admin_button('submit', LAN_BACK, 'submit')."
-			 </div>			
+			 </div>
 		 </form>
 		  ";
 		if ($_nl_sanatized == 1)
 		{
 			$mes->addInfo(NLLAN_66);
 		}
-		
+
 		$ns->tablerender(NLLAN_65.' '.$p_id, $mes->render() . $vs_text);
 	}
- 
 
 
-	function remove_subscribers($p_id, $p_key) 
+
+	function remove_subscribers($p_id, $p_key)
 	{
 		$sql = e107::getDb();
 		$sql ->select('newsletter', '*', 'newsletter_id='.intval($p_id));

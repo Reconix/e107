@@ -18,7 +18,7 @@ if (!e107::isInstalled('newsletter'))
 
 // Do not display menu when there are no newsletters defined yet
 if(!USER || !$sql->select('newsletter', '*', "newsletter_parent='0'"))
-{	
+{
 	return FALSE;
 }
 
@@ -42,18 +42,18 @@ foreach($_POST as $key => $value)
 
 		// prevent double entry of same user id
 		if (!array_key_exists(USERID, $nl_subscriber_array))
-		{	
+		{
 			$newsletterArray[$subid]['newsletter_subscribers'] .= chr(1).USERID;
 			$subscribers_list = array_flip(explode(chr(1), $newsletterArray[$subid]['newsletter_subscribers']));
 			sort($subscribers_list);
 			$new_subscriber_list = implode(chr(1), array_keys($subscribers_list));
-			
+
 			// remove the possible zero caused by function array_flip
 			if (substr($new_subscriber_list, 0, 1) == '0')
-			{	
+			{
 				$new_subscriber_list = substr($new_subscriber_list, 1);
 			}
-			
+
 			$sql->update('newsletter', "newsletter_subscribers='".$new_subscriber_list."' WHERE newsletter_id='".intval($subid)."' ");
 			$requery = true;
 		}
@@ -68,7 +68,7 @@ if($requery)
 	{
 		$newsletterArray = $sql->db_getList();
 	}
-}	
+}
 
 $text = '';
 foreach($newsletterArray as $nl)
@@ -96,7 +96,7 @@ foreach($newsletterArray as $nl)
 	$nl_count = $sql->count('newsletter', "(*)", "WHERE newsletter_parent='".$nl['newsletter_id']."' AND newsletter_flag='1'");
 	// display issued newsletters
 	if($nl_count > 0 && USER)
-	{	
+	{
 		$text .= "<br /><a href='".e_PLUGIN_ABS."newsletter/nl_archive.php?show.".$nl['newsletter_id']."' alt='".NLLAN_72."' title='".NLLAN_72."'>".NLLAN_72."</a><br/><br/>";
 	}
 	$text .= "</form>

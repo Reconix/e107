@@ -14,7 +14,7 @@ require_once('../../class2.php');
 if (!e107::isInstalled('newsletter') || !ADMIN)
 {
 	e107::redirect();
-	exit(); 
+	exit();
 }
 e107::includeLan(e_PLUGIN.'newsletter/languages/'.e_LANGUAGE.'.php');
 require_once(HEADERF);
@@ -38,7 +38,7 @@ $text .= "<div style='text-align: center; margin-left: auto; margin-right: auto;
 if (($action <> 'show' && $action <> 'showp') || ($action_parent_id == 0))
 { 	// Action 'show' displays initial page, 'showp' displays following pages
 	$text .= NLLAN_68; // Invalid parameter defined
-} 
+}
 else
 {
 	if(!isset($_POST['limit_start']))
@@ -54,7 +54,7 @@ else
 	{
 		// Retrieve parent info
 		$sql->select('newsletter', "*", "newsletter_id='".$action_parent_id."'");
-		if ($row = $sql->fetch()) 
+		if ($row = $sql->fetch())
 		{
 			$parent_newsletter_title  = $tp->toHTML($row['newsletter_title'],true);
 			$parent_newsletter_text   = $tp->toHTML($row['newsletter_text'],true);
@@ -67,14 +67,14 @@ else
 			$text .= "{$parent_newsletter_title}<br />
 					  <div style='text-align: left;'>{$parent_newsletter_text}</div><br /><br />
 					  <table>";
-					  
+
 			// Display list of sent newsletters titles
 			if ($action == 'showp')
 			{	// This should only be done when action is 'showp'
 				$limit_start = $limit_start + $page_size;
 			}
 			$sql->select('newsletter', '*', "newsletter_parent='".$action_parent_id."' AND newsletter_flag='1' ORDER BY newsletter_datestamp DESC LIMIT ".$limit_start.",".$page_size);
-			while ($row = $sql->fetch()) 
+			while ($row = $sql->fetch())
 			{
 				$ga = new convert();
 				$newsletter_datestamp = $ga->convert_date($row['newsletter_datestamp'], 'long');
@@ -101,7 +101,7 @@ else
 		else // Show requested newsletter
 		{
 			$sql->select('newsletter', '*', "newsletter_parent='".$action_parent_id."' AND newsletter_id='".$action_nl_id."' AND newsletter_flag='1'");
-			if ($row = $sql->fetch()) 
+			if ($row = $sql->fetch())
 			{
 				// Display parent header
 				$text .= "$parent_newsletter_title<br />
@@ -109,10 +109,10 @@ else
 						  $parent_newsletter_header<br /><br />";
 				// Display newsletter text
 				$ga = new convert();
-				$newsletter_datestamp = $ga->convert_date($row['newsletter_datestamp'], "long");		
-				$text .= $newsletter_datestamp."<br />". 
+				$newsletter_datestamp = $ga->convert_date($row['newsletter_datestamp'], "long");
+				$text .= $newsletter_datestamp."<br />".
 						 $tp->toHTML($row['newsletter_title'],true)."<br />
-						 <div style='text-align: left;'>".$tp->toHTML($row['newsletter_text'],true)."</div><br /><br />"; 
+						 <div style='text-align: left;'>".$tp->toHTML($row['newsletter_text'],true)."</div><br /><br />";
 				// Display parent footer
 				$text .= "$parent_newsletter_footer<br />";
 				// Display back to newsletter overview button
@@ -123,7 +123,7 @@ else
 				$text .= NLLAN_70; //Selected newsletter does not exist
 			}
 		}
-	} 
+	}
 	else
 	{
 		$text .= NLLAN_69; // No send newsletters available for selected parent

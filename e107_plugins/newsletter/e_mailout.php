@@ -25,13 +25,13 @@ if (!defined('e107_INIT')) { exit; }
 
 e107::includeLan(e_PLUGIN.'/newsletter/languages/English_admin_newsletter.php');
 
-/* 
+/*
 Class for newsletter mailout function
 
 Allows admins to send mail to those subscribed to one or more newsletters
 */
 // These variables determine the circumstances under which this class is loaded (only used during loading, and may be overwritten later)
-	$mailerIncludeWithDefault = TRUE;			// Mandatory - if false, show only when mailout for this specific plugin is enabled 
+	$mailerIncludeWithDefault = TRUE;			// Mandatory - if false, show only when mailout for this specific plugin is enabled
 	$mailerExcludeDefault = FALSE;				// Mandatory - if TRUE, when this plugin's mailout is active, the default (core) isn't loaded
 
 class newsletter_mailout
@@ -53,11 +53,11 @@ class newsletter_mailout
 		//$this->e107 = e107::getInstance();
 		//$this->adminHandler = e107::getRegistry('_mailout_admin');		// Get the mailer admin object - we want to use some of its functions
 	}
-  
-  
+
+
 	/**
 	 * Return data representing the user's selection criteria as entered in the $_POST array.
-	 * 
+	 *
 	 * This is stored in the DB with a saved email. (Just return an empty string or array if this is undesirable)
 	 * The returned value is passed back to selectInit() and showSelect when needed.
 	 *
@@ -89,8 +89,8 @@ class newsletter_mailout
 	public function selectInit($selectVals = FALSE)
 	{
 		$sql = e107::getDb();
-		
-		
+
+
 		if (($selectVals === FALSE) || ($selectVals == ''))
 		{
 			return 0;				// No valid selector - so no valid records
@@ -109,23 +109,23 @@ class newsletter_mailout
 
 
 	/**
-	 * Return an email address to add to the recipients list. Return FALSE if no more addresses to add 
+	 * Return an email address to add to the recipients list. Return FALSE if no more addresses to add
 	 *
 	 * @return array|boolean FALSE if no more addresses available; else an array:
 	 *	'mail_recipient_id' - non-zero if a registered user, zero if a non-registered user. (Always non-zero from this class)
 	 *	'mail_recipient_name' - user name
 	 *	'mail_recipient_email' - email address to use
-	 *	'mail_target_info' - array of info which might be substituted into email, usually using the codes defined by the editor. 
+	 *	'mail_target_info' - array of info which might be substituted into email, usually using the codes defined by the editor.
 	 * 		Array key is the code within '|...|', value is the string for substitution
 	 */
 	public function selectAdd()
 	{
-		
+
 		$sql = e107::getDb();
-		
-		
+
+
 		if (!$this->selectorActive) return FALSE;
-		
+
 		while ($this->selectorActive)
 		{
 			if (count($this->targets) == 0)
@@ -172,14 +172,14 @@ class newsletter_mailout
 	 * @return none
 	 */
 	public function select_close()
-	{	
+	{
 		// Nothing to do here
 	}
-  
+
 
 	/**
 	 * Called to show current selection criteria, and optionally allow edit
-	 * 
+	 *
 	 * @param boolean $allow_edit is TRUE to allow user to change the selection; FALSE to just display current settings
 	 * @param string $selectVals is the current selection information - in the same format as returned by returnSelectors()
 	 *
@@ -190,7 +190,7 @@ class newsletter_mailout
 		$sql = e107::getDb();
 		$frm = e107::getForm();
 		$var = array();
-				
+
 		$selects = array_flip(explode(',', $selectVals));
 
 		if ($sql->select('newsletter', 'newsletter_id, newsletter_title', '`newsletter_parent`=0'))
@@ -199,7 +199,7 @@ class newsletter_mailout
 			while ($row = $sql->fetch())
 			{
 				$checked = (isset($selects[$row['newsletter_id']])) ? " checked='checked'" : '';
-				
+
 				if ($allow_edit)
 				{
 					$var[$c]['caption'] = $row['newsletter_title'];
@@ -212,49 +212,49 @@ class newsletter_mailout
 				}
 				$c++;
 			}
-			
-			return $var; 
+
+			return $var;
 		}
 		elseif($allow_edit == true)
 		{
-			
+
 			$var[0]['caption'] = "No newsletters found";
-			$var[0]['html'] = '';	
-			
-			return $var; 
+			$var[0]['html'] = '';
+
+			return $var;
 		}
-		else 
+		else
 		{
-			return false; // Return Nothing to avoid confusion. 	
+			return false; // Return Nothing to avoid confusion.
 		}
-	
+
 	}
-	
+
 	/**
-	 * Manage Bounces. 
+	 * Manage Bounces.
 	 */
 	public function bounce($data)
 	{
-		e107::getLog()->add('Newsletter Bounce', $data, E_LOG_INFORMATIVE, 'BOUNCE');	
+		e107::getLog()->add('Newsletter Bounce', $data, E_LOG_INFORMATIVE, 'BOUNCE');
 	}
 
 
 
 	/**
-	 * Manage Sent. 
+	 * Manage Sent.
 	 */
 	public function sent($data) // trigerred when email sent from queue.
 	{
 		if($data['status'] == 1) // Successfully sent
 		{
-			// e107::getLog()->add('Newsletter Sent', $data, E_LOG_INFORMATIVE, 'SENT');		
+			// e107::getLog()->add('Newsletter Sent', $data, E_LOG_INFORMATIVE, 'SENT');
 		}
-		else // Failed 
+		else // Failed
 		{
-		//	 e107::getLog()->add('Newsletter Sent', $data, E_LOG_FATAL, 'SENT');		
+		//	 e107::getLog()->add('Newsletter Sent', $data, E_LOG_FATAL, 'SENT');
 		}
 	}
-	
+
 }
 
 

@@ -40,4 +40,3 @@ elseif(ADMIN)
 
 	$ns->tablerender(LAN_PLUGIN_NEWSLETTER_NAME, "<div class='alert alert-danger' style='margin:0'>".$message."</div>" );
 }
-
