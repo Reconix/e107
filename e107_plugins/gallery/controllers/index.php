@@ -229,4 +229,3 @@ class plugin_gallery_index_controller extends eControllerFront
 
 	}
 }
- 

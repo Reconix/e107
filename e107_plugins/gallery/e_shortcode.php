@@ -93,7 +93,7 @@ class gallery_shortcodes extends e_shortcode
 		e107_require_once(e_PLUGIN . 'gallery/includes/gallery_load.php');
 		// Load prettyPhoto settings and files.
 		gallery_load_prettyphoto();
-		
+
 		$plugPrefs = e107::getPlugConfig('gallery')->getPref();
 		$hook = varset($plugPrefs['pp_hook'], 'data-gal');
 
@@ -337,7 +337,7 @@ class gallery_shortcodes extends e_shortcode
 
 	function sc_gallery_jumper($parm)
 	{
-		// echo "SlideCount=".$this->slideCount; 
+		// echo "SlideCount=".$this->slideCount;
 		if($this->slideCount == 1 && deftrue('E107_DBG_BASIC'))
 		{
 			return "gallery-jumper must be loaded after Gallery-Slides";

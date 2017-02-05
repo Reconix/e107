@@ -54,9 +54,9 @@ $GALLERY_TEMPLATE['cat']['end'] = '
 </div>
 ';
 
-// {GALLERY_SLIDESHOW=X}  X = Gallery Category. Default: 1 (ie. 'gallery_1') Overrides preference in admin. 
-// {GALLERY_SLIDES=X}  X = number of items per slide. 
-// {GALLERY_JUMPER=space} will remove numbers and just leave spaces. 
+// {GALLERY_SLIDESHOW=X}  X = Gallery Category. Default: 1 (ie. 'gallery_1') Overrides preference in admin.
+// {GALLERY_SLIDES=X}  X = number of items per slide.
+// {GALLERY_JUMPER=space} will remove numbers and just leave spaces.
 
 $GALLERY_TEMPLATE['slideshow_wrapper'] = '
 <div id="gallery-slideshow-wrapper">
