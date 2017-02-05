@@ -23,7 +23,7 @@
  *	@subpackage	login
  *	@version 	$Id$;
  */
-if (!defined('e107_INIT')){ exit; } 
+if (!defined('e107_INIT')){ exit; }
 
 if ( ! isset($LOGIN_MENU_FORM))
 {
@@ -90,7 +90,7 @@ if ( ! isset($LOGIN_MENU_FORM))
             {LM_SIGNUP_LINK}
             {LM_FPW_LINK}
             {LM_RESEND_LINK}
-			{FB_LOGIN_BUTTON} 
+			{FB_LOGIN_BUTTON}
     	</div>
 	";
 }
@@ -135,7 +135,7 @@ if ( ! isset($LOGIN_MENU_LOGGED))
     - LM_STAT_EMPTY
 
     ---------------- Legacy Layout --------------------------------
- 
+
    	$sc_style['LM_MAINTENANCE']['pre'] = '<div style="text-align:center"><strong>';
 	$sc_style['LM_MAINTENANCE']['post'] = '</strong></div><br />';
 
@@ -167,7 +167,7 @@ if ( ! isset($LOGIN_MENU_LOGGED))
 	';
 */
 
-// New Template for v2. Bullets via CSS etc. Login-Menu Stats may require work. 
+// New Template for v2. Bullets via CSS etc. Login-Menu Stats may require work.
 
     $sc_style['LM_MAINTENANCE']['pre'] = '<li class="login-menu-maintenance">';
 	$sc_style['LM_MAINTENANCE']['post'] = '</li>';
@@ -186,14 +186,14 @@ if ( ! isset($LOGIN_MENU_LOGGED))
 
     $sc_style['LM_ADMIN_CONFIGURE']['pre'] = '<li class="login-menu-admin-config">';
 	$sc_style['LM_ADMIN_CONFIGURE']['post'] = '</li>';
-	
-    $sc_style['LM_LOGOUT']['pre'] = '<li class="login-menu-logout">';
-	$sc_style['LM_LOGOUT']['post'] = '</li>';
-	
+
     $sc_style['LM_LOGOUT']['pre'] = '<li class="login-menu-logout">';
 	$sc_style['LM_LOGOUT']['post'] = '</li>';
 
-	
+    $sc_style['LM_LOGOUT']['pre'] = '<li class="login-menu-logout">';
+	$sc_style['LM_LOGOUT']['post'] = '</li>';
+
+
 	$LOGIN_MENU_LOGGED = '
 	<ul class="login-menu-logged nav nav-list">
 		{LM_MAINTENANCE}

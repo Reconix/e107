@@ -26,8 +26,8 @@
 $eplug_admin = TRUE;
 
 require_once('../../class2.php');
-if (!getperms('4')) 
-{ 
+if (!getperms('4'))
+{
 	e107::redirect('admin');
 	exit() ;
 }
@@ -46,12 +46,12 @@ $frm = e107::getForm();
 if (isset($_POST['update_menu']))
 {
     //sort/show/hide links - Start
-	if(varset($_POST['external_links'])) 
-	{   
+	if(varset($_POST['external_links']))
+	{
 	    $_POST['pref']['external_links'] = array();
         asort($_POST['external_links_order']);
-        
-		foreach ($_POST['external_links_order'] as $key => $value) 
+
+		foreach ($_POST['external_links_order'] as $key => $value)
 		{
         	if(array_key_exists($key, $_POST['external_links']))
 			{
@@ -62,25 +62,25 @@ if (isset($_POST['update_menu']))
         $_POST['pref']['external_links'] = $_POST['pref']['external_links'] ? implode(',', $_POST['pref']['external_links']) : '';
 
         unset($_POST['external_links']);
-        
-	} 
-	else 
+
+	}
+	else
 	{
         $_POST['pref']['external_links'] = '';
     }
-    
+
     unset($_POST['external_links_order']);
     //sort/show/hide links - End
-    
+
     //show/hide stats - Start
-	if(varset($_POST['external_stats'])) 
+	if(varset($_POST['external_stats']))
 	{
-	    
+
 	    $_POST['pref']['external_stats'] = implode(',', array_keys($_POST['external_stats']));
         unset($_POST['external_stats']);
-        
-	} 
-	else 
+
+	}
+	else
 	{
         $_POST['pref']['external_stats'] = '';
     }
@@ -102,7 +102,7 @@ if (isset($_POST['update_menu']))
 	e107::getLog()->add('MISC_03','', E_LOG_INFORMATIVE,'');
 	//$ns->tablerender("", '<div style=\'text-align:center\'><b>'.LAN_SETSAVED.'</b></div>');
 	$mes->addSuccess(LAN_SAVED);
-	$ns->tablerender("", $mes->render() . $text); 
+	$ns->tablerender("", $mes->render() . $text);
 }
 
 if (!isset($loginPrefs['new_news']))
@@ -120,11 +120,11 @@ $text = "
 		<col class='col-label' />
 		<col class='col-control' />
 	</colgroup>
-	
+
     ".$loginClass->render_config_links()."
     ";
 
-    
+
   /*
     <tr>
    	 <td colspan="2">'.LAN_LOGINMENU_42.'</td>
@@ -146,10 +146,10 @@ $text = "
 		<td>".LAN_LOGINMENU_36."</td>
 		<td>".$frm->checkbox('pref[new_members]', 1, varset($loginPrefs['new_members'],0))."</td>
 	</tr>
-	
+
 		".$loginClass->render_config_stats()."
 	</table>
-	
+
 	<div class='buttons-bar center'>
 		".$frm->admin_button('update_menu', LAN_SAVE, 'update')."
 	</div>

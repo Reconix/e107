@@ -49,7 +49,7 @@ if (defined('CORRUPT_COOKIE') && CORRUPT_COOKIE == TRUE)
 	{$bullet} <a href='".SITEURL."index.php?logout'>".LAN_LOGOUT."</a></div>";
 	$ns->tablerender(LAN_LOGINMENU_9, $text, 'login_error');
 }
-    
+
 //Image code
 $use_imagecode = ($pref['logcode'] && extension_loaded('gd'));
 
@@ -61,7 +61,7 @@ if ($use_imagecode)
 }
 
 $text = '';
-    
+
 // START LOGGED CODE
 if (USER == TRUE || ADMIN == TRUE)
 {
@@ -75,13 +75,13 @@ if (USER == TRUE || ADMIN == TRUE)
 	}
 
 	//get templates
-    if (!isset($LOGIN_MENU_LOGGED)) 
+    if (!isset($LOGIN_MENU_LOGGED))
 	{
-		if (file_exists(THEME.'templates/login_menu/login_menu_template.php')) // Preferred v2.x location. 
+		if (file_exists(THEME.'templates/login_menu/login_menu_template.php')) // Preferred v2.x location.
 		{
 	   		require(THEME.'templates/login_menu/login_menu_template.php');
 		}
-		elseif(file_exists(THEME.'login_menu_template.php')) 
+		elseif(file_exists(THEME.'login_menu_template.php'))
 		{
 	   		require(THEME.'login_menu_template.php');
 		}
@@ -124,18 +124,18 @@ if (USER == TRUE || ADMIN == TRUE)
 			$menu_data['new_users'] = $sql->count('user', '(user_join)', 'WHERE user_join > '.$time);
 			$new_total += $menu_data['new_users'];
 		}
-		
+
 		// ------------ Enable stats / other ---------------
-		
+
 		$menu_data['enable_stats'] = $menu_data || vartrue($loginPrefs['external_stats']) ? true : false;
 		$menu_data['new_total'] = $new_total + $loginClass->get_stats_total();
 		$menu_data['link_bullet'] = $bullet;
 		$menu_data['link_bullet_src'] = $bullet_src;
-		
+
 		// ------------ List New Link ---------------
-		
+
 		$menu_data['listnew_link'] = '';
-		if ($menu_data['new_total'] && array_key_exists('list_new', $pref['plug_installed'])) 
+		if ($menu_data['new_total'] && array_key_exists('list_new', $pref['plug_installed']))
         {
             $menu_data['listnew_link'] = e_PLUGIN_ABS.'list_new/list.php?new';
 		}
@@ -143,25 +143,25 @@ if (USER == TRUE || ADMIN == TRUE)
 		// ------------ Pass the data & parse ------------
 		cachevars('login_menu_data', $menu_data);
 		$text = $tp->parseTemplate($LOGIN_MENU_LOGGED, true, $login_menu_shortcodes);
-    
+
     //menu caption
 	if (file_exists(THEME.'images/login_menu.png')) {
 		$caption = '<img src="'.THEME_ABS.'images/login_menu.png" alt="" />'.LAN_LOGINMENU_5.' '.USERNAME;
 	} else {
 		$caption = LAN_LOGINMENU_5.' '.USERNAME;
 	}
-	
+
 	//render
 	$ns->tablerender($caption, $text, 'login');
 
-// END LOGGED CODE	
-} 
-// START NOT LOGGED CODE	
-else 
+// END LOGGED CODE
+}
+// START NOT LOGGED CODE
+else
 {
     //get templates
 	if (!$LOGIN_MENU_FORM || !$LOGIN_MENU_MESSAGE) {
-		if (file_exists(THEME.'templates/login_menu/login_menu_template.php')) // Preferred v2.x location. 
+		if (file_exists(THEME.'templates/login_menu/login_menu_template.php')) // Preferred v2.x location.
 		{
 	   		require(THEME.'templates/login_menu/login_menu_template.php');
 		}
