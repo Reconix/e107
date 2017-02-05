@@ -166,7 +166,9 @@ if(!empty($FORUM_VIEWFORUM_TEMPLATE) && is_array($FORUM_VIEWFORUM_TEMPLATE) && T
 	$FORUM_VIEW_CAPTION				= $FORUM_VIEWFORUM_TEMPLATE['caption'];
 	$FORUM_VIEW_START_CONTAINER		= $FORUM_VIEWFORUM_TEMPLATE['start'];
 	$FORUM_VIEW_START				= $FORUM_VIEWFORUM_TEMPLATE['header'];
+	$FORUM_VIEW_WRAP_START			= $FORUM_VIEWFORUM_TEMPLATE['item-wrap-start'];
 	$FORUM_VIEW_FORUM				= $FORUM_VIEWFORUM_TEMPLATE['item'];
+	$FORUM_VIEW_WRAP_END			= $FORUM_VIEWFORUM_TEMPLATE['item-wrap-end'];
 	$FORUM_VIEW_FORUM_STICKY		= $FORUM_VIEWFORUM_TEMPLATE['item-sticky'];
 	$FORUM_VIEW_FORUM_ANNOUNCE		= $FORUM_VIEWFORUM_TEMPLATE['item-announce'];
 	$FORUM_VIEW_END					= $FORUM_VIEWFORUM_TEMPLATE['footer'];
@@ -560,7 +562,9 @@ if($container_only)
 //var_dump ($FORUM_VIEW_START);
 //  	var_dump ($FORUM_VIEW_SUB);
 $forum_view_start = $tp->parseTemplate($FORUM_VIEW_START_CONTAINER.$FORUM_VIEW_START, false, $sc);
+$forum_view_wrap_start = $tp->parseTemplate($FORUM_VIEW_WRAP_START, false, $sc); // Exstended Item Wrap - $FORUM_VIEW_WRAP_START
 $forum_view_forum = $tp->parseTemplate($forum_view_forum, false, $sc);
+$forum_view_wrap_end = $tp->parseTemplate($FORUM_VIEW_WRAP_END, false, $sc); // Exstended Item Wrap - $FORUM_VIEW_WRAP_END
 $forum_view_end = $tp->parseTemplate($FORUM_VIEW_END.$FORUM_VIEW_END_CONTAINER, false, $sc);
 
 //$forum_view_start .= "<hr><hr>FVARS FORUM<hr><hr>".$tp->simpleParse($FORUM_VIEW_START, $fVars);
@@ -571,7 +575,7 @@ if ($forum->prefs->get('enclose'))
 // $forum_view_subs????
 	$caption = varset($FORUM_VIEW_CAPTION) ? $tp->parseTemplate($FORUM_VIEW_CAPTION, TRUE, $sc) : $forum->prefs->get('title');
 
-	$ns->tablerender($caption, $forum_view_start.$forum_view_subs.$forum_view_forum.$forum_view_end, array('forum_viewforum', 'main1'));
+	$ns->tablerender($caption, $forum_view_start.$forum_view_subs.$forum_view_wrap_start.$forum_view_forum.$forum_view_wrap_end.$forum_view_end, array('forum_viewforum', 'main1'));
 }
 else
 {
