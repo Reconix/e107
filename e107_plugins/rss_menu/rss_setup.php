@@ -12,7 +12,7 @@
 
 class rss_menu_setup
 {
-/*	
+/*
  	function install_pre($var)
 	{
 		// print_a($var);
@@ -40,14 +40,14 @@ class rss_menu_setup
 	//	$mes->addInfo(print_a($insert,true));
 
 		$status = ($sql->insert('rss', $insert)) ? E_MESSAGE_SUCCESS : E_MESSAGE_ERROR;
-		$mes->add(LAN_DEFAULT_TABLE_DATA.": rss",$status);  
+		$mes->add(LAN_DEFAULT_TABLE_DATA.": rss",$status);
 
 
 	}
-/*	
+/*
 	function uninstall_options()
 	{
-	
+
 	}
 
 
@@ -60,5 +60,5 @@ class rss_menu_setup
 	{
 		// $sql = e107::getDb();
 	}
-*/	
+*/
 }

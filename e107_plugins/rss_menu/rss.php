@@ -215,7 +215,7 @@ class rssCreate
 		{
 			$path = e_PLUGIN.$row['rss_path'].'/e_rss.php';
 		}
-		if(strpos($row['rss_path'],'|')!==FALSE) //FIXME remove this check completely. 
+		if(strpos($row['rss_path'],'|')!==FALSE) //FIXME remove this check completely.
 		{
 			$tmp = explode("|", $row['rss_path']);
 			$path = e_PLUGIN.$tmp[0]."/e_rss.php";
@@ -309,16 +309,16 @@ class rssCreate
 			if (is_readable($path))
 			{
 				require_once($path);
-				
+
 				$className = basename(dirname($path)).'_rss';
-				
-				// v2.x standard 
+
+				// v2.x standard
 				if($data = e107::callMethod($className,'data', array('url' => $content_type, 'id' => $this->topicid, 'limit' => $this->limit)))
-				{			
+				{
 					$eplug_rss_data = array(0 => $data);
-					unset($data);			
+					unset($data);
 				}
-								
+
 				foreach($eplug_rss_data as $key=>$rs)
 				{
 					foreach($rs as $k=>$row)

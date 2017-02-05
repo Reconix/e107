@@ -84,7 +84,7 @@
 				12              => RSS_MENU_L9,
 
 			);
-			
+
 
 			$text = "
 			<div>

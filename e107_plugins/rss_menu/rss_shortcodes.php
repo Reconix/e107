@@ -6,10 +6,10 @@
  * Copyright (C) 2008-2016 e107 Inc (e107.org)
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
- * 
+ *
  *    e107 website system - Shortcodes
  */
-if (!defined('e107_INIT')) { exit; }   
+if (!defined('e107_INIT')) { exit; }
 
  include_once(e_HANDLER.'shortcode_handler.php');
 // $rss_shortcodes = $tp -> e_sc -> parse_scbatch(__FILE__);

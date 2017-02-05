@@ -7,14 +7,14 @@
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
 
  */
- 
+
 if (!defined('e107_INIT')) { exit; }
 
-// v2.x Standard  - Simple mod-rewrite module. 
+// v2.x Standard  - Simple mod-rewrite module.
 
 class rss_menu_url // plugin-folder + '_url'
 {
-	function config() 
+	function config()
 	{
 		$config = array();
 
@@ -31,7 +31,7 @@ class rss_menu_url // plugin-folder + '_url'
 			'sef'			=> '{alias}/{rss_url}/atom/{rss_topicid}',
 			'redirect'		=> '{e_PLUGIN}rss_menu/rss.php?cat=$1&type=4&topic=$2'
 		);
-	
+
 		$config['index'] = array(
 			'alias'			=> 'feed',
 			'regex'			=> '^{alias}/?$',
@@ -41,5 +41,5 @@ class rss_menu_url // plugin-folder + '_url'
 
 		return $config;
 	}
-	
+
 }

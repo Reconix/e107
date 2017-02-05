@@ -25,7 +25,7 @@ Notes:
 */
 require_once("../../class2.php");
 if(!getperms("P") || !e107::isInstalled('rss_menu'))
-{ 
+{
 	e107::redirect('admin');
 	exit;
 }
@@ -35,13 +35,13 @@ e107::includeLan(e_PLUGIN."rss_menu/languages/".e_LANGUAGE."_admin_rss_menu.php"
 
 
 
-// XXX THIS IS SET UP FOR LATER USE. 
+// XXX THIS IS SET UP FOR LATER USE.
 
 class rss_admin extends e_admin_dispatcher
 {
 
-	protected $modes = array(	
-	
+	protected $modes = array(
+
 		'main'	=> array(
 			'controller' 	=> 'rss_ui',
 			'path' 			=> null,
@@ -49,9 +49,9 @@ class rss_admin extends e_admin_dispatcher
 			'uipath' 		=> null
 		),
 
-	);	
-	
-	
+	);
+
+
 	protected $adminMenu = array(
 
 		'main/list'			=> array('caption'=> LAN_MANAGE, 'perm' => 'P'),
@@ -60,14 +60,14 @@ class rss_admin extends e_admin_dispatcher
 		'main/prefs' 		=> array('caption'=> LAN_PREFS, 'perm' => 'P'),
 		/*
 		'main/custom'		=> array('caption'=> 'Custom Page', 'perm' => 'P')
-	*/	
+	*/
 
 	);
 
 	protected $adminMenuAliases = array(
-		'main/edit'	=> 'main/list'				
-	);	
-	
+		'main/edit'	=> 'main/list'
+	);
+
 	protected $menuTitle = 'RSS';
 
 
@@ -83,16 +83,16 @@ class rss_admin extends e_admin_dispatcher
 
 
 
-//TODO - Use this .. .				
+//TODO - Use this .. .
 class rss_ui extends e_admin_ui
 {
-			
+
 		protected $pluginTitle		= 'RSS';
 		protected $pluginName		= 'core';
 		protected $table			= 'rss';
 		protected $pid				= 'rss_id';
-		protected $perPage 			= 10; 
-			
+		protected $perPage 			= 10;
+
 		protected $fields 		= array (
 		  'checkboxes'      =>   array ( 'title' => '',             'type' => null, 'data' => false, 'width' => '5%', 'thclass' => 'center', 'forced' => '1', 'class' => 'center', 'toggle' => 'e-multiselect',  ),
 		  'rss_id'          =>   array ( 'title' => LAN_ID,         'data' => 'int', 'width' => '5%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
@@ -107,7 +107,7 @@ class rss_ui extends e_admin_ui
 		  'rss_limit'       =>   array ( 'title' => LAN_LIMIT,      'type' => 'number', 'data' => 'int', 'inline'=>true, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 		  'options'         =>   array ( 'title' => LAN_OPTIONS,    'type' => null, 'data' => '', 'width' => '10%', 'thclass' => 'center last', 'class' => 'center last', 'forced' => '1',  ),
 		);
-		
+
 		protected $fieldpref = array('checkboxes', 'rss_name','rss_url', 'rss_topicid', 'rss_limit', 'rss_class', 'options');
 
 
@@ -347,16 +347,16 @@ class rss_ui extends e_admin_ui
 			}
 		}
 
-			
+
 }
-				
+
 
 
 class rss_form_ui extends e_admin_form_ui
 {
 
-	
-	// Custom Method/Function 
+
+	// Custom Method/Function
 	function rss_url($curVal,$mode)
 	{
 
@@ -372,12 +372,12 @@ class rss_form_ui extends e_admin_form_ui
 				$link = e107::url('rss_menu', 'rss', array('rss_type'=>$type, 'rss_url'=>$curVal, 'rss_topicid'=>$topic));
 				return "<a href='".$link."'>".$curVal."</a>";
 			break;
-			
+
 			case 'write': // Edit Page
 				$link = SITEURL."feed/"; // e107::url('rss_menu','index').'/';
 				return "<div class='form-inline'>".$link.e107::getForm()->text('rss_url', $curVal,255, 'size=small')."/rss/{Topic id}</div>";
 			break;
-			
+
 			case 'filter':
 			case 'batch':
 				return  null;
@@ -385,8 +385,8 @@ class rss_form_ui extends e_admin_form_ui
 		}
 	}
 
-}		
-		
+}
+
 
 	new rss_admin();
 
@@ -478,11 +478,11 @@ if(isset($message))
 
 // Get template
 /*
-if (is_readable(THEME."rss_template.php")) 
+if (is_readable(THEME."rss_template.php"))
 {
 	require_once(THEME."rss_template.php");
-} 
-else 
+}
+else
 {
 	require_once(e_PLUGIN."rss_menu/rss_template.php");
 }*/
@@ -492,7 +492,7 @@ $frm = e107::getForm();
 // Admin : rss listing
 if(!isset($RSS_ADMIN_LIST_HEADER))
 {
-		
+
     $RSS_ADMIN_LIST_HEADER = "
     <div style='text-align:center;'>
     <form action='".e_SELF.(e_QUERY ? "?".e_QUERY : "")."' id='dataform' method='post' >
@@ -730,7 +730,7 @@ class rss
 		$mes = e107::getMessage();
 		$ns = e107::getRender();
 		$sql = e107::getDb();
-		
+
 		global $field, $sort, $rss_shortcodes, $row, $RSS_ADMIN_LIST_HEADER, $RSS_ADMIN_LIST_TABLE, $RSS_ADMIN_LIST_FOOTER;
 
         $fieldstag = array('id'=>'rss_id','path'=>'rss_path','name'=>'rss_name','url'=>'rss_url','limit'=>'rss_limit');
@@ -760,7 +760,7 @@ class rss
 		$ns = e107::getRender();
 		$tp = e107::getParser();
 		$sql = e107::getDb();
-		
+
 		global $rss_shortcodes, $row, $RSS_ADMIN_CREATE_TABLE;
 
 		if (($action == "edit") && $id )
@@ -778,9 +778,9 @@ class rss
 				$row['rss_text']	= $tp -> toForm($row['rss_text']);
 			}
 		}
-		
+
 		$text = $tp->parseTemplate($RSS_ADMIN_CREATE_TABLE, FALSE, $rss_shortcodes);
-		
+
 		$ns->tablerender(RSS_LAN_ADMIN_10, $mes->render().$text);
 	}
 
@@ -791,7 +791,7 @@ class rss
 		$ns = e107::getRender();
 		$mes = e107::getMessage();
 		$tp = e107::getParser();
-		
+
 		global $i,$rss_shortcodes, $feed, $pref;
 		global $RSS_ADMIN_IMPORT_HEADER, $RSS_ADMIN_IMPORT_TABLE, $RSS_ADMIN_IMPORT_FOOTER;
 
@@ -866,29 +866,29 @@ class rss
 		foreach($pref['e_rss_list'] as $val)
 		{
 			$eplug_rss_feed = array();
-			if (is_readable(e_PLUGIN.$val."/e_rss.php")) 
+			if (is_readable(e_PLUGIN.$val."/e_rss.php"))
 			{
 				require_once(e_PLUGIN.$val."/e_rss.php");
-				
+
 				$className = $val."_rss";
 				$data = false;
-				
+
 				if(!$data = e107::callMethod($className,'config'))
 				{
-					$data = $eplug_rss_feed;	
+					$data = $eplug_rss_feed;
 				}
-				
+
 				foreach($data as $v)
 				{
 					$v['path'] = $val;
 					array_push($plugin_feedlist,$v);
 				}
-				
+
 			}
 		}
 
 		$feedlist = array_merge($feedlist, $plugin_feedlist);
-		
+
 //		print_a($feedlist);
 
 		$render=FALSE;
@@ -1014,7 +1014,7 @@ class rss
 	function dbrsslimit()
 	{
 		global $sql, $tp, $admin_log;
-		
+
 		$limitVals = array();
 		foreach($_POST['limit'] as $key=>$value)
 		{
