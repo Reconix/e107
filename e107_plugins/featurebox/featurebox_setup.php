@@ -19,7 +19,7 @@ if (!defined('e107_INIT')) { exit; }
 
 class featurebox_setup
 {
-/*	
+/*
  	function install_pre($var)
 	{
 		// print_a($var);
@@ -30,24 +30,24 @@ class featurebox_setup
 	{
 		e107::includeLan(e_PLUGIN.'featurebox/languages/'.e_LANGUAGE.'_admin_featurebox.php');
 		$mes = e107::getMessage();
-		
+
 		$e107_featurebox_category = array(
  			array('fb_category_id'=> 1,'fb_category_title'=>FBLAN_INSTALL_04,'fb_category_icon'=>'','fb_category_template'=>'bootstrap3_carousel','fb_category_random'=>'0','fb_category_class'=>'0','fb_category_limit'=>'0','fb_category_parms'=>''),
 			array('fb_category_id'=> 2,'fb_category_title'=>FBLAN_INSTALL_05,'fb_category_icon'=>'','fb_category_template'=>'bootstrap_tabs','fb_category_random'=>'0','fb_category_class'=>'0','fb_category_limit'=>'0','fb_category_parms'=>''),
 			array('fb_category_id'=> 3,'fb_category_title'=>FBLAN_INSTALL_03,'fb_category_icon'=>'','fb_category_template'=>'unassigned','fb_category_random'=>'0','fb_category_class'=>'255','fb_category_limit'=>'0','fb_category_parms'=>'')
 		);
-		
+
 		$count = 0;
 		foreach($e107_featurebox_category as $insert)
 		{
-			$count = e107::getDb()->insert('featurebox_category', $insert) ?  $count + 1 : $count;	
+			$count = e107::getDb()->insert('featurebox_category', $insert) ?  $count + 1 : $count;
 		}
-		
-	
-		$status = ($count == 3) ? E_MESSAGE_SUCCESS : E_MESSAGE_ERROR; 
-		
+
+
+		$status = ($count == 3) ? E_MESSAGE_SUCCESS : E_MESSAGE_ERROR;
+
 		$mes->add(FBLAN_INSTALL_01, $status);
-		
+
 		if($status)
 		{
 			$e107_featurebox = array(
@@ -57,24 +57,24 @@ class featurebox_setup
 			  array('fb_id'=>'10','fb_title'=>'Slide 3','fb_text'=>'Suspendisse ac dui purus. Cras eleifend, velit sed dapibus pharetra, elit dolor mattis tellus, ac luctus nisi massa at ligula. Ut sagittis, neque consequat elementum convallis, lorem nulla molestie arcu, eu rutrum velit quam at metus! Nullam eu eleifend magna. Praesent eget leo felis, vel euismod nibh. Morbi sem eros, pellentesque eu scelerisque id, pretium id enim. Mauris aliquet molestie dui vel ultricies. Etiam consequat quam sed tellus facilisis sollicitudin. Vivamus malesuada iaculis metus.
 			','fb_mode'=>'0','fb_class'=>'0','fb_rendertype'=>'0','fb_template'=>'bootstrap_carousel_right','fb_order'=>'4','fb_image'=>'','fb_imageurl'=>'','fb_category'=>'1')
 			);
-			
+
 			foreach($e107_featurebox as $qry)
 			{
-				$status = e107::getDb('sql2')->insert('featurebox', $qry) ? E_MESSAGE_SUCCESS : E_MESSAGE_ERROR; 	
+				$status = e107::getDb('sql2')->insert('featurebox', $qry) ? E_MESSAGE_SUCCESS : E_MESSAGE_ERROR;
 			}
 			$mes->add(FBLAN_INSTALL_02, $status);
 		}
-		else 
+		else
 		{
 			$status = E_MESSAGE_ERROR;
 			$mes->add(FBLAN_INSTALL_02, $status);
 		}
-		
+
 	}
-/*	
+/*
 	function uninstall_options()
 	{
-	
+
 	}
 
 
@@ -82,17 +82,17 @@ class featurebox_setup
 	{
 		// print_a($var);
 	}
-*/	
+*/
 
 	function upgrade_required()
-	{	
+	{
 		if(!e107::getDb()->isTable('featurebox_category'))
 		{
-			return true; // true to trigger an upgrade alert, and false to not. 	
+			return true; // true to trigger an upgrade alert, and false to not.
 		}
-		
+
 	}
-	
+
 
 	function upgrade_pre($var)
 	{
@@ -127,9 +127,9 @@ class featurebox_setup
 			$query['fb_category_random'] = 0;
 			$query['fb_category_class'] = e_UC_NOBODY;
 			$query['fb_category_limit'] = 0;
-			
+
 			$inserted = $sql->insert('featurebox_category', $query);
-			$status = $inserted ? E_MESSAGE_SUCCESS : E_MESSAGE_ERROR; 
+			$status = $inserted ? E_MESSAGE_SUCCESS : E_MESSAGE_ERROR;
 			e107::getMessage()->add(FBLAN_INSTALL_01, $status);
 			if($sql->getLastErrorNumber())
 			{

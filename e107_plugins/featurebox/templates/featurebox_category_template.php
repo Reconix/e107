@@ -12,11 +12,11 @@ $FEATUREBOX_CATEGORY_TEMPLATE = array();
 
 
 $FEATUREBOX_CATEGORY_TEMPLATE['bootstrap3_carousel']['list_start'] = '
-<div id="carousel-example-generic" class="featurebox carousel slide" data-ride="carousel">  
+<div id="carousel-example-generic" class="featurebox carousel slide" data-ride="carousel">
 {FEATUREBOX_NAVIGATION|bootstrap3_carousel=loop&uselimit=1}
   <!-- Wrapper for slides -->
   <div class="carousel-inner">
-    
+
 ';
 
 $FEATUREBOX_CATEGORY_TEMPLATE['bootstrap3_carousel']['list_end'] = '
@@ -29,7 +29,7 @@ $FEATUREBOX_CATEGORY_TEMPLATE['bootstrap3_carousel']['list_end'] = '
   <a class="right carousel-control" href="#carousel-example-generic" data-slide="next">
     <span class="glyphicon glyphicon-chevron-right"></span>
   </a>
-                    
+
 
 	</div><!-- end row -->
 
@@ -54,7 +54,7 @@ $FEATUREBOX_CATEGORY_TEMPLATE['bootstrap3_carousel']['item_empty'] = '';
 
 
 
-// v2.x Default - Bootstrap. 
+// v2.x Default - Bootstrap.
 
 $FEATUREBOX_CATEGORY_TEMPLATE['bootstrap_carousel']['list_start'] = '
  <!-- starts carousel -->
@@ -67,11 +67,11 @@ $FEATUREBOX_CATEGORY_TEMPLATE['bootstrap_carousel']['list_start'] = '
 
 $FEATUREBOX_CATEGORY_TEMPLATE['bootstrap_carousel']['list_end'] = '
 				</div>
-	 				
+
 	 				<!-- Carousel nav -->
                     <a class="carousel-control left" href="#myCarousel" data-slide="prev">&lsaquo;</a>
                     <a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a>
-                    
+
 			</div><!-- end myCarousel -->
 		</div><!-- end span12 -->
 	</div><!-- end row -->
@@ -221,7 +221,7 @@ $FEATUREBOX_CATEGORY_TEMPLATE['tabs-proto']['js_type'] = 'prototype';
 
 $FEATUREBOX_CATEGORY_TEMPLATE['bootstrap_tabs']['list_start'] = '
 <div class="box featurebox tab-content">
-	{FEATUREBOX_NAVIGATION|bootstrap_tabs=loop&uselimit}	
+	{FEATUREBOX_NAVIGATION|bootstrap_tabs=loop&uselimit}
 ';
 
 $FEATUREBOX_CATEGORY_TEMPLATE['bootstrap_tabs']['list_end'] = '
@@ -293,7 +293,7 @@ $FEATUREBOX_CATEGORY_TEMPLATE['accordion']['js_type'] 			= 'jquery';
 /*
 $FEATUREBOX_CATEGORY_TEMPLATE['camera']['list_start'] = '<!-- start Camera -->
 <div class="box featurebox camera_wrap camera_azure_skin">
-	
+
 ';
 // {FEATUREBOX_NAVIGATION|camera=loop&uselimit}
 $FEATUREBOX_CATEGORY_TEMPLATE['camera']['list_end'] = '

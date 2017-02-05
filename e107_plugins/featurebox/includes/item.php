@@ -81,11 +81,11 @@ class plugin_featurebox_item extends e_model
 	{
 		$tp = e107::getParser();
 		$url = $tp->replaceConstants($this->get('fb_imageurl'), 'full');
-		
+
 		if(empty($url)) return '';
 
 		parse_str($parm, $parm);
-				
+
 		if(vartrue($parm['href']))
 		{
 			return $tp->replaceConstants($url);
@@ -93,25 +93,25 @@ class plugin_featurebox_item extends e_model
 
 		$title = vartrue($parm['text']) ? defset($parm['text']) : LAN_MORE;
 		$alt = $tp->toAttribute($this->get('fb_title'), false, 'TITLE');
-		
+
 		$buttonCls = vartrue($parm['button']) ? 'class="btn btn-primary btn-featurebox" ' : "";
-		
-		
-		
+
+
+
 		return '<a '.$buttonCls.'id="featurebox-url-'.$this->getId().'" href="'.$url.'" title="'.$alt.'" rel="'.$tp->toAttribute(vartrue($parm['rel'], '')).'">'.$title.'</a>';
 	}
-	
-	
-	
+
+
+
 	public function sc_featurebox_button($parm='')
 	{
 		return $this->sc_featurebox_url('button=1');
-		
+
 	}
-		
-		
-	
-	
+
+
+
+
 
 	public function sc_featurebox_text()
 	{
@@ -132,10 +132,10 @@ class plugin_featurebox_item extends e_model
 		{
 			return '';
 		}
-		
+
 		if($video = e107::getParser()->toVideo($this->get('fb_image')))
 		{
-			return $video;	
+			return $video;
 		}
 
 		if(is_string($parm))
@@ -144,18 +144,18 @@ class plugin_featurebox_item extends e_model
 		}
 
 		$tp = e107::getParser();
-		
+
 		$imageSrc = ($parm != 'placeholder') ? $this->get('fb_image') : "";
-		
-		if($tp->thumbWidth > 100 || $tp->thumbHeight > 100) //Guessing it's a featurebox image.  Use {SETIMAGE} inside theme.php to configure. 
+
+		if($tp->thumbWidth > 100 || $tp->thumbHeight > 100) //Guessing it's a featurebox image.  Use {SETIMAGE} inside theme.php to configure.
 		{
 			$src = $tp->thumbUrl($imageSrc); //XXX TODO TBD Add a pref to use without resizing? Or, detect {SETIMAGE} in template to enable?
 		}
-		else 
+		else
 		{
 			$src = $tp->replaceConstants($imageSrc, 'full');
 		}
-		
+
 		if(isset($parm['src']))
 		{
 			return $src;
@@ -167,7 +167,7 @@ class plugin_featurebox_item extends e_model
 		}
 		return '<a id="featurebox-imageurl-'.$this->getId().'" href="'.$tp->replaceConstants($this->get('fb_imageurl'), 'full').'" title="'.$tp->toAttribute($this->get('fb_title')).'" rel="'.$tp->toAttribute(vartrue($parm['rel'], 'external')).'">'.$tag.'</a>';
 	}
-	
+
 	public function sc_featurebox_thumb($parm='')
 	{
 		$tp = e107::getParser();
@@ -178,38 +178,38 @@ class plugin_featurebox_item extends e_model
 		parse_str($parm, $parm);
 		$att = ($parm['aw']) ? "aw=".$parm['aw'] : 'aw=100&ah=60';
 		$src = e107::getParser()->thumbUrl($this->get('fb_image'),$att);
-			
+
 		if(isset($parm['src']))
 		{
-			return $src;		
+			return $src;
 		}
 		else
 		{
 			return '<img id="featurebox-thumb-'.$this->getId().'" src="'.$src.'" alt="'.$tp->toAttribute($this->get('fb_title')).'" class="featurebox" />';
-			
+
 		}
-				
+
 	}
-	
-	
+
+
 	/**
-	 * Returns 'active' for the first-slide. - often used by Bootstrap. 
+	 * Returns 'active' for the first-slide. - often used by Bootstrap.
 	 */
 	public function sc_featurebox_active()
 	{
 		$count = $this->getParam('counter', 1);
 		return ($count == 1) ? "active" : "";
 	}
-	
-	
-	
+
+
+
 
 	/**
 	 * Item counter number (starting from 1)
 	 * @param optional - to strat from 0 if needed. (bootstrap 3)
 	 */
 	public function sc_featurebox_counter($parm=1)
-	{	
+	{
 		$count = $this->getParam('counter', 1);
 		return (empty($parm)) ? $count - 1 : $count;
 	}
@@ -301,6 +301,3 @@ class plugin_featurebox_item extends e_model
 		}
 	}
 }
-
-
-

@@ -9,11 +9,11 @@
 global $sc_style;
 
 
-// e107 v2.x Defaults. 
+// e107 v2.x Defaults.
 
 $FEATUREBOX_TEMPLATE['bootstrap_carousel_default'] = '{SETIMAGE: w=2205&h=510&crop=1}
 		<div class="{FEATUREBOX_ACTIVE} item slide{FEATUREBOX_COUNTER}">
-			{FEATUREBOX_IMAGE}		
+			{FEATUREBOX_IMAGE}
            <div class="container">
             <div class="carousel-caption">
               <h1>{FEATUREBOX_TITLE}</h1>
@@ -35,14 +35,14 @@ $FEATUREBOX_TEMPLATE['bootstrap_carousel_left'] = '
                                             {FEATUREBOX_TITLE}
                                         </h1>
                                         {FEATUREBOX_TEXT}
-										
+
 										 <p>{FEATUREBOX_BUTTON}</p>
-										
+
                                     </div>
                                 </div>
                             </div>
    <!-- -->
-   
+
 ';
 
 $FEATUREBOX_TEMPLATE['bootstrap_carousel_right'] = '
@@ -55,9 +55,9 @@ $FEATUREBOX_TEMPLATE['bootstrap_carousel_right'] = '
                                     <div class="featurebox-item-text col-xs-12 col-md-6 col-sm-6">
                                         <h1>{FEATUREBOX_TITLE}</h1>
                                         {FEATUREBOX_TEXT}
-										
+
                                         <p>{FEATUREBOX_BUTTON}</p>
-										
+
                                     </div>
                                 </div>
                             </div>
@@ -66,8 +66,8 @@ $FEATUREBOX_TEMPLATE['bootstrap_carousel_right'] = '
 
 $FEATUREBOX_TEMPLATE['bootstrap_carousel_image'] = '{SETIMAGE: w=1905&h=500&crop=1}
 
-									<div class="{FEATUREBOX_ACTIVE} item slide{FEATUREBOX_COUNTER}">			
-									{FEATUREBOX_IMAGE=placeholder}		
+									<div class="{FEATUREBOX_ACTIVE} item slide{FEATUREBOX_COUNTER}">
+									{FEATUREBOX_IMAGE=placeholder}
 									</div>
 ';
 
@@ -160,12 +160,12 @@ $FEATUREBOX_TEMPLATE['tabs'] = '
 
 
 $FEATUREBOX_INFO = array(
-	
+
 	'bootstrap_carousel_default' 	=> array('title' => 'Bootstrap', 							'description' => 'Title and Description'),
 	'bootstrap_carousel_image' 		=> array('title' => 'Bootstrap Carousel (Image-Only)', 		'description' => 'Image Only'),
 	'bootstrap_carousel_left' 		=> array('title' => 'Bootstrap Carousel (Image-left)', 		'description' => 'Image aligned left with title and text on the right'),
 	'bootstrap_carousel_right' 		=> array('title' => 'Bootstrap Carousel (Image-right)', 	'description' => 'Image aligned right with title and text on the left'),
-	
+
 	'default' 						=> array('title' => 'Generic', 								'description' => 'Title and description - no image'),
 	'image_left'					=> array('title' => 'Generic - (Image-left)'	, 			'description' => 'Left floated image'),
 	'image_right' 					=> array('title' => 'Generic - (Image-right)',				'description' => 'Right floated image'),

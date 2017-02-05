@@ -23,25 +23,25 @@ class plugin_featurebox_category extends e_model
 	 * @var plugin_featurebox_tree
 	 */
 	protected $_tree = null;
-	
+
 	/**
-	 * Data loaded check 
-	 * @var boolean 
+	 * Data loaded check
+	 * @var boolean
 	 */
 	protected $_loaded_data = null;
-	
+
 	/**
 	 * @see e_model::_field_id
 	 * @var string
 	 */
 	protected $_field_id = 'fb_category_id';
-	
+
 	/**
 	 * @see e_model::_db_table
 	 * @var string
 	 */
 	protected $_db_table = 'featurebox_category';
-	
+
 	/**
 	 * Parameter (single string format):
 	 * - alt: return title as tag attribute text
@@ -52,11 +52,11 @@ class plugin_featurebox_category extends e_model
 	{
 		return ($parm == 'alt' ? e107::getParser()->toAttribute($this->get('fb_category_title')) : e107::getParser()->toHTML($this->get('fb_category_title'), false, 'TITLE'));
 	}
-	
+
 	/**
 	 * Parameter (single string format):
 	 * - src: return image src URL only
-	 * 
+	 *
 	 * @param string $parm
 	 * @return string
 	 */
@@ -67,7 +67,7 @@ class plugin_featurebox_category extends e_model
 			return '';
 		}
 		$tp = e107::getParser();
-		
+
 		$src = $tp->replaceConstants($this->get('fb_category_icon'), 'full');
 		if($parm == 'src')
 		{
@@ -75,17 +75,17 @@ class plugin_featurebox_category extends e_model
 		}
 		return '<img src="'.$src.'" alt="'.$tp->toAttribute($this->get('fb_category_title')).'" class="icon featurebox" />';
 	}
-	
+
 	public function sc_featurebox_category_template()
 	{
 		return $this->get('fb_category_template');
 	}
-	
+
 	public function sc_featurebox_category_limit()
 	{
 		return $this->get('fb_category_limit');
 	}
-	
+
 	public function sc_featurebox_category_total()
 	{
 		return $this->getParam('total', 0);
@@ -95,7 +95,7 @@ class plugin_featurebox_category extends e_model
 	{
 		return $this->getItemTree()->getTotal();
 	}
-	
+
 	public function sc_featurebox_category_cols()
 	{
 		return $this->getParam('cols', 1);
@@ -115,11 +115,11 @@ class plugin_featurebox_category extends e_model
 	{
 		return $this->getParam('no_fill_empty', 0);
 	}
-	
+
 	/**
 	 * Load category data by layout
 	 * TODO - system cache
-	 * 
+	 *
 	 * @param string $template
 	 * @param boolean $force
 	 * @return plugin_featurebox_category
@@ -137,11 +137,11 @@ class plugin_featurebox_category extends e_model
 		$this->_loaded_data = false;
 		return $this;
 	}
-	
+
 	/**
 	 * Get items model tree for the current category
 	 * TODO - system cache
-	 * 
+	 *
 	 * @param boolean $force
 	 * @return plugin_featurebox_tree
 	 */
@@ -158,13 +158,13 @@ class plugin_featurebox_category extends e_model
 			);
 			$this->_tree->load($this->getId(), $options, $force);
 		}
-		
+
 		return $this->_tree;
 	}
-	
+
 	/**
 	 * Set item tree
-	 * 
+	 *
 	 * @param plugin_featurebox_tree $item_tree
 	 * @return plugin_featurebox_category
 	 */
