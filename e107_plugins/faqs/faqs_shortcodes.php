@@ -7,7 +7,7 @@
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
  */
- 
+
 if (!defined('e107_INIT')) { exit; }
 
 /**
@@ -19,7 +19,7 @@ if (!defined('e107_INIT')) { exit; }
  *
  *	FAQ shortcodes
  */
- 
+
 
 class faqs_shortcodes extends e_shortcode
 {
@@ -51,14 +51,14 @@ class faqs_shortcodes extends e_shortcode
 		}
 
 	}
-	
-	// Simply FAQ count when needed. 
+
+	// Simply FAQ count when needed.
 	function sc_faq_counter($parm='')
 	{
-		return $this->counter;	
+		return $this->counter;
 	}
-	
-	
+
+
 	function sc_faq_question($parm='')
 	{
 		$tp = e107::getParser();
@@ -113,30 +113,30 @@ class faqs_shortcodes extends e_shortcode
 		}
 		return $text;
 	}
-	
+
 	function sc_faq_question_link($parm='')
 	{
 		$tp = e107::getParser();
 		return "<a class='faq-question' href='". e107::url('faqs', 'item', $this->var)."' >".$tp -> toHTML($this->var['faq_question'],true,'TITLE')."</a>";
 	}
-	
+
 	function sc_faq_answer()
 	{
-		return e107::getParser()->toHTML($this->var['faq_answer'],true,'BODY'); 
+		return e107::getParser()->toHTML($this->var['faq_answer'],true,'BODY');
 	}
-	
-	
+
+
 	function sc_faq_tags($parm='')
 	{
 		$tags = $this->var['faq_tags'];
 		if(!$tags) return '';
-		
+
 		if(!$parm) $parm = ' ';
-		
+
 		$ret = $urlparms = array();
 		if($this->category) $urlparms['category'] = $this->category;
 		$tags = array_map('trim', explode(',', $tags));
-		foreach ($tags as $tag) 
+		foreach ($tags as $tag)
 		{
 			$urlparms['tag'] = $tag;
 		//	$url = e107::getUrl()->create('faqs/list/all', $urlparms);
@@ -144,27 +144,27 @@ class faqs_shortcodes extends e_shortcode
 			$tag = htmlspecialchars($tag, ENT_QUOTES, 'utf-8');
 			$ret[] = '<a href="'.$url.'" title="'.$tag.'"><span class="label label-info">'.$tag.'</span></a>';
 		}
-		
+
 		return implode($parm, $ret);
 	}
-	
+
 	function sc_faq_current_tag($parm='')
 	{
 		if(!$this->tag) return '';
-		
+
 		$tag = $this->tag;
 		if($parm == 'raw') return $tag;
-		
+
 		$urlparms = array();
 		if($this->category) $urlparms['category'] = $this->category;
 		$urlparms['tag'] = $tag;
 	//	$url = e107::getUrl()->create('faqs/list/all', $urlparms);
 		$url = e107::url('faqs', 'tag', $urlparms);
 		if($parm == 'url') return $url;
-		
+
 		return '<a href="'.$url.'" title="'.$tag.'">'.$tag.'</a>';
 	}
-	
+
 	function sc_faq_edit()
 	{
 		$tp = e107::getParser();
@@ -173,47 +173,47 @@ class faqs_shortcodes extends e_shortcode
 		{
 			// UNDER CONSTRUCTION
 		 	//return "[ <a href='faqs.php?edit.".$this->var['faq_parent'].".".$this->var['faq_id']."'>Edit</a> ]";
-		}	
+		}
 	}
-	
+
 	function sc_faq_category($parm = '')
 	{
 	//	$tp = e107::getParser();
 	//	return $tp->toHTML($this->var['faq_info_title']);
-		
-		
+
+
 		$tp = e107::getParser();
-		$url = e107::url('faqs','category', $this->var); //@See faqs/e_url.php 
-		return "<a href='".$url."'>".$tp->toHTML($this->var['faq_info_title'])."</a>";	
+		$url = e107::url('faqs','category', $this->var); //@See faqs/e_url.php
+		return "<a href='".$url."'>".$tp->toHTML($this->var['faq_info_title'])."</a>";
 		/*
 
-		return "<a href='".e107::getUrl()->create('faqs/list/all', array('category' => $this->var['faq_info_id']))."'>".$tp->toHTML($this->var['faq_info_title'])."</a>";	
-		
-		
-		
+		return "<a href='".e107::getUrl()->create('faqs/list/all', array('category' => $this->var['faq_info_id']))."'>".$tp->toHTML($this->var['faq_info_title'])."</a>";
+
+
+
 		$tp = e107::getParser();
 		if($parm == 'extend' && $this->tag)
 		{
 			return "<a href='".$this->sc_faq_current_tag('url')."'>".$tp->toHTML($this->var['faq_info_title'])." &raquo; ".$this->sc_faq_current_tag('raw')."</a>";
 		}
-		
+
 		if($parm == 'raw')
 		{
-			return $tp->toHTML($this->var['faq_info_title']);	
+			return $tp->toHTML($this->var['faq_info_title']);
 		}
-		
-		return "<a href='".e107::getUrl()->create('faqs/list/all', array('category' => $this->var['faq_info_id']))."'>".$tp->toHTML($this->var['faq_info_title'])."</a>";	
+
+		return "<a href='".e107::getUrl()->create('faqs/list/all', array('category' => $this->var['faq_info_id']))."'>".$tp->toHTML($this->var['faq_info_title'])."</a>";
 	*/
 	}
-	
+
 	function sc_faq_category_description($parm='')
 	{
 		$tp = e107::getParser();
-		return $tp->toHTML($this->var['faq_info_about'],true, 'BODY');	
-		
+		return $tp->toHTML($this->var['faq_info_about'],true, 'BODY');
+
 	}
-	
-	
+
+
 	function sc_faq_caturl()
 	{
 		return e107::url('faqs', 'category', $this->var);
@@ -251,16 +251,16 @@ class faqs_shortcodes extends e_shortcode
 
  		return $this->var['f_count'];
 	}
-	
+
 	function sc_faq_cat_diz()
 	{
 		$tp = e107::getParser();
-		return $tp->toHTML($this->var['faq_info_about'], true);	
+		return $tp->toHTML($this->var['faq_info_about'], true);
 	}
 
 	function sc_faq_icon()
 	{
-		return "<img src='".e_PLUGIN_ABS."faq/images/faq.png'  alt='' />";	
+		return "<img src='".e_PLUGIN_ABS."faq/images/faq.png'  alt='' />";
 	}
 
 	function sc_faq_submit_question($parms)
@@ -362,15 +362,15 @@ class faqs_shortcodes extends e_shortcode
 
 	}
 
-	
+
 	function sc_faq_search($parm='')
 	{
-		
+
 			$frm = e107::getForm();
 			$tp = e107::getParser();
 
 			$target = e107::url('faqs','search');
-			
+
 			$text = $frm->open('faq-search-form','get', $target);
 			$text .= '<span class="input-group e-search">';
 			$text .= $frm->text('srch', $_GET['srch'], 20,'class=search-query&placeholder='.LAN_SEARCH).'
@@ -382,14 +382,14 @@ class faqs_shortcodes extends e_shortcode
 
 	}
 
-	
-	function sc_faq_breadcrumb() //TODO Category Detection. and proper SEF Urls with category names. 
+
+	function sc_faq_breadcrumb() //TODO Category Detection. and proper SEF Urls with category names.
 	{
 		$array = array();
 		$array[0] = array('url'=> e_REQUEST_SELF, 'text'=>LAN_PLUGIN_FAQS_NAME);
-			
+
 		return e107::getForm()->breadcrumb($array);
-		
+
 	}
-	
+
 }

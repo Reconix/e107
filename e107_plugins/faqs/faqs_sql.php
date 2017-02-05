@@ -25,4 +25,3 @@ CREATE TABLE faqs_info (
   faq_info_sef varchar(255) NOT NULL default '',
   PRIMARY KEY  (faq_info_id)
 ) ENGINE=MyISAM;
-

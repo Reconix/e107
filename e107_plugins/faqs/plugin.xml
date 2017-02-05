@@ -4,7 +4,7 @@
 	<summary>Add frequently asked questions to your e107 website.</summary>
 	<description lan="LAN_PLUGIN_FAQS_DESCRIPTION">A simple plugin to add Frequently Asked Questions to your website.</description>
 	<copyright>Copyright e107 Inc e107.org, Licensed under GPL (http://www.gnu.org/licenses/gpl.txt)</copyright>
-	<bbcodes imgResize="true" />	
+	<bbcodes imgResize="true" />
 	<category>content</category>
 	<keywords>
 		<word>faq</word>
@@ -12,7 +12,7 @@
 		<word>answer</word>
 	</keywords>
 	<adminLinks>
-		<link url="admin_config.php" description="Configure FAQs" icon="images/icon_32.png" iconSmall="images/icon_16.png" primary="true" >LAN_PLUGIN_FAQS_NAME</link>		
+		<link url="admin_config.php" description="Configure FAQs" icon="images/icon_32.png" iconSmall="images/icon_16.png" primary="true" >LAN_PLUGIN_FAQS_NAME</link>
 	</adminLinks>
 	<siteLinks>
 		<link url="{e_PLUGIN}faqs/faqs.php" sef='index' description="FAQs" perm='everyone' icon="" >LAN_PLUGIN_FAQS_NAME</link>

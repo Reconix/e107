@@ -17,7 +17,7 @@
 
 if (!defined('e107_INIT')) { exit; }
 /*if(!e107::isInstalled('gsitemap'))
-{ 
+{
 	return;
 }*/
 
@@ -27,28 +27,28 @@ class faqs_sitelink // include plugin-folder in the name.
 	function config()
 	{
 		global $pref;
-		
+
 		$links = array();
-			
+
 		$links[] = array(
 			'name'			=> LAN_PLUGIN_FAQS_FUNCTIONNAME, // "FAQ Categories",
 			'function'		=> "faqCategories"
-		);	
-		
-		
+		);
+
+
 		return $links;
 	}
-	
-	
 
-	function faqCategories() 
+
+
+	function faqCategories()
 	{
 		$sql = e107::getDb();
 		$tp = e107::getParser();
 		$sublinks = array();
-		
+
 		$sql->select("faqs_info","*","faq_info_id != '' ORDER BY faq_info_order");
-		
+
 		while($row = $sql->fetch())
 		{
 			$sublinks[] = array(
@@ -63,9 +63,9 @@ class faqs_sitelink // include plugin-folder in the name.
 				'link_class'		=> intval($row['faq_info_class'])
 			);
 		}
-		
+
 		return $sublinks;
-	    
+
 	}
-	
+
 }

@@ -27,7 +27,7 @@ class plugin_faqs_list_controller extends eControllerFront
 	 * @var string
 	 */
 	protected $plugin = 'faqs';
-	
+
 	/**
 	 * User input filter (_GET)
 	 * Format 'action' => array(var => validationArray)
@@ -39,25 +39,25 @@ class plugin_faqs_list_controller extends eControllerFront
 			'tag' => array('str', '2:'),
 		),
 	);
-	
+
 	public function init()
 	{
 		e107::lan('faqs', 'front');
-		e107::css('faqs','faqs.css'); 
+		e107::css('faqs','faqs.css');
 	}
-	
+
 	public function actionIndex()
 	{
 		$this->_forward('all');
 	}
-	
+
 	public function actionAll()
 	{
 		$sql = e107::getDb();
 		$tp = e107::getParser();
 
 		//global $FAQ_START, $FAQ_END, $FAQ_LISTALL_START,$FAQ_LISTALL_LOOP,$FAQ_LISTALL_END;
-		
+
 		$FAQ_START = e107::getTemplate('faqs', true, 'start');
 		$FAQ_END = e107::getTemplate('faqs', true, 'end');
 		$FAQ_LISTALL = e107::getTemplate('faqs', true, 'all');
@@ -75,7 +75,7 @@ class plugin_faqs_list_controller extends eControllerFront
 		{
 			$where[] = "FIND_IN_SET ('".$tp->toDB($tag)."', f.faq_tags)";
 		}
-		
+
 		if($where)
 		{
 			$where = ' AND '.implode(' AND ' , $where);
@@ -83,11 +83,11 @@ class plugin_faqs_list_controller extends eControllerFront
 		else $where = '';
 
 		$query = "
-			SELECT f.*,cat.* FROM #faqs AS f 
-			LEFT JOIN #faqs_info AS cat ON f.faq_parent = cat.faq_info_id 
+			SELECT f.*,cat.* FROM #faqs AS f
+			LEFT JOIN #faqs_info AS cat ON f.faq_parent = cat.faq_info_id
 			WHERE cat.faq_info_class IN (".USERCLASS_LIST."){$where} ORDER BY cat.faq_info_order,f.faq_order ";
 		$sql->gen($query, false);
-		
+
 		$prevcat = "";
 		$sc = e107::getScBatch('faqs', true);
 		$sc->counter = 1;
@@ -95,11 +95,11 @@ class plugin_faqs_list_controller extends eControllerFront
 		$sc->category = $category;
 
 		$text = $tp->parseTemplate($FAQ_START, true, $sc);
-		
+
 		while ($rw = $sql->db_Fetch())
 		{
-			$sc->setVars($rw);	
-			
+			$sc->setVars($rw);
+
 			if($rw['faq_info_order'] != $prevcat)
 			{
 				if($prevcat !='')
@@ -118,7 +118,7 @@ class plugin_faqs_list_controller extends eControllerFront
 		}
 		$text .= ($start) ? $tp->parseTemplate($FAQ_LISTALL['end'], true, $sc) : "";
 		$text .= $tp->parseTemplate($FAQ_END, true, $sc);
-		
+
 		// add meta data if there is parent category
 		if(!empty($meta))
 		{
@@ -132,11 +132,11 @@ class plugin_faqs_list_controller extends eControllerFront
 				$response->addMetaKeywords($meta['faq_info_metak']);
 			}
 		}
-		
+
 		$caption = ($FAQ_CAPTION) ? $FAQ_CAPTION : LAN_PLUGIN_FAQS_FRONT_NAME;
-	
+
 		$this->addTitle($caption);
-		
+
 		$this->addBody($text);
 	}
 }

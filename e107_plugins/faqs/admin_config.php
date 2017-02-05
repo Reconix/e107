@@ -27,8 +27,8 @@ class faq_admin extends e_admin_dispatcher
 			'path' 			=> null,
 			'ui' 			=> 'faq_cat_form_ui',
 			'uipath' 		=> null
-		)					
-	);	
+		)
+	);
 
 	protected $adminMenu = array(
 		'main/list'		=> array('caption'=> LAN_MANAGE, 'perm' => 'P'),
@@ -38,7 +38,7 @@ class faq_admin extends e_admin_dispatcher
 		'cat/list' 		=> array('caption'=> LAN_CATEGORIES, 'perm' => 'P'),
 		'cat/create' 	=> array('caption'=> LAN_CREATE_CATEGORY, 'perm' => 'P'),
 		'main/prefs' 	=> array('caption'=> LAN_PREFS, 'perm' => '0'),
-	//	'main/custom'	=> array('caption'=> 'Custom Page', 'perm' => '0')		
+	//	'main/custom'	=> array('caption'=> 'Custom Page', 'perm' => '0')
 	);
 
 
@@ -47,9 +47,9 @@ class faq_admin extends e_admin_dispatcher
 	);
 
 	protected $adminMenuAliases = array(
-		'main/edit'	=> 'main/list'				
-	);	
-	
+		'main/edit'	=> 'main/list'
+	);
+
 	protected $menuTitle = 'FAQs';
 
 	//
@@ -77,7 +77,7 @@ class faq_admin extends e_admin_dispatcher
 }
 
 class faq_cat_ui extends e_admin_ui
-{ 	 	 
+{
 		protected $pluginTitle	= LAN_PLUGIN_FAQS_NAME;
 		protected $pluginName	= 'plugin';
 
@@ -86,31 +86,31 @@ class faq_cat_ui extends e_admin_ui
 		protected $perPage 		= 5; //no limit
 		protected $listOrder	= 'faq_info_order ASC';
 		protected $sortField	= 'faq_info_order';
-	 	 	
+
 		protected $fields = array(
 			'checkboxes'				=> array('title'=> '',				'type' => null, 			'width' =>'5%', 'forced'=> TRUE, 'thclass'=>'center', 'class'=>'center'),
-			'faq_info_icon' 			=> array('title'=> LAN_ICON,		'type' => 'icon',			'width' => '5%', 'thclass' => 'left', 'writeParms'=>'glyphs=1' ),	 
-			'faq_info_id'				=> array('title'=> LAN_ID,			'type' => 'number',			'width' =>'5%', 'forced'=> TRUE),     		
-         	'faq_info_title' 			=> array('title'=> LAN_TITLE,		'type' => 'text',			'width' => 'auto', 'thclass' => 'left', 'readParms'=>'editable=1'), 
+			'faq_info_icon' 			=> array('title'=> LAN_ICON,		'type' => 'icon',			'width' => '5%', 'thclass' => 'left', 'writeParms'=>'glyphs=1' ),
+			'faq_info_id'				=> array('title'=> LAN_ID,			'type' => 'number',			'width' =>'5%', 'forced'=> TRUE),
+         	'faq_info_title' 			=> array('title'=> LAN_TITLE,		'type' => 'text',			'width' => 'auto', 'thclass' => 'left', 'readParms'=>'editable=1'),
          	'faq_info_about' 			=> array('title'=> LAN_DESCRIPTION,	'type' => 'bbarea',			'width' => '30%', 'readParms' => 'expand=...&truncate=50&bb=1'), // Display name
-		 	'faq_info_parent' 			=> array('title'=> LAN_CATEGORY,	'type' => 'dropdown',		'width' => '5%', 'writeParms'=>''),		
+		 	'faq_info_parent' 			=> array('title'=> LAN_CATEGORY,	'type' => 'dropdown',		'width' => '5%', 'writeParms'=>''),
 			'faq_info_class' 			=> array('title'=> LAN_VISIBILITY,	'type' => 'userclass',		'width' => 'auto', 'data' => 'int', 'inline'=>true),
-			'faq_info_metad' 			=> array('title'=> LANA_FAQ_METAD,	'type' => 'text',			'width' => 'auto', 'thclass' => 'left', 'readParms'=>'editable=1'), 
-			'faq_info_metak' 			=> array('title'=> LANA_FAQ_METAK,	'type' => 'tags',			'width' => 'auto', 'thclass' => 'left', 'readParms'=>'editable=1'), 				
-			'faq_info_sef' 				=> array('title'=> LAN_SEFURL,		'type' => 'text',			'width' => 'auto', 'thclass' => 'left', 'inline'=>true, 'writeParms'=>'size=xxlarge'), 				
-	
-			'faq_info_order' 			=> array('title'=> LAN_ORDER,		'type' => 'number',			'width' => '5%', 'thclass' => 'left' ),	
+			'faq_info_metad' 			=> array('title'=> LANA_FAQ_METAD,	'type' => 'text',			'width' => 'auto', 'thclass' => 'left', 'readParms'=>'editable=1'),
+			'faq_info_metak' 			=> array('title'=> LANA_FAQ_METAK,	'type' => 'tags',			'width' => 'auto', 'thclass' => 'left', 'readParms'=>'editable=1'),
+			'faq_info_sef' 				=> array('title'=> LAN_SEFURL,		'type' => 'text',			'width' => 'auto', 'thclass' => 'left', 'inline'=>true, 'writeParms'=>'size=xxlarge'),
+
+			'faq_info_order' 			=> array('title'=> LAN_ORDER,		'type' => 'number',			'width' => '5%', 'thclass' => 'left' ),
 			'options' 					=> array('title'=> LAN_OPTIONS,		'type' => null,				'width' => '10%', 'forced'=>TRUE, 'thclass' => 'center last', 'class' => 'center','readParms'=>array('sort'=>1))
-		);	
-	
+		);
+
 	protected $categories = array();
-	
+
 	public function init()
 	{
 		$sql = e107::getDb();
-		
+
 		$this->categories[0] = "(Root)";
-		
+
 		if($sql->select('faqs_info','*', 'faq_info_parent = 0 ORDER BY faq_info_title ASC'))
 		{
 			while ($row = $sql->fetch())
@@ -118,11 +118,11 @@ class faq_cat_ui extends e_admin_ui
 				$this->categories[$row['faq_info_id']] = $row['faq_info_title'];
 			}
 		}
-		
+
 		$this->fields['faq_info_parent']['writeParms'] = $this->categories;
-		
+
 		/*
-		if(e_AJAX_REQUEST) // ajax link sorting. 
+		if(e_AJAX_REQUEST) // ajax link sorting.
 		{
 			$sql = e107::getDb();
 			$c=0;
@@ -131,35 +131,35 @@ class faq_cat_ui extends e_admin_ui
 				foreach($_POST['all'] as $id)
 				{
 					$sql->db_Update("faqs_info","faq_info_order = ".intval($c)." WHERE faq_info_id = ".intval($id));
-					$c++;		
-				}	
+					$c++;
+				}
 			}
-			
-		
+
+
 			exit;
-		}		
+		}
 		*/
-		
-	}	
+
+	}
 	/**
 	 * Get FAQ Category data
 	 *
 	 * @param integer $id [optional] get category title, false - return whole array
 	 * @param mixed $default [optional] default value if not found (default 'n/a')
-	 * @return 
+	 * @return
 	 */
 	function getFaqCategoryTree($id = false, $default = 'n/a')
 	{
 		// TODO get faq category tree
 	}
-		
+
 }
 
 class faq_cat_form_ui extends e_admin_form_ui
 {
 	public function faq_info_parent($curVal,$mode)
 	{
-		// TODO - catlist combo without current cat ID in write mode, parents only for batch/filter 
+		// TODO - catlist combo without current cat ID in write mode, parents only for batch/filter
 		// Get UI instance
 		$controller = $this->getController();
 		switch($mode)
@@ -167,11 +167,11 @@ class faq_cat_form_ui extends e_admin_form_ui
 			case 'read':
 				return e107::getParser()->toHTML($controller->getFaqCategoryTree($curVal), false, 'TITLE');
 			break;
-			
+
 			case 'write':
 				return $this->selectbox('faq_info_parent', $controller->getFaqCategoryTree(), $curVal);
 			break;
-			
+
 			case 'filter':
 			case 'batch':
 				return $controller->getFaqCategoryTree();
@@ -187,34 +187,34 @@ class faq_main_ui extends e_admin_ui
 		protected $pluginName		= 'faqs';
 		protected $eventName	    = 'faqs';
 		protected $table			= "faqs";
-		// without any Order or Limit. 
-		
-		//FIXME JOIN should occur automatically. We have all the data necessary to build the query. 
-		// ie. faq_author is a 'user' field. 
-		
+		// without any Order or Limit.
+
+		//FIXME JOIN should occur automatically. We have all the data necessary to build the query.
+		// ie. faq_author is a 'user' field.
+
 		protected $listQry		= "SELECT  f.*, u.* FROM #faqs AS f LEFT JOIN #user AS u ON f.faq_author = u.user_id "; // Should not be necessary.
-		
+
 		protected $editQry		= "SELECT * FROM #faqs WHERE faq_id = {ID}";
-		
+
 		protected $pid 			= "faq_id";
 		protected $perPage 		= 10;
 		protected $batchDelete	= true;
 		protected $batchCopy	= true;
 		protected $listOrder	= 'faq_order ASC';
 		protected $sortField	= 'faq_order';
-		protected $tabs			= array('FAQs',"Details"); // Simpler method than 'fieldsets'. Allows for easy moving of fields between tabs and works as required by 'news' and 'custom pages'. 
-		
+		protected $tabs			= array('FAQs',"Details"); // Simpler method than 'fieldsets'. Allows for easy moving of fields between tabs and works as required by 'news' and 'custom pages'.
+
 		//TODO - finish 'user' type, set 'data' to all editable fields, set 'noedit' for all non-editable fields
     	protected $fields = array(
 			'checkboxes'			=> array('title'=> '',				                'type' => null, 			'width' =>'5%', 'forced'=> TRUE, 'thclass'=>'center', 'class'=>'center'),
 			'faq_id'				=> array('title'=> LAN_ID,				'tab' => 0, 'type' => null,			    'width' =>'5%', 'forced'=> TRUE),
          	'faq_question' 			=> array('title'=> LANA_FAQ_QUESTION,	'tab' => 0, 'type' => 'text',			'width' => 'auto', 'thclass' => 'left first', 'required'=>TRUE, 'readParms'=>'editable=1', 'writeParms'=>'maxlength=1000&size=block-level'),
-         	'faq_answer' 			=> array('title'=> LANA_FAQ_ANSWER,		'tab' => 0,	'type' => 'bbarea',			'width' => '30%', 'readParms' => 'expand=1&truncate=50&bb=1'), 
+         	'faq_answer' 			=> array('title'=> LANA_FAQ_ANSWER,		'tab' => 0,	'type' => 'bbarea',			'width' => '30%', 'readParms' => 'expand=1&truncate=50&bb=1'),
 		 	'faq_parent' 			=> array('title'=> LAN_CATEGORY,		'tab' => 0,	'type' => 'dropdown',		'data'=> 'int', 'inline'=>true,'width' => '10%', 'filter'=>TRUE, 'batch'=>TRUE),
 
 			'faq_tags' 				=> array('title'=> LANA_FAQ_TAGS,		'tab' => 1, 'type' => 'tags',		    'data' => 'str',	'width' => 'auto', 'inline'=> true, 'help' => LANA_FAQ_TAGS_HELP),	// User id
 			'faq_comment' 			=> array('title'=> LANA_FAQ_COMMENT,	'tab' => 1, 'type' => 'userclass',		'data' => 'int',	'width' => 'auto', 'inline'=> true),	// user class who can make comments
-			
+
 			'faq_datestamp' 		=> array('title'=> LAN_DATE,			'tab' => 1, 'type' => 'datestamp',		'data'=> 'int','width' => 'auto', 'noedit' => false,'writeParms'=>'type=datetime&auto=1'),
 			'faq_author'			=> array('title'=> LAN_AUTHOR,			'tab' => 1, 'type' => 'user',			'data'=> 'int', 'width' => 'auto', 'thclass' => 'center', 'class'=>'center', 'writeParms' => 'currentInit=1', 'filter' => true, 'batch' => true, 'nolist' => true	),	 	// Photo
 			'faq_author_ip' 		=> array('title'=> LAN_IP,				'tab' => 1, 'type' => 'ip',		        'readonly'=>2,	'data'=> 'str', 'width' => 'auto', 'thclass' => 'center', 'class'=>'center', 'writeParms' => 'currentInit=1', 'filter' => true, 'batch' => true, 'nolist' => true	),	 	// Photo
@@ -222,17 +222,17 @@ class faq_main_ui extends e_admin_ui
 			'u.user_name'			=> array('title'=> LAN_USER,			'tab' => 1, 'type' => 'user',			'width' => 'auto', 'noedit' => true, 'readParms'=>'idField=faq_author&link=1'),	// User name
 			'u.user_loginname'		=> array('title'=> LANA_FAQ_ULOGINNAME,	'tab' => 1, 'type' => 'user',			'width' => 'auto', 'noedit' => true, 'readParms'=>'idField=faq_author&link=1'),	// User login name
 			'faq_order' 			=> array('title'=> LAN_ORDER,			'tab' => 1, 'type' => 'number',			'data'=> 'int','width' => '5%', 'thclass' => 'center','nolist' => false, 'noedit'=>false, 'readParms'=>'editable=1'),
-			
+
 			'options' 				=> array('title'=> LAN_OPTIONS,			'type' => null,				'forced'=>TRUE, 'width' => '10%', 'thclass' => 'center last', 'class' => 'center','readParms'=>array('sort'=>1)),
 			'pending'				=> array('title' => 'internal',			'type' => 'hidden',			'data'=>false, 'writeParms'=>array()),
 		);
-		 
+
 		protected $fieldpref = array('checkboxes', 'faq_question', 'faq_answer', 'faq_parent', 'faq_datestamp', 'options');
 
 		protected $preftabs        = array(LAN_GENERAL, LAN_PLUGIN_FAQS_NAME , LAN_CATEGORIES);
-		
+
 		// optional, if $pluginName == 'core', core prefs will be used, else e107::getPluginConfig($pluginName);
-		protected $prefs = array( 
+		protected $prefs = array(
 			'add_faq'					=> array('title'=> LANA_FAQ_PREF_1, 'tab'=>0, 'type'=>'userclass' ),
 			'submit_question'	   		=> array('title'=> LANA_FAQ_PREF_2, 'tab'=>0, 'type'=>'userclass' ),
 			'submit_question_limit'		=> array('title'=> "'Ask a Question' limit per user",  'tab'=>0, 'type'=>'number', 'data'=>'int', 'help'=>'0 = no limit'),
@@ -243,7 +243,7 @@ class faq_main_ui extends e_admin_ui
 			'classic_look'				=> array('title'=> LANA_FAQ_PREF_3,          'tab'=>0, 'type'=>'boolean' ),
 			'list_type'					=> array('title'=> "List Type",              'tab'=>0,'type'=>'dropdown', 'writeParms'=>array('ul'=>'Unordered List', 'ol'=>'Ordered List') ),
 			'page_title'				=> array('title'=> "Page Title",             'tab'=>0,'type'=>'text', 'multilan'=>true, 'help'=>'Leave blank to use default' ),
-			
+
 			'new'						=> array('title'=> "'New' FAQs are no more than", 'tab'=>0,'type'=>'number', 'writeParms'=>'size=mini&default=0&post=days old', 'help'=>'Leave blank to use default' ),
 			'display_total'				=> array('title'=> "Display FAQ total",      'tab'=>0,'type'=>'boolean', 'data'=>'int' ),
 			'display_datestamp'			=> array('title'=> "Display Datestamp",      'tab'=>0,'type'=>'boolean', 'data'=>'int' ),
@@ -262,7 +262,7 @@ class faq_main_ui extends e_admin_ui
 
 	protected $categories = array();
 
-	
+
 	public function init()
 	{
 		$this->prefs['submit_question_language']['writeParms'] = array(0=> 'English', 1=>'All Languages');
@@ -310,7 +310,7 @@ class faq_main_ui extends e_admin_ui
 		}
 
 	}
-	
+
 	public function beforeCreate($new_data, $old_data)
 	{
 		// trim spaces
@@ -323,8 +323,8 @@ class faq_main_ui extends e_admin_ui
 
 		return $new_data;
 	}
-	
-	
+
+
 	public function beforeUpdate($new_data, $old_data, $id)
 	{
 		// trim spaces
@@ -348,27 +348,27 @@ class faq_admin_form_ui extends e_admin_form_ui
 {
 	/**
 	 * faq_parent field method
-	 * 
+	 *
 	 * @param integer $curVal
 	 * @param string $mode
 	 * @return mixed
 	 */
 	function faq_parent($curVal,$mode)
-	{ 
+	{
 		// Get UI instance
 		$controller = $this->getController();
-		
+
 		switch($mode)
 		{
 			case 'read':
 				return e107::getParser()->toHTML($controller->getFaqCategory($curVal), false, 'TITLE');
 			break;
-			
+
 			case 'write':
 
 				return $this->selectbox('faq_parent', $controller->getFaqCategory(), $curVal).$this->hidden('pending', $pending);
 			break;
-			
+
 			case 'filter':
 			case 'batch':
 				return $controller->getFaqCategory();
@@ -384,4 +384,3 @@ e107::getAdminUI()->runPage();
 
 require_once(e_ADMIN."footer.php");
 exit;
-

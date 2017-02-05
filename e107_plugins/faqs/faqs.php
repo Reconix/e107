@@ -21,7 +21,7 @@ if(file_exists(e_PLUGIN."faqs/controllers/list.php")) // bc for old controller.
 	header('Location: '.$url);
 	exit;
 }
-else 
+else
 {
  	e107::includeLan(e_PLUGIN."faqs/languages/".e_LANGUAGE."/".e_LANGUAGE."_front.php");
 }
@@ -63,7 +63,7 @@ if (!vartrue($_GET['elan']) && empty($_GET))
 }
 else
 {
-	
+
 }
 
 
@@ -170,9 +170,9 @@ if (isset($_POST['commentsubmit']))
 
 
 		require_once (HEADERF);
-				
+
 		$ns->tablerender($ftmp['caption'], $ftmp['text']);
-		
+
 	}
 
 	if($action == "cat" && $idx)
@@ -269,19 +269,19 @@ class faq
 
 		$template = e107::getTemplate('faqs');
 		$this->template = $template;
-	
+
 		$this->sc = e107::getScBatch('faqs',TRUE);
-		
+
 		$text = $tp->parseTemplate($template['start'], true, $this->sc); // header
-		
+
 		// var_dump($sc);
-		
+
 		$text .= "<div id='faqs-container'>";
-		
+
 		$text .= $this->view_all_query($srch);
-		
+
 		$text .= "</div>";
-	
+
 		$text .= $tp->parseTemplate($template['end'], true, $this->sc); // footer
 
 		$ret['title'] = LAN_FAQS_FAQ;
@@ -305,7 +305,7 @@ class faq
 		{
 			$ret['pagedescription'] = e107::getParser()->toText($this->pageDescription,true,'RAWTEXT');
 		}
-		
+
 		return $ret;
 	}
 
@@ -317,12 +317,12 @@ class faq
 		$tp = e107::getParser();
 
 		$text = "";
-		
+
 		$insert = "";
 		$item = false;
 
 		$removeUrl = e107::url('faqs','index');
-		
+
 		if(!empty($srch))
 		{
 			$srch = $tp->toDB($srch);
@@ -341,7 +341,7 @@ class faq
 		//	$insert = " AND (f.faq_id = ".$srch.") ";
 			$item = $srch;
 		}
-		
+
 		if(!empty($_GET['cat']))
 		{
 			$srch = $tp->toDB($_GET['cat']);
@@ -365,15 +365,15 @@ class faq
 		list($orderBy, $ascdesc) = explode('-', vartrue($this->pref['orderby'],'faq_order-ASC'));
 
 		$query = "SELECT f.*,cat.* FROM #faqs AS f LEFT JOIN #faqs_info AS cat ON f.faq_parent = cat.faq_info_id WHERE cat.faq_info_class IN (".USERCLASS_LIST.") ".$insert." ORDER BY cat.faq_info_order, f.".$orderBy." ".$ascdesc." ";
-		
+
 		if(!$data = $sql->retrieve($query, true))
 		{
 			$message = 	(!empty($srch)) ? e107::getParser()->lanVars(LAN_FAQS_X_NOT_FOUND, $srch)."<a class='e-tip' title='".LAN_FAQS_RESET."' href='".$removeUrl."'>".LAN_FAQS_RESET."</a>" : LAN_FAQS_NONE_AVAILABLE;
-			return "<div class='alert alert-warning alert-block'>".$message."</div>" ; 
+			return "<div class='alert alert-warning alert-block'>".$message."</div>" ;
 		}
-		
+
 		// -----------------
-		
+
 		$FAQ_LISTALL = e107::getTemplate('faqs', true, 'all');
 
 		$prevcat = "";
@@ -423,7 +423,7 @@ class faq
 				$this->pageTitle = $rw['faq_question'];
 				$this->pageDescription = $rw['faq_answer'];
 			}
-			
+
 			if($rw['faq_info_order'] != $prevcat)
 			{
 				if($prevcat !='')
@@ -443,7 +443,7 @@ class faq
 //		$text .= $tp->parseTemplate($FAQ_END, true, $sc);
 
 		return $text;
-		
+
 	}
 
 
@@ -546,7 +546,7 @@ class faq
 		global $ns,$row,$sql,$aj,$pref,$cobj,$id,$tp,$FAQ_VIEW_TEMPLATE;
 
 		//require_once (e_PLUGIN."faqs/faqs_shortcodes.php");
-		
+
 		$sc = e107::getScBatch('faqs',TRUE);
 
 		$sql->db_Select("faqs", "*", "faq_id='$idx' LIMIT 1");
@@ -678,7 +678,7 @@ class faq
         <td class='fcaption' colspan='2' style='text-align:center'>";
 
 		$text .= (is_numeric($id)) ? LAN_EDIT : LAN_ADD; //LAN_ADD may not exist on the front end, but I dont think this code is used - Mikey.
-		$text .= " FAQ</td></tr>"; 
+		$text .= " FAQ</td></tr>";
 
 		$text .= "
         <tr>
