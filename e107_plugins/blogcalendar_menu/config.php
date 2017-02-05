@@ -12,9 +12,9 @@
 $eplug_admin = TRUE;
 require_once("../../class2.php");
 require_once(e_HANDLER."userclass_class.php");
-	
+
 e107::includeLan(e_PLUGIN."blogcalendar_menu/languages/".e_LANGUAGE.".php");
-if (!getperms("1")) 
+if (!getperms("1"))
 {
 	e107::redirect('admin');
 	 exit ;
@@ -42,12 +42,12 @@ $text = "
     	<col class='col-label' />
     	<col class='col-control' />
     </colgroup>
-	 
+
 	<tr>
 		<td>".BLOGCAL_CONF1.": </td>
 		<td>
 			<select class='tbox' name='blogcal_mpr'>";
-	
+
 			// if the nr of months per row is undefined, default to 3
 			$months_per_row = $pref['blogcal_mpr']?$pref['blogcal_mpr']:
 			"3";
@@ -57,11 +57,11 @@ $text = "
 				"";
 				$text .= ">$i</option>";
 			}
-				
+
 			$text .= "</select>
 		</td>
 	</tr>
-	 
+
 	<tr>
 		<td>".BLOGCAL_CONF2.": </td>
 		<td><input class='tbox' type='text' name='blogcal_padding' size='20' value='";
@@ -73,15 +73,15 @@ $text = "
 		</td>
 	</tr>
 	</table>
-	
+
 	<div class='buttons-bar center'>
-		".$frm->admin_button('update_menu', LAN_UPDATE, 'update')." 
+		".$frm->admin_button('update_menu', LAN_UPDATE, 'update')."
 
 	</div>
 	</form>
 ";
 
 $ns->tablerender(BLOGCAL_CONF4, $text);
-	
+
 require_once(e_ADMIN."footer.php");
 ?>
