@@ -30,7 +30,7 @@ class base_import_class
 	 * Connect to the external DB if not already connected
 	 */
 	function db_Connect($server, $user, $password, $database, $prefix)
-	{		
+	{
 		if ($this->ourDB == NULL)
 		{
 	  		$this->ourDB = e107::getDb('ourDB');
@@ -41,7 +41,7 @@ class base_import_class
 	  	 		return $result;
 	  		}
 		}
-		
+
 		return TRUE;
 	}
 
@@ -62,11 +62,11 @@ class base_import_class
 	  		case 'users' :
 	    		return $this->saveUserData($dataRecord);
 	    	break;
-			
+
 			case 'news' :
 				return $this->saveNewsData($dataRecord);
 			break;
-			
+
 			case 'page' :
 				return $this->savePageData($dataRecord);
 			break;
@@ -74,31 +74,31 @@ class base_import_class
 			case 'links' :
 				return $this->saveLinksData($dataRecord);
 			break;
-			
+
 			case 'media' :
 				return $this->saveMediaData($dataRecord);
 			break;
-			
+
 	  		case 'forum' :
 	    		return $this->saveForumData($dataRecord);
 	    	break;
-			
+
 		  	case 'forumthread' :
 	    		return $this->saveForumThreadData($dataRecord);
-	    	break;		
-			
+	    	break;
+
 	  		case 'forumpost' :
 	    		return $this->saveForumPostData($dataRecord);
 	    	break;
-	
+
 		  	case 'forumtrack' :
 	    		return $this->saveForumTrackData($dataRecord);
-	    	break;			
-			
+	    	break;
+
 	  		case 'polls' :
 	    	break;
 		}
-		
+
 		return FALSE;
   }
 
@@ -110,26 +110,26 @@ class base_import_class
 	{
 		if($mode == 'db')
 		{
-			$result = $this->ourDB->db_Fetch();	
+			$result = $this->ourDB->db_Fetch();
 		}
 		else
 		{
 			$result = current($this->arrayData);
 			next($this->arrayData);
 		}
-		
-		
+
+
 		if (!$result) return FALSE;
 		switch($this->currentTask)
 		{
 	  		case 'users' :
 				return $this->copyUserData($initial, $result);
 			break;
-			
+
 			case 'news' :
 				return $this->copyNewsData($initial, $result);
 	  		break;
-			
+
 			case 'page' :
 				return $this->copyPageData($initial, $result);
 	  		break;
@@ -141,27 +141,27 @@ class base_import_class
 			case 'media' :
 				return $this->copyMediaData($initial, $result);
 	  		break;
-						
+
 	  		case 'forum' :
 				return $this->copyForumData($initial, $result);
-	  		break; 
-			
+	  		break;
+
 			case 'forumthread' :
 				return $this->copyForumThreadData($initial, $result);
 	  		break;
-				
+
 	  		case 'forumpost' :
 				return $this->copyForumPostData($initial, $result);
 	  		break;
-			
+
 			case 'forumtrack' :
 				return $this->copyForumTrackData($initial, $result);
 	  		break;
-		  
+
 	  		case 'polls' :
 	  		break;
-		  
-	  		
+
+
 		}
 
     	return FALSE;
@@ -181,59 +181,59 @@ class base_import_class
 	{
 		return;
 	}
-	
-		
+
+
 	function copyUserData(&$target, &$source)
 	{
 		return $target;
 	}
-	
+
 	function copyNewsData(&$target, &$source)
 	{
 		return $target;
 	}
-	
+
 	function copyPageData(&$target, &$source)
 	{
 		return $target;
 	}
-	
+
 	function copyLinksData(&$target, &$source)
 	{
 		return $target;
 	}
-	
+
 	function copyMediaData(&$target, &$source)
 	{
 		return $target;
 	}
-	
+
 	function copyForumData(&$target, &$source)
 	{
 		return $target;
 	}
-	
+
 	function copyForumPostData(&$target, &$source)
 	{
 		return $target;
 	}
-	
+
 	function copyForumThreadData(&$target, &$source)
 	{
 		return $target;
 	}
-	
+
 	function copyForumTrackData(&$target, &$source)
 	{
 		return $target;
 	}
 
 
-	
+
 	//===========================================================
 	//				UTILITY ROUTINES
 	//===========================================================
-	
+
 	// Process all bbcodes in the passed value; return the processed string.
 	// Works recursively
 	// Start by assembling matched pairs. Then map and otherwise process as required.
@@ -250,7 +250,7 @@ class base_import_class
 	  $bbphpbb = (strpos($options,'phpbb') !== FALSE) ? TRUE : FALSE;		// Strip values as phpbb
 	  $nextchar = 0;
 	  $loopcount = 0;
-	 
+
 	  while ($nextchar < strlen($value))
 	  {
 	    $firstbit = '';
@@ -277,7 +277,7 @@ class base_import_class
 		  $lastend   = strpos($value,']',$laststart);
 		  if (($laststart === FALSE) || ($lastend === FALSE))
 		  {   //  No matching end character
-		    $nextchar = $firstend;	// Just move scan pointer along 
+		    $nextchar = $firstend;	// Just move scan pointer along
 		  }
 		  else
 		  {  // Got a valid bbcode pair here
@@ -302,7 +302,7 @@ class base_import_class
 		  $nextchar = $firstend+1;
 		}
 	  }  //endwhile;
-	  
+
 	}
 
 }

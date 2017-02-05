@@ -29,14 +29,14 @@ require_once('import_classes.php');
 
 class joomla_import extends base_import_class
 {
-	
+
 	public $title		= 'Joomla';
 	public $description	= 'Untested - need feedback from users ';
 	public $supported	= array('users');
 	public $mprefix		= 'jos_';
-	
-	
-	
+
+
+
   // Set up a query for the specified task.
   // Returns TRUE on success. FALSE on error
 	function setupQuery($task, $blank_user=FALSE)
@@ -60,11 +60,11 @@ class joomla_import extends base_import_class
   //------------------------------------
   //	Internal functions below here
   //------------------------------------
-  
+
   // Copy data read from the DB into the record to be returned.
 	function copyUserData(&$target, &$source)
 	{
-		if ($this->copyUserInfo) 
+		if ($this->copyUserInfo)
 		{
 			$target['user_id'] = $source['id'];
 			$target['user_name'] 		= $source['name'];
@@ -74,16 +74,16 @@ class joomla_import extends base_import_class
 		//	$target['user_hideemail'] = $source['user_viewemail'];
 			$target['user_join'] 		= $source['registerDate'];
 			$target['user_admin'] 		= ($source['usertype'] == 'superadministrator') ? 1 : 0;
-			
-			if ($target['user_admin'] != 0) 
+
+			if ($target['user_admin'] != 0)
 			{
 				$target['user_perms'] = '0.';
 			}
-				
+
 			$target['user_lastvisit']	= $source['lastvisitDate'];
 			$target['user_login'] 		= $source['name'];
 			$target['user_ban']			= ($source['block'] ? 2 : 0);
-			
+
 			return $target;
 		}
 	}

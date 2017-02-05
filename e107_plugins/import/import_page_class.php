@@ -53,16 +53,16 @@ class page_import
 
 	);
 
-	// Fields which must be set up by the caller.  
+	// Fields which must be set up by the caller.
 	var $mandatory = array(
 		'page_title', 'page_datestamp', 'page_author', 'page_text'
 	);
-  
+
 	// Constructor
 	function __construct()
 	{
 	  	global $sql;
-	    $this->pageDB = new db;	// Have our own database object to write to the table	
+	    $this->pageDB = new db;	// Have our own database object to write to the table
 	}
 
 
@@ -71,8 +71,8 @@ class page_import
 	{
 		// $this->pageDB->db_Delete('page');
 	}
-  
-  
+
+
 	// Set a new default for a particular field
 	function overrideDefault($key, $value)
 	{
@@ -81,7 +81,7 @@ class page_import
 		$this->defaults[$key] = $value;
 	}
 
-  
+
   // Returns an array with all relevant fields set to the current default
 	function getDefaults()
 	{
@@ -94,39 +94,39 @@ class page_import
 	 * @return integer, boolean - error code on failure, TRUE on success
 	 */
 	function saveData($row)
-	{	
+	{
 		if(!$result = $this->pageDB->db_Insert('page',$row))
 		{
 	     	return 4;
 		}
-	
+
 		//if ($result === FALSE) return 6;
-	
+
 		return TRUE;
 	}
- 
 
- 
+
+
 	function getErrorText($errnum)    // these errors are presumptuous and misleading. especially '4' .
 	{
 		$errorTexts = array(
-	    	0 => 'No error', 
-	    	1 => 'Can\'t change main admin data', 
+	    	0 => 'No error',
+	    	1 => 'Can\'t change main admin data',
 	    	2 => 'invalid field passed',
-			3 => 'Mandatory field not set', 
-			4 => 'Entry already exists', 
+			3 => 'Mandatory field not set',
+			4 => 'Entry already exists',
 			5 => 'Invalid characters in user or login name',
 			6 => 'Error saving extended user fields'
 		);
-			
+
 		if (isset($errorTexts[$errnum])) return $errorTexts[$errnum];
-		
+
 		return 'Unknown: '.$errnum;
-	
+
 	}
-  
-  
-  
+
+
+
 }
 
 

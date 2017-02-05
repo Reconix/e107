@@ -30,16 +30,16 @@ require_once('import_classes.php');
 
 class e107_import extends base_import_class
 {
-	
-	
+
+
 	public $title		= 'e107';
 	public $description	= 'Reads 0.7 and 0.8 version files';
 	public $supported	= array('users');
 	public $mprefix		= 'e107_';
-	
-	
-	
-	
+
+
+
+
   // Set up a query for the specified task.
   // Returns TRUE on success. FALSE on error
 	function setupQuery($task, $blank_user=FALSE)
@@ -50,18 +50,18 @@ class e107_import extends base_import_class
 		  case 'users' :
 		  	$query =  "SELECT * FROM {$this->DBPrefix}user WHERE `user_id` != 1";
 		    $result = $this->ourDB->db_Select_gen($query);
-	
+
 			if ($result === FALSE) return FALSE;
 			break;
-	
-	
-			
+
+
+
 		  default :
 		    return FALSE;
 		}
 		$this->copyUserInfo = !$blank_user;
 		$this->currentTask = $task;
-		
+
 		return TRUE;
   }
 
@@ -69,7 +69,7 @@ class e107_import extends base_import_class
   //------------------------------------
   //	Internal functions below here
   //------------------------------------
-  
+
   // Copy data read from the DB into the record to be returned.
 	function copyUserData(&$target, &$source)
 	{
@@ -112,7 +112,7 @@ class e107_import extends base_import_class
 			$target['user_homepage'] = $source['user_homepage'];
 			$target['user_birthday'] = $source['user_birthday'];
 			$target['user_timezone'] = $source['user_timezone'];
-			
+
 			return $target;
 		}
 	}

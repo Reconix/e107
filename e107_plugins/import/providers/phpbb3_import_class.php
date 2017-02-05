@@ -23,34 +23,34 @@ class phpbb3_import extends base_import_class
 	public $description	= 'Import phpBB3 Users and Forums';
 	public $supported	=  array('users','forum','forumthread','forumpost','forumtrack');
 	public $mprefix		= 'phpbb_';
-	public $sourceType 	= 'db';	
-	
+	public $sourceType 	= 'db';
+
 	var $catcount = 0;				// Counts forum IDs
 	var $id_map = array();			// Map of PHPBB forum IDs ==> E107 forum IDs
-	
+
 	private $forum_attachments = array();
 	private $forum_attachment_path = null;
 	private $forum_moderator_class = false;
-	var $helperClass; // forum class. 
- 
- 
+	var $helperClass; // forum class.
+
+
 	function init()
 	{
 		$this->forum_attachment_path	= vartrue(trim($_POST['forum_attachment_path'],"/" ), false);
-		
+
 		if($data = e107::getDb('phpbb')->retrieve('userclass_classes','userclass_id',"userclass_name='FORUM_MODERATOR' "))
 		{
 			$this->forum_moderator_class = $data;
 		}
-		
-	} 
- 
- 
-  
+
+	}
+
+
+
 	function config()
 	{
 		$frm = e107::getForm();
-		
+
 		$var[0]['caption']	= "Path to phpBB3 Attachments folder (optional)";
 		$var[0]['html'] 	= $frm->text('forum_attachment_path',null,40,'size=xxlarge');
 		$var[0]['help'] 	= "Relative to the root folder of your e107 installation";
@@ -61,65 +61,65 @@ class phpbb3_import extends base_import_class
 
 	function help()
 	{
-		return "some help text";	
-		
+		return "some help text";
+
 	}
-  
+
   // Set up a query for the specified task.
   // Returns TRUE on success. FALSE on error
   // If $blank_user is true, certain cross-referencing user info is to be zeroed
 	function setupQuery($task, $blank_user=FALSE)
 	{
     	if ($this->ourDB == NULL) return FALSE;
-		
+
 	    switch ($task)
 		{
 		  	case 'users' :
 				$result = $this->ourDB->gen("SELECT * FROM {$this->DBPrefix}users ORDER BY user_id ASC ");
 				if ($result === FALSE) return FALSE;
 			break;
-			
+
 		  	case 'forum' :
 				$result = $this->ourDB->gen("SELECT * FROM `{$this->DBPrefix}forums`");
-				if ($result === FALSE) return FALSE;	  
+				if ($result === FALSE) return FALSE;
 			break;
-				
+
 			case 'forumthread' :
 				$result = $this->ourDB->gen("SELECT * FROM `{$this->DBPrefix}topics`");
-				
-				if ($result === FALSE) return FALSE;	  
+
+				if ($result === FALSE) return FALSE;
 			break;
-				
+
 			case 'forumpost' :
-								
+
 				if($this->ourDB->gen("SELECT * FROM `{$this->DBPrefix}attachments`"))
 				{
 					while($row = $this->ourDB->fetch())
 					{
 						$id = $row['post_msg_id'];
 						$key = $row['physical_filename'];
-						$this->forum_attachments[$id][$key] = $row['real_filename'];	
+						$this->forum_attachments[$id][$key] = $row['real_filename'];
 					}
 				}
 				$result = $this->ourDB->gen("SELECT * FROM `{$this->DBPrefix}posts`");
-				if ($result === FALSE) return FALSE;	  
-			break;				
+				if ($result === FALSE) return FALSE;
+			break;
 
 			case 'forumtrack' :
 				$result = $this->ourDB->gen("SELECT * FROM `{$this->DBPrefix}forums_track`");
-				if ($result === FALSE) return FALSE;	  
+				if ($result === FALSE) return FALSE;
 			break;
 
-				
+
 		  	case 'polls' :
 		    	return FALSE;
-			break;  
-			
-		  	case 'news' :
-				  return FALSE;	
 			break;
-		  
-			  
+
+		  	case 'news' :
+				  return FALSE;
+			break;
+
+
 		  	default :
 		    return FALSE;
 		}
@@ -129,53 +129,53 @@ class phpbb3_import extends base_import_class
 		return TRUE;
 	}
 
-  
+
 	/**
 	 * Convert salted password to e107 style (they use the same basic coding)
 	 */
 	function convertPassword($password)
 	{
-		if ((substr($password ,0,3) == '$H$') && (strlen($password) == 34)) 
-		{ 
+		if ((substr($password ,0,3) == '$H$') && (strlen($password) == 34))
+		{
 			return substr_replace($password, '$E$',0,3);
 		}
 		else // Probably an old md5 password
-		{  
-			return $password; 
-		}	
-		
+		{
+			return $password;
+		}
+
 	}
-	
+
 	function convertBirthday($date)
 	{
 		$tp = e107::getParser();
-		
+
 		if(trim($date) == '')
 		{
-			return;	
+			return;
 		}
-		
+
 		list($d,$m,$y) = explode("-",$date);
 		return $tp->leadingZeros($y,4)."-".$tp->leadingZeros($m,2)."-".$tp->leadingZeros($d,2);
 	}
-	  
-	  
+
+
 	function convertUserclass($perm='')
 	{
 		if($perm == '')
 		{
-			return; 	
+			return;
 		}
-				
+
 		$conv = array(1 => e_UC_GUEST, 4 => e_UC_MODS, 6 => e_UC_BOTS, 7 => e_UC_NEWUSER);
-		
+
 		if($this->forum_moderator_class !== false)
 		{
 			$conv[4] = $this->forum_moderator_class;
-			$conv[5] = $this->forum_moderator_class;	
+			$conv[5] = $this->forum_moderator_class;
 		}
-		
-		
+
+
 		return vartrue($conv[$perm]) ? $conv[$perm] : "";
 		/*
 		 * 	1		GUESTS
@@ -185,28 +185,28 @@ class phpbb3_import extends base_import_class
 			5		ADMINISTRATORS
 			6		BOTS
 			7		NEWLY_REGISTERED
-		 * 
+		 *
 		 */
-	}  
-	  
+	}
+
 	function convertUserBan($data)
 	{
-		if($data == 3) // founder in phpbb3, but 'bounced' in e107. 
+		if($data == 3) // founder in phpbb3, but 'bounced' in e107.
 		{
-			return;	
-		}	
+			return;
+		}
 		else
 		{
-			return $data;	
+			return $data;
 		}
-		
-	} 
-	
-	
+
+	}
+
+
   //------------------------------------
   //	Internal functions below here
   //------------------------------------
-  
+
 
   /**
    * Copy data read from the DB into the record to be returned.
@@ -228,7 +228,7 @@ class phpbb3_import extends base_import_class
 		$target['user_lastvisit'] 		= $source['user_lastvisit'];
 		$target['user_currentvisit']	= 0;
 		$target['user_admin'] 			= 0; //  $source['user_level'];
-		$target['user_lastpost']		= $source['user_lastpost_time']; 
+		$target['user_lastpost']		= $source['user_lastpost_time'];
 		$target['user_chats']			= '';
 		$target['user_comments']		= '';
 		$target['user_ip']				= $source['user_ip'];
@@ -242,13 +242,13 @@ class phpbb3_import extends base_import_class
 		$target['user_realm']			= '';
 		$target['user_pwchange']		= $source['user_passchg'];
 		$target['user_xup']				= '';
-	
-		// Extended Fields. 
-				
+
+		// Extended Fields.
+
 		$target['user_plugin_forum_viewed'] = 0;
 		$target['user_plugin_forum_posts']	= $source['user_posts'];
 		$target['user_timezone'] 			= $source['user_timezone'];		// source is decimal(5,2)
-		$target['user_language'] 			= e107::getLanguage()->convert($source['user_lang']);	// convert from 2-letter to full. 
+		$target['user_language'] 			= e107::getLanguage()->convert($source['user_lang']);	// convert from 2-letter to full.
 		$target['user_location'] 			= $source['user_from'];
 		$target['user_icq'] 				= $source['user_icq'];
 		$target['user_aim'] 				= $source['user_aim'];
@@ -258,15 +258,15 @@ class phpbb3_import extends base_import_class
 		$target['user_birthday']			= $this->convertBirthday($source['user_birthday']);
 		$target['user_occupation']			= $source['user_occ'];
 		$target['user_interests']			= $source['user_interests'];
-		
+
 
 		return $target;
-		
-		
+
+
 
 	}
 
- 
+
  	/**
 	 * $target - e107_forum table
 	 * $source - phpbb_forums table : https://wiki.phpbb.com/Table.phpbb_forums
@@ -280,36 +280,36 @@ class phpbb3_import extends base_import_class
 		$target['forum_sub']				= "";
 		$target['forum_datestamp']			= time();
 		$target['forum_moderators']			= "";
-	
+
 		$target['forum_threads'] 			= $source['forum_topics'];
 		$target['forum_replies']			= $source['forum_posts'];
 		$target['forum_lastpost_user']		= $source['forum_last_poster_id'];
 		$target['forum_lastpost_user_anon']	= $source['forum_last_poster_name'];
 		$target['forum_lastpost_info']		= $source['forum_last_post_time'];
 		//	$target['forum_class']				= "";
-		// $target['forum_order']	
-		// $target['forum_postclass']	
-		// $target['forum_threadclass']	
-		// $target['forum_options']	
-	
-	
+		// $target['forum_order']
+		// $target['forum_postclass']
+		// $target['forum_threadclass']
+		// $target['forum_options']
+
+
 		return $target;
 	}
 
-	
+
 	/**
 	 * $target - e107 forum_threads
 	 * $source - phpbb_topics : https://wiki.phpbb.com/Table.phpbb_topics
 	 */
 	function copyForumThreadData(&$target, &$source)
 	{
-		
+
 		$target['thread_id'] 				= $source['topic_id'];
 		$target['thread_name'] 				= $source['topic_title'];
 		$target['thread_forum_id'] 			= $source['forum_id'];
 		$target['thread_views'] 			= $source['topic_views'];
 	//	$target['thread_active'] 			= $source['topic_status'];
-		$target['thread_lastpost'] 			= $source['topic_last_post_time'];  	
+		$target['thread_lastpost'] 			= $source['topic_last_post_time'];
 		$target['thread_sticky'] 			= $source['topic_time_limit'];
 		$target['thread_datestamp'] 		= $source['topic_time'];
 		$target['thread_user'] 				= $source['topic_poster'];
@@ -318,11 +318,11 @@ class phpbb3_import extends base_import_class
 		$target['thread_lastuser_anon'] 	= $source['topic_last_poster_name'];
 		$target['thread_total_replies'] 	= $source['topic_replies'];
 	//	$target['thread_options'] 			= $source['topic_'];
-	
+
 		return $target;
 	}
 
- 	
+
 	/**
 	 * $target - e107_forum_post table
 	 * $source - phpbb_posts table : https://wiki.phpbb.com/Table.phpbb_posts
@@ -342,8 +342,8 @@ class phpbb3_import extends base_import_class
 	//	$target['post_user_anon'] 			= $source[''];
 		$target['post_attachments'] 		= $this->convertAttachment($source);
 	//	$target['post_options'] 			= $source[''];
-		
-		
+
+
 		return $target;
 	}
 
@@ -361,86 +361,86 @@ class phpbb3_import extends base_import_class
 		return $target;
 	}
 
-	
-	
+
+
 	function convertAttachment($row)
 	{
-		
+
 		if($row['post_attachment'] != 1)
 		{
 			return;
 		}
-		
+
 		$id = $row['post_id'];
-				
+
 		if(isset($this->forum_attachments[$id]))
 		{
 			$attach = array();
-			
-			$forum = $this->helperClass; // e107_plugins/forum/forum_class.php 
-			
-			if($folder = $forum->getAttachmentPath($row['poster_id'],true)) // get Path and create Folder if needed. 
+
+			$forum = $this->helperClass; // e107_plugins/forum/forum_class.php
+
+			if($folder = $forum->getAttachmentPath($row['poster_id'],true)) // get Path and create Folder if needed.
 			{
 				e107::getMessage()->addDebug("Created Attachment Folder: ".$folder );
 			}
 			else
 			{
-				e107::getMessage()->addError("Couldn't find/create attachment folder for user-id: ".$row['poster_id'] );	
+				e107::getMessage()->addError("Couldn't find/create attachment folder for user-id: ".$row['poster_id'] );
 			}
-			
+
 			foreach($this->forum_attachments[$id] as $file => $name)
 			{
-				
+
 				if(preg_match('#.JPG|.jpg|.gif|.png|.PNG|.GIF|.jpeg|.JPEG$#',$name))
 				{
-					$attach['img'][] = $file;	
+					$attach['img'][] = $file;
 				}
-				else 
+				else
 				{
 					$attach['file'][] = $file;
-				}	
-				
-				if($this->forum_attachment_path) // if path entered - then move the files. 
+				}
+
+				if($this->forum_attachment_path) // if path entered - then move the files.
 				{
 					$oldpath = e_BASE.$this->forum_attachment_path."/".$file;
 					$newpath = $folder.$file;
-					
+
 					if(rename($oldpath,$newpath))
 					{
-						e107::getMessage()->addDebug("Renamed file from <b>{$oldpath}</b> to <b>{$newpath}</b>" );	
+						e107::getMessage()->addDebug("Renamed file from <b>{$oldpath}</b> to <b>{$newpath}</b>" );
 					}
 					else
 					{
-						e107::getMessage()->addError("Couldn't rename file from <b>{$oldpath}</b> to <b>{$newpath}</b>" );	
-					}	
-					
+						e107::getMessage()->addError("Couldn't rename file from <b>{$oldpath}</b> to <b>{$newpath}</b>" );
+					}
+
 				}
-				
-			}	
-			
+
+			}
+
 		}
 
-		
-		return e107::serialize($attach); // set attachments 	
+
+		return e107::serialize($attach); // set attachments
 	}
 
 
 
 	function convertText($text)
-	{		
+	{
 		$text = preg_replace('#<!-- s(\S*) --><img([^>]*)><!-- s(\S*) -->#','$1',$text);	 					// Smilies to text
-		$text = preg_replace('#\[img:([^\]]*)]([^\[]*)\[/img:([^\]]*)]#', '[img]$2[/img]', $text); 				// Image Bbcodes. 
+		$text = preg_replace('#\[img:([^\]]*)]([^\[]*)\[/img:([^\]]*)]#', '[img]$2[/img]', $text); 				// Image Bbcodes.
 		$text = preg_replace('#<!-- m --><a class="postlink" href="([^>]*)">([^<]*)</a><!-- m -->#','[link=$1]$2[/link]',$text);	 	// links
 		$text = preg_replace('#<!-- w --><a class="postlink" href="([^>]*)">([^<]*)</a><!-- w -->#','[link=$1]$2[/link]',$text);	 	// links
-		
+
 		$text = preg_replace('#\[attachment([^\]]*)]([^\[]*)\[/attachment:([^\]]*)]#','',$text);
 
-		if(preg_match('#\[/url:([^\]]*)]#',$text, $match)) // strip bbcode hash. 
+		if(preg_match('#\[/url:([^\]]*)]#',$text, $match)) // strip bbcode hash.
 		{
 			$hash = $match[1];
 			$text = str_replace($hash,'',$text);
 		}
-		
+
 		$text 		= html_entity_decode($text,ENT_NOQUOTES,'UTF-8');
 
 		$detected 	= mb_detect_encoding($text); // 'ISO-8859-1'
@@ -469,7 +469,7 @@ class phpbb3_import extends base_import_class
 
 
 
-  
+
 
   function convertForumParent(&$target, &$source)
   {
@@ -486,10 +486,10 @@ class phpbb3_import extends base_import_class
 
 
   }
-  
+
   /**
    * $target - e107 table
-   * $source - phpbb3 table 
+   * $source - phpbb3 table
    */
   function convertForum(&$target, &$source, $catid)
   {
@@ -507,7 +507,7 @@ class phpbb3_import extends base_import_class
   }
 }
 /*
-e107 
+e107
 thread_id
 thread_name
 thread_forum_id
@@ -522,7 +522,7 @@ thread_lastuser
 thread_lastuser_anon
 thread_total_replies
 thread_options
- */ 
+ */
 
 
 

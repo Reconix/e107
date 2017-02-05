@@ -27,31 +27,31 @@ require_once('import_classes.php');
 
 class rss_import extends base_import_class
 {
-	
+
 	public $title			= 'RSS';
 	public $description		= 'Import content via RSS v2.0 feeds from virtually any website.';
 	public $supported		= array('news','page','links');
 	public $mprefix			= false;
-	public $sourceType 		= 'rss';	
-	
-	
+	public $sourceType 		= 'rss';
+
+
 
 	var $feedUrl			= null;
 	var $defaultClass 		= false;
-	
+
 
 	function init()
 	{
 		$this->feedUrl		= vartrue($_POST['rss_feed'],false);
 		$this->saveImages	= vartrue($_POST['rss_saveimages'],false);
 	}
-	
-	
-	
+
+
+
 	function config()
 	{
 		$frm = e107::getForm();
-		
+
 		$var[0]['caption']	= "Feed URL";
 		$var[0]['html'] 	= "<input class='tbox span7' type='text' name='rss_feed' size='180' value='{$_POST['rss_feed']}' maxlength='250' />";
 
@@ -61,49 +61,49 @@ class rss_import extends base_import_class
 
 		return $var;
 	}
-	
+
 
   // Set up a query for the specified task.
   // Returns TRUE on success. FALSE on error
 	function setupQuery($task, $blank_user=FALSE)
 	{
 		$mes = e107::getMessage();
-		
+
 		$this->arrayData = array();
-		
-		$xml = e107::getXml();	
+
+		$xml = e107::getXml();
 		$file = $this->feedUrl;
-			
-		$mes->addDebug("rss_import::setupQuery - \$task:  ".$task);	
-		$mes->addDebug("rss_import::setupQuery - \$file:  ".$file);	
-					
+
+		$mes->addDebug("rss_import::setupQuery - \$task:  ".$task);
+		$mes->addDebug("rss_import::setupQuery - \$file:  ".$file);
+
     	switch ($task)
-		{		
+		{
 			case 'news' :
 			case 'page' :
 			case 'links' :
-				
+
 				// $rawData = $xml->getRemoteFile($file);
 				//	print_a($rawData);
 				$array = $xml->loadXMLfile($file,'advanced');
-				
-			//	$mes->addDebug("rss - setupQuery - RSS array:  ".print_a($array,true));	
-				
-				if ($array === FALSE || $file === FALSE) 
+
+			//	$mes->addDebug("rss - setupQuery - RSS array:  ".print_a($array,true));
+
+				if ($array === FALSE || $file === FALSE)
 				{
 					$mes->addError("No data returned from : ".$file);
 					return FALSE;
 				}
-					
-				
+
+
 				foreach($array['channel']['item'] as $val)
 				{
 					$this->arrayData[] = $val;
 				}
-				
-				$this->arrayData = array_reverse($this->arrayData); // most recent last. 
+
+				$this->arrayData = array_reverse($this->arrayData); // most recent last.
 				reset($this->arrayData);
-				
+
 			break;
 
 			default :
@@ -119,10 +119,10 @@ class rss_import extends base_import_class
   //------------------------------------
   //	Internal functions below here
   //------------------------------------
-  
+
 	/**
-	 * Align source data to e107 User Table 
-	 * @param $target array - default e107 target values for e107_user table. 
+	 * Align source data to e107 User Table
+	 * @param $target array - default e107 target values for e107_user table.
 	 * @param $source array - WordPress table data
 	 */
 	function copyUserData(&$target, &$source)
@@ -131,40 +131,40 @@ class rss_import extends base_import_class
 	}
 
 	/**
-	 * Align source data with e107 News Table 
-	 * @param $target array - default e107 target values for e107_news table. 
+	 * Align source data with e107 News Table
+	 * @param $target array - default e107 target values for e107_news table.
 	 * @param $source array - RSS data
 	 */
 	function copyNewsData(&$target, &$source)
 	{
-		
+
 		if(!$content = $this->process('content_encoded',$source))
 		{
-			$body = $this->process('description',$source);	
+			$body = $this->process('description',$source);
 		}
 		else
 		{
 			$body = $content;
 		}
-				
+
 		$body 			= $this->saveImages($body,'news');
 		$keywords 		= $this->process('category',$source);
 		$sef            = $this->process('sef',$source);
-							
+
 		if(!vartrue($source['title'][0]))
 		{
 			list($title,$newbody) = explode("<br />",$body,2);
 			$title = strip_tags($title);
 			if(trim($newbody)!='')
 			{
-				$body = $newbody;	
-			}	
+				$body = $newbody;
+			}
 		}
-		else 
+		else
 		{
 			$title = $source['title'][0];
 		}
-		
+
 		$target['news_title']					= $title;
 		$target['news_sef']					    = $sef;
 		$target['news_body']					= "[html]".$body."[/html]";
@@ -184,21 +184,21 @@ class rss_import extends base_import_class
 		//	$target['news_thumbnail']			= '';
 		//	$target['news_sticky']				= '';
 
-		
-		
-		return $target;  // comment out to debug 
-		
+
+
+		return $target;  // comment out to debug
+
 	//	$this->renderDebug($source,$target);
-		
-		// DEBUG INFO BELOW. 		
-		
+
+		// DEBUG INFO BELOW.
+
 	}
 
 
 	function process($type='description',$source)
 	{
-		switch ($type) 
-		{			
+		switch ($type)
+		{
 			case 'category':
 				$keywords = array();
 				if(is_array(varset($source['category'][0])))
@@ -221,23 +221,23 @@ class rss_import extends base_import_class
 							$keywords[] = $val;
 						}
 					}
-					return $keywords;		
+					return $keywords;
 				}
 			break;
 
 			case 'sef':
 				return '';
 			break;
-			
+
 			default:
 				return varset($source[$type][0]);
 			break;
-		}	
+		}
 	}
 
 	/**
-	 * Align source data to e107 Page Table 
-	 * @param $target array - default e107 target values for e107_page table. 
+	 * Align source data to e107 Page Table
+	 * @param $target array - default e107 target values for e107_page table.
 	 * @param $source array - WordPress table data
 	 */
 	function copyPageData(&$target, &$source)
@@ -254,24 +254,24 @@ class rss_import extends base_import_class
 	//	$target['page_category']		= '',
 	//	$target['page_comment_flag']	= ($source['comment_status']=='open') ? 1 : 0;
 	//	$target['page_password']		= $source['post_password'];
-		
-		return $target;  // comment out to debug 
-		
-		// DEBUG INFO BELOW. 
+
+		return $target;  // comment out to debug
+
+		// DEBUG INFO BELOW.
 		$this->renderDebug($source,$target);
-		
+
 	}
-	
+
 
 	/**
-	 * Align source data to e107 Links Table 
-	 * @param $target array - default e107 target values for e107_links table. 
+	 * Align source data to e107 Links Table
+	 * @param $target array - default e107 target values for e107_links table.
 	 * @param $source array - WordPress table data
 	 */
 	function copyLinksData(&$target, &$source)
 	{
 		$tp = e107::getParser();
-			 		
+
 	// 	$target['page_id']				= $source['ID']; //  auto increment
 		$target['link_name']			= $source['title'][0];
 		$target['link_url']				= $source['link'][0];
@@ -283,18 +283,18 @@ class rss_import extends base_import_class
 	//	$target['link_open']			= '';
 	//	$target['link_class']			= '';
 	//	$target['link_sefurl']			= $source['post_password'];
-		
-		
-		
-		return $target;  // comment out to debug 
-			
+
+
+
+		return $target;  // comment out to debug
+
 		$this->renderDebug($source,$target);
-		
+
 	}
-	
-	
+
+
 	/** Download and Import remote images and update body text with local relative-links. eg. {e_MEDIA}
-	 * @param returns text-body with remote links replaced with local ones for the images downloaded. 
+	 * @param returns text-body with remote links replaced with local ones for the images downloaded.
 	 */
 	function saveImages($body,$cat='news')
 	{
@@ -307,16 +307,16 @@ class rss_import extends base_import_class
 
 
 		$result = $tp->getTags($body, 'img');
-			
+
 		if($result)
 		{
 			$relPath = 'images/'. substr(md5($this->feedUrl),0,10);
-		
+
 			if(!is_dir(e_MEDIA.$relPath))
 			{
-				mkdir(e_MEDIA.$relPath,'0755');	
+				mkdir(e_MEDIA.$relPath,'0755');
 			}
-		
+
 			foreach($result['img'] as $att)
 			{
 				$filename = basename($att['src']);
@@ -325,84 +325,84 @@ class rss_import extends base_import_class
 				{
 					continue;
 				}
-					
+
 				$fl->getRemoteFile($att['src'], $relPath."/".$filename, 'media');
 
 				if(filesize(e_MEDIA.$relPath."/".$filename) > 0)
 				{
 					$search[] = $att['src'];
-					$replace[] = $tp->createConstants(e_MEDIA.$relPath."/".$filename,1);	
+					$replace[] = $tp->createConstants(e_MEDIA.$relPath."/".$filename,1);
 				}
-			}	
-		
+			}
+
 		}
 		else
 		{
 			$mes->addDebug("No Images Found: ".print_a($result,true));
 		}
-		
+
 		if(count($search))
 		{
 			$mes->addDebug("Found: ".print_a($search,true));
 			$mes->addDebug("Replaced: ".print_a($replace,true));
-			$med->import($cat,e_MEDIA.$relPath);	
+			$med->import($cat,e_MEDIA.$relPath);
 		}
-		
+
 		return str_replace($search,$replace,$body);
-		
-		
-		
-		
+
+
+
+
 	//	echo htmlentities($body);
 		preg_match_all("/(((http:\/\/www)|(http:\/\/)|(www))[-a-zA-Z0-9@:%_\+.~#?&\/\/=]+)\.(jpg|jpeg|gif|png|svg)/im",$body,$matches);
 		$fl = e107::getFile();
-			
+
 		if(is_array($matches[0]))
 		{
 			$relPath = 'images/'. substr(md5($this->feedUrl),0,10);
-			
+
 			if(!is_dir(e_MEDIA.$relPath))
 			{
-				mkdir(e_MEDIA.$relPath,'0755');	
+				mkdir(e_MEDIA.$relPath,'0755');
 			}
-			
+
 			foreach($matches[0] as $link)
 			{
 				$filename = basename($link);
-				
+
 				if(file_exists($relPath."/".$filename))
 				{
 					continue;
 				}
-				
+
 				$fl->getRemoteFile($link,$relPath."/".$filename, 'media');
-				
+
 				$search[] = $link;
 				$replace[] = $tp->createConstants(e_MEDIA.$relPath."/".$filename,1);
-			}	
+			}
 		}
-		
+
 		if(count($search))
 		{
-			$med->import($cat,e_MEDIA.$relPath);	
+			$med->import($cat,e_MEDIA.$relPath);
 		}
-		
-		return str_replace($search,$replace,$body);
-		
-	}
-	
 
-	
-	
-	
-	
-	
+		return str_replace($search,$replace,$body);
+
+	}
+
+
+
+
+
+
+
 	function renderDebug($source,$target)
 	{
-		
+
 	//	echo print_a($target);
 	//	return;
-				
+
 		echo "
 		<div style='width:1000px'>
 			<table style='width:100%'>

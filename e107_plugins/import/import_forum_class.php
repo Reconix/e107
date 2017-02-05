@@ -26,7 +26,7 @@ class forum_import
 			'forum_lastpost_user'		=> '',
 			'forum_lastpost_user_anon' => '',
 			'forum_lastpost_info'		=> '',
-		
+
 			'forum_class'				=> '0',
 			'forum_order'				=> '0',
 			'forum_postclass'			=> '',
@@ -37,12 +37,12 @@ class forum_import
 	var $mandatory = array(
 		'forum_name', 'forum_description'
 	);
-  
+
 	// Constructor
 	function __construct()
 	{
 	 // 	global $sql;
-	 //   $this->pageDB = new db;	// Have our own database object to write to the table	
+	 //   $this->pageDB = new db;	// Have our own database object to write to the table
 	}
 
 
@@ -54,8 +54,8 @@ class forum_import
 		 	e107::getMessage()->addDebug("Emptied Forum Table");
 		 }
 	}
-  
-  
+
+
 	// Set a new default for a particular field
 	function overrideDefault($key, $value)
 	{
@@ -64,7 +64,7 @@ class forum_import
 		$this->defaults[$key] = $value;
 	}
 
-  
+
   // Returns an array with all relevant fields set to the current default
 	function getDefaults()
 	{
@@ -77,39 +77,39 @@ class forum_import
 	 * @return integer, boolean - error code on failure, TRUE on success
 	 */
 	function saveData($row)
-	{	
+	{
 		if(!$result = e107::getDb('forum')->insert('forum',$row))
 		{
 	     	return 4;
 		}
-	
+
 		//if ($result === FALSE) return 6;
-	
+
 		return TRUE;
 	}
- 
 
- 
+
+
 	function getErrorText($errnum)    // these errors are presumptuous and misleading. especially '4' .
 	{
 		$errorTexts = array(
-	    	0 => 'No error', 
-	    	1 => 'Can\'t change main admin data', 
+	    	0 => 'No error',
+	    	1 => 'Can\'t change main admin data',
 	    	2 => 'invalid field passed',
-			3 => 'Mandatory field not set', 
-			4 => 'Entry already exists', 
+			3 => 'Mandatory field not set',
+			4 => 'Entry already exists',
 			5 => 'Invalid characters in user or login name',
 			6 => 'Error saving extended user fields'
 		);
-			
+
 		if (isset($errorTexts[$errnum])) return $errorTexts[$errnum];
-		
+
 		return 'Unknown: '.$errnum;
-	
+
 	}
-  
-  
-  
+
+
+
 }
 
 
@@ -140,13 +140,13 @@ class forumthread_import
 	var $mandatory = array(
 		'thread_name', 'thread_forum_id', 'thread_datestamp'
 	);
-  
+
 	// Constructor
 	function __construct()
 	{
 	 // 	global $sql;
-	 //   $this->pageDB = new db;	// Have our own database object to write to the table	
-	 
+	 //   $this->pageDB = new db;	// Have our own database object to write to the table
+
 	}
 
 
@@ -158,8 +158,8 @@ class forumthread_import
 			e107::getMessage()->addDebug("Emptied forum_thread Table");
 		}
 	}
-  
-  
+
+
 	// Set a new default for a particular field
 	function overrideDefault($key, $value)
 	{
@@ -168,7 +168,7 @@ class forumthread_import
 		$this->defaults[$key] = $value;
 	}
 
-  
+
   // Returns an array with all relevant fields set to the current default
 	function getDefaults()
 	{
@@ -181,39 +181,39 @@ class forumthread_import
 	 * @return integer, boolean - error code on failure, TRUE on success
 	 */
 	function saveData($row)
-	{	
+	{
 		if(!$result = e107::getDb('forum')->insert('forum_thread',$row))
 		{
 	     	return 4;
 		}
-	
+
 		//if ($result === FALSE) return 6;
-	
+
 		return TRUE;
 	}
- 
 
- 
+
+
 	function getErrorText($errnum)    // these errors are presumptuous and misleading. especially '4' .
 	{
 		$errorTexts = array(
-	    	0 => 'No error', 
-	    	1 => 'Can\'t change main admin data', 
+	    	0 => 'No error',
+	    	1 => 'Can\'t change main admin data',
 	    	2 => 'invalid field passed',
-			3 => 'Mandatory field not set', 
-			4 => 'Entry already exists', 
+			3 => 'Mandatory field not set',
+			4 => 'Entry already exists',
 			5 => 'Invalid characters in user or login name',
 			6 => 'Error saving extended user fields'
 		);
-			
+
 		if (isset($errorTexts[$errnum])) return $errorTexts[$errnum];
-		
+
 		return 'Unknown: '.$errnum;
-	
+
 	}
-  
-  
-  
+
+
+
 }
 
 
@@ -243,22 +243,22 @@ class forumpost_import
 	var $mandatory = array(
 		'post_thread', 'post_forum'
 	);
-	
+
 	var $helperClass;
 
 	// Constructor
 	function __construct()
 	{
 	 // 	global $sql;
-	 //   $this->pageDB = new db;	// Have our own database object to write to the table	
+	 //   $this->pageDB = new db;	// Have our own database object to write to the table
 		if(require_once(e_PLUGIN."forum/forum_class.php"))
 		{
 			e107::getMessage()->addDebug("Include forum_class");
 		}
-		
-		$this->helperClass = new e107forum();		
+
+		$this->helperClass = new e107forum();
 	}
-	
+
 
 	// Empty the  DB - not necessary
 	function emptyTargetDB($inc_admin = FALSE)
@@ -268,8 +268,8 @@ class forumpost_import
 			e107::getMessage()->addDebug("Emptied forum_post Table");
 		}
 	}
-  
-  
+
+
 	// Set a new default for a particular field
 	function overrideDefault($key, $value)
 	{
@@ -278,7 +278,7 @@ class forumpost_import
 		$this->defaults[$key] = $value;
 	}
 
-  
+
   // Returns an array with all relevant fields set to the current default
 	function getDefaults()
 	{
@@ -291,39 +291,39 @@ class forumpost_import
 	 * @return integer, boolean - error code on failure, TRUE on success
 	 */
 	function saveData($row)
-	{	
+	{
 		if(!$result = e107::getDb('forum')->insert('forum_post',$row))
 		{
 	     	return 4;
 		}
-	
+
 		//if ($result === FALSE) return 6;
-	
+
 		return TRUE;
 	}
- 
 
- 
+
+
 	function getErrorText($errnum)    // these errors are presumptuous and misleading. especially '4' .
 	{
 		$errorTexts = array(
-	    	0 => 'No error', 
-	    	1 => 'Can\'t change main admin data', 
+	    	0 => 'No error',
+	    	1 => 'Can\'t change main admin data',
 	    	2 => 'invalid field passed',
-			3 => 'Mandatory field not set', 
-			4 => 'Entry already exists', 
+			3 => 'Mandatory field not set',
+			4 => 'Entry already exists',
 			5 => 'Invalid characters in user or login name',
 			6 => 'Error saving extended user fields'
 		);
-			
+
 		if (isset($errorTexts[$errnum])) return $errorTexts[$errnum];
-		
+
 		return 'Unknown: '.$errnum;
-	
+
 	}
-  
-  
-  
+
+
+
 }
 
 
@@ -340,18 +340,18 @@ class forumtrack_import
 	var $defaults = array(
 			'track_userid'				=> '',
 			'track_thread'				=> ''
-			
+
 	);
 
 	var $mandatory = array(
 		'track_userid', 'track_thread'
 	);
-  
+
 	// Constructor
 	function __construct()
 	{
 	 // 	global $sql;
-	 //   $this->pageDB = new db;	// Have our own database object to write to the table	
+	 //   $this->pageDB = new db;	// Have our own database object to write to the table
 	}
 
 
@@ -363,8 +363,8 @@ class forumtrack_import
 		 	e107::getMessage()->addDebug("Emptied forum_track Table");
 		 }
 	}
-  
-  
+
+
 	// Set a new default for a particular field
 	function overrideDefault($key, $value)
 	{
@@ -373,7 +373,7 @@ class forumtrack_import
 		$this->defaults[$key] = $value;
 	}
 
-  
+
   // Returns an array with all relevant fields set to the current default
 	function getDefaults()
 	{
@@ -386,39 +386,39 @@ class forumtrack_import
 	 * @return integer, boolean - error code on failure, TRUE on success
 	 */
 	function saveData($row)
-	{	
+	{
 		if(!$result = e107::getDb('forum')->insert('forum_track',$row))
 		{
 	     	return 4;
 		}
-	
+
 		//if ($result === FALSE) return 6;
-	
+
 		return TRUE;
 	}
- 
 
- 
+
+
 	function getErrorText($errnum)    // these errors are presumptuous and misleading. especially '4' .
 	{
 		$errorTexts = array(
-	    	0 => 'No error', 
-	    	1 => 'Can\'t change main admin data', 
+	    	0 => 'No error',
+	    	1 => 'Can\'t change main admin data',
 	    	2 => 'invalid field passed',
-			3 => 'Mandatory field not set', 
-			4 => 'Entry already exists', 
+			3 => 'Mandatory field not set',
+			4 => 'Entry already exists',
 			5 => 'Invalid characters in user or login name',
 			6 => 'Error saving extended user fields'
 		);
-			
+
 		if (isset($errorTexts[$errnum])) return $errorTexts[$errnum];
-		
+
 		return 'Unknown: '.$errnum;
-	
+
 	}
-  
-  
-  
+
+
+
 }
 
 

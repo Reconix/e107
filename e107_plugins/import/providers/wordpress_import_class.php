@@ -33,57 +33,57 @@ class wordpress_import extends base_import_class
 	public $title		= 'Wordpress 3.4+';
 	public $description	= 'Import Users, News, Content and Links';
 	public $supported	= array('users','news','page','links');
-	public $mprefix		= 'wp_';	
-	
+	public $mprefix		= 'wp_';
+
 	function init()
 	{
-		
-		
+
+
 		$this->newsAuthor	= intval($_POST['news_author']);
-		
+
 	//	if($data = e107::getDb('phpbb')->retrieve('userclass_classes','userclass_id',"userclass_name='FORUM_MODERATOR' "))
 	//	{
 	//		$this->forum_moderator_class = $data;
 	//	}
-		
-	} 	
-	
+
+	}
+
 	function config()
 	{
 		$sql = e107::getDb();
-		
+
 		$sql->select('user','user_id, user_name','user_admin = 1');
-		
+
 		$adminList = array();
-		
+
 		$adminList[0] = "Default";
-		
+
 		while($row = $sql->fetch())
 		{
 			$id = $row['user_id'];
-			$adminList[$id] = $row['user_name'];	
+			$adminList[$id] = $row['user_name'];
 		}
 		$frm = e107::getForm();
-		
+
 		$var[0]['caption']	= "News Author Override (optional)";
 		$var[0]['html'] 	= $frm->select('news_author',$adminList);
 		$var[0]['help'] 	= "Change the author of the news items";
-		
+
 	//	$var[1]['caption']	= "Include revisions";
 	//	$var[1]['html'] 	= $frm->checkbox('news_revisions',1);
 	//	$var[1]['help'] 	= "Change the author of the news items";
 
 		return $var;
-	}	
-			
+	}
 
-	
+
+
   // Set up a query for the specified task.
   // Returns TRUE on success. FALSE on error
 	function setupQuery($task, $blank_user=FALSE)
 	{
     	if ($this->ourDB == NULL) return FALSE;
-		
+
     	switch ($task)
 		{
 	  		case 'users' :
@@ -104,7 +104,7 @@ class wordpress_import extends base_import_class
 				$result = $this->ourDB->gen($query);
 
 				if ($result === FALSE) return FALSE;
-			
+
 			break;
 
 			case 'userclass' :
@@ -117,25 +117,25 @@ class wordpress_import extends base_import_class
 			  */
 
 			break;
-		
+
 			case 'news' :
 				$query =  "SELECT * FROM {$this->DBPrefix}posts WHERE (post_type = 'post') AND post_status !='trash' AND post_status != 'auto-draft' ORDER BY ID";
 				$result = $this->ourDB->gen($query);
 				if ($result === FALSE) return FALSE;
 			break;
-			
+
 			case 'page' :
 				$query =  "SELECT * FROM {$this->DBPrefix}posts WHERE post_type = 'page' AND post_status !='trash' ORDER BY ID";
 				$result = $this->ourDB->gen($query);
 				if ($result === FALSE) return FALSE;
 			break;
-			
+
 			case 'media' :
 				$query =  "SELECT * FROM {$this->DBPrefix}posts WHERE post_type = 'attachment' AND post_status !='trash' ORDER BY ID";
 				$result = $this->ourDB->gen($query);
 				if ($result === FALSE) return FALSE;
 			break;
-				
+
 			case 'links':
 			 	$query =  "SELECT * FROM {$this->DBPrefix}links WHERE link_id !='' ORDER BY link_id";
 				$result = $this->ourDB->gen($query);
@@ -155,10 +155,10 @@ class wordpress_import extends base_import_class
   //------------------------------------
   //	Internal functions below here
   //------------------------------------
-  
+
 	/**
-	 * Align source data to e107 User Table 
-	 * @param $target array - default e107 target values for e107_user table. 
+	 * Align source data to e107 User Table
+	 * @param $target array - default e107 target values for e107_user table.
 	 * @param $source array - WordPress table data
 	 */
 	function copyUserData(&$target, &$source)
@@ -169,7 +169,7 @@ class wordpress_import extends base_import_class
 		{
 			 $target['user_id'] = $source['ID'];
 		}
-		
+
 		$target['user_name'] 		= $source['user_nicename'];
 		$target['user_loginname'] 	= $source['user_login'];
 		$target['user_password'] 	= $source['user_pass'];   // needs to be salted!!!!
@@ -188,7 +188,7 @@ class wordpress_import extends base_import_class
 		$target['user_lastpost'] 	= $source['user_lastpost'];
 		$target['user_chats'] 		= $source['user_chats'];
 		$target['user_comments'] 	= $source['user_comments'];
-	
+
 		$target['user_ip'] 			= $source['user_ip'];
 		$target['user_prefs'] 		= $source['user_prefs'];
 		$target['user_visits'] 		= $source['user_visits'];
@@ -207,47 +207,47 @@ class wordpress_import extends base_import_class
 		$target['user_timezone'] 	= $source['user_timezone'];
 
 		$this->renderDebug($source,$target);
-		
+
 	//return $target;
 	}
 
 	/**
-	 * Align source data to e107 News Table 
-	 * @param $target array - default e107 target values for e107_news table. 
+	 * Align source data to e107 News Table
+	 * @param $target array - default e107 target values for e107_news table.
 	 * @param $source array - WordPress table data
 	 */
 	function copyNewsData(&$target, &$source)
 	{
-		/*	Example: 
+		/*	Example:
 			[ID] => 88
 		    [post_author] => 1
 		    [post_date] => 2012-01-25 04:11:22
 		    [post_date_gmt] => 2012-01-25 09:11:22
 		    [post_content] => [gallery itemtag="div" icontag="span" captiontag="p" link="file"]
 		    [post_title] => Media Gallery
-		    [post_excerpt] => 
+		    [post_excerpt] =>
 		    [post_status] => inherit
 		    [comment_status] => open
 		    [ping_status] => open
-		    [post_password] => 
+		    [post_password] =>
 		    [post_name] => 10-revision-6
-		    [to_ping] => 
-		    [pinged] => 
+		    [to_ping] =>
+		    [pinged] =>
 		    [post_modified] => 2012-01-25 04:11:22
 		    [post_modified_gmt] => 2012-01-25 09:11:22
-		    [post_content_filtered] => 
+		    [post_content_filtered] =>
 		    [post_parent] => 10
 		    [guid] => http://siteurl.com/2012/01/25/10-revision-6/
 		    [menu_order] => 0
 		    [post_type] => post
-		    [post_mime_type] => 
+		    [post_mime_type] =>
 		    [comment_count] => 0
-		 */	
-	
+		 */
+
 	//		$target['news_id']					= $source['ID'];
 			$target['news_title']				= $this->convertText($source['post_title']);
 			$target['news_sef']					= $source['post_name'];
-			$target['news_body']				= (vartrue($source['post_content'])) ? "[html]".$this->convertText($source['post_content'])."[/html]" : ""; 
+			$target['news_body']				= (vartrue($source['post_content'])) ? "[html]".$this->convertText($source['post_content'])."[/html]" : "";
 		//	$target['news_extended']			= '';
 		//	$target['news_meta_keywords']		= '';
 		//	$target['news_meta_description']	= '';
@@ -264,32 +264,32 @@ class wordpress_import extends base_import_class
 			$target['news_thumbnail']			= '';
 			$target['news_sticky']				= '';
 
-		return $target;  // comment out to debug 
-		
-		// DEBUG INFO BELOW. 		
-		$this->renderDebug($source,$target);	
+		return $target;  // comment out to debug
+
+		// DEBUG INFO BELOW.
+		$this->renderDebug($source,$target);
 	}
 
 
 
-	// Convert Wordpress Status to e107 News visibility class. 
+	// Convert Wordpress Status to e107 News visibility class.
 	function newsClass($status)
 	{
 		$convert = array('publish'=> e_UC_PUBLIC, 'inherit' => e_UC_NOBODY, 'draft' => e_UC_NOBODY);
-		
+
 		return intval($convert[$status]);
-	
+
 	}
 
 	/**
-	 * Align source data to e107 Page Table 
-	 * @param $target array - default e107 target values for e107_page table. 
+	 * Align source data to e107 Page Table
+	 * @param $target array - default e107 target values for e107_page table.
 	 * @param $source array - WordPress table data
 	 */
 	function copyPageData(&$target, &$source)
 	{
 		$tp = e107::getParser();
-		/*	post_status: 
+		/*	post_status:
 				publish - A published post or page
 				inherit - a revision
 				pending - post is pending review
@@ -298,16 +298,16 @@ class wordpress_import extends base_import_class
 				draft - a post in draft status
 				trash - post is in trashbin (available with 2.9)
 		*/
-		
+
 		if($source['post_status']=='private' || $source['post_status']=='future' || $source['post_status'] == 'draft')
 		{
-			$target['page_class']	 = e_UC_ADMIN;	
+			$target['page_class']	 = e_UC_ADMIN;
 		}
-		
+
 	// 	$target['page_id']				= $source['ID']; //  auto increment
 		$target['page_title']			= $this->convertText($source['post_title']);
 		$target['page_sef']				= $source['post_name'];
-		$target['page_text']			= (vartrue($source['post_content'])) ? "[html]".$this->convertText($source['post_content'])."[/html]" : ""; 
+		$target['page_text']			= (vartrue($source['post_content'])) ? "[html]".$this->convertText($source['post_content'])."[/html]" : "";
 		$target['page_metakeys']		= '';
 		$target['page_metadscr']		= '';
 		$target['page_datestamp']		= strtotime($source['post_date']);
@@ -315,18 +315,18 @@ class wordpress_import extends base_import_class
 	//	$target['page_category']		= '',
 		$target['page_comment_flag']	= ($source['comment_status']=='open') ? 1 : 0;
 		$target['page_password']		= $source['post_password'];
-		
-		return $target;  // comment out to debug 
-		
-		// DEBUG INFO BELOW. 
+
+		return $target;  // comment out to debug
+
+		// DEBUG INFO BELOW.
 		$this->renderDebug($source,$target);
-		
+
 	}
-	
+
 
 	/**
-	 * Align source data to e107 Links Table 
-	 * @param $target array - default e107 target values for e107_links table. 
+	 * Align source data to e107 Links Table
+	 * @param $target array - default e107 target values for e107_links table.
 	 * @param $source array - WordPress table data
 	 */
 	function copyLinksData(&$target, &$source)
@@ -346,7 +346,7 @@ class wordpress_import extends base_import_class
 				link_rel
 				link_notes
 				link_rss
-		 * 
+		 *
 		 * 	e107
 		 *	link_id
 			link_name
@@ -360,15 +360,15 @@ class wordpress_import extends base_import_class
 			link_class
 			link_function
 			link_sefurl
-			 */	
+			 */
 		/* e107.
 		0 => LCLAN_20, // 0 = same window
 		1 => LCLAN_23, // new window
 		4 => LCLAN_24, // 4 = miniwindow  600x400
 		5 => LINKLAN_1 // 5 = miniwindow  800x600
 		*/
-		
-			 
+
+
 		$target['link_name']			= $this->convertText($source['link_name']);
 		$target['link_url']				= $source['link_url'];
 		$target['link_description']		= (vartrue($source['link_description'])) ? "[html]".$this->convertText($source['link_description'])."[/html]" : "";
@@ -379,38 +379,38 @@ class wordpress_import extends base_import_class
 		$target['link_open']			= ''; // link_target
 		$target['link_class']			= ($source['link_visible'] == 'Y') ? '0' : e_UC_MAINADMIN;
 	//	$target['link_sefurl']			= '';
-		
-		return $target;  // comment out to debug 
-		
-		// DEBUG INFO BELOW. 
+
+		return $target;  // comment out to debug
+
+		// DEBUG INFO BELOW.
 		$this->renderDebug($source,$target);
-		
+
 	}
-	
+
 
 
 	function convertText($text)
 	{
 		//$text = e107::getParser()->toDb($text);
 		return $text;
-					
+
 		$text 		= html_entity_decode($text,ENT_QUOTES,'UTF-8');
 
 		$detected 	= mb_detect_encoding($text); // 'ISO-8859-1'
 		$text 		= iconv($detected,'UTF-8',$text);
 
-		
+
 
 		return $text;
 	}
 
-	
-	
-	
-	
-	
+
+
+
+
+
 	function renderDebug($source,$target)
-	{		
+	{
 		echo "
 		<div style='width:1000px'>
 			<table style='width:100%'>

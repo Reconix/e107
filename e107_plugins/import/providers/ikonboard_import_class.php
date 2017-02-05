@@ -29,9 +29,9 @@ class ikonboard_import extends base_import_class
 	public $description		= 'About Sept 2007';
 	public $supported		= array('users');
 	public $mprefix			= 'ib_';
-	
-	
-	
+
+
+
   // Set up a query for the specified task.
   // Returns TRUE on success. FALSE on error
   // If $blank_user is true, certain cross-referencing user info is to be zeroed
@@ -61,11 +61,11 @@ class ikonboard_import extends base_import_class
   }
 
 
-  
+
   //------------------------------------
   //	Internal functions below here
   //------------------------------------
-  
+
   // Copy data read from the DB into the record to be returned.
   function copyUserData(&$target, &$source)
   {
@@ -75,7 +75,7 @@ class ikonboard_import extends base_import_class
 	$target['user_password'] = $source['MEMBER_PASSWORD'];
 	$target['user_email'] = $source['MEMBER_EMAIL'];
 	$target['user_signature'] = $source['SIGNATURE'];
-	$target['user_join'] = $source['MEMBER_JOINED'];			
+	$target['user_join'] = $source['MEMBER_JOINED'];
 	$target['user_lastvisit'] = $source['LAST_LOG_IN'];
     $target['user_image'] = $source['MEMBER_AVATAR'];
 	$target['user_forums'] = $source['MEMBER_POSTS'];

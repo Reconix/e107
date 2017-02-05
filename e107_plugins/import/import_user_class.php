@@ -34,7 +34,7 @@ class user_import
 	var $blockMainAdmin = TRUE;
 	var $error;
 
-// Every field must be in exactly one of the arrays $userDefaults, $userSpecial, $userMandatory  
+// Every field must be in exactly one of the arrays $userDefaults, $userSpecial, $userMandatory
 	var $userDefaults = array(
 		'user_id' 			=> 0,
 		'user_name' 		=> '',
@@ -70,11 +70,11 @@ class user_import
   // Fields which are defaulted at save-time if not previously set
 	var $userSpecial = array('user_join', 'user_realm', 'user_pwchange');
 
-  // Fields which must be set up by the caller.  
+  // Fields which must be set up by the caller.
 	var $userMandatory = array(
 		'user_name', 'user_loginname', 'user_password'
 	);
-  	
+
 	// Array is set up with the predefined extended fields which are actually in use
 	var $actualExtended = array();
 
@@ -90,7 +90,7 @@ class user_import
   // Empty the user DB - by default leaving only the main admin.
 	function emptyTargetDB($inc_admin = FALSE)
 	{
-	    
+
 	    if ($inc_admin === TRUE)
 		{
 			$this->blockMainAdmin = FALSE;
@@ -106,16 +106,16 @@ class user_import
 
 		if($this->userDB->delete('user',$delClause))
 		{
-			e107::getMessage()->addDebug("Emptied User table");	
+			e107::getMessage()->addDebug("Emptied User table");
 		}
-		
+
 		if($this->userDB->delete('user_extended',$extClause))
 		{
-			e107::getMessage()->addDebug("Emptied User-extended table");	
+			e107::getMessage()->addDebug("Emptied User-extended table");
 		}
 	}
-  
-  
+
+
   // Set a new default for a particular field
 	function overrideDefault($key, $value)
 	{
@@ -124,7 +124,7 @@ class user_import
 		$this->userDefaults[$key] = $value;
 	}
 
-  
+
   // Returns an array with all relevant fields set to the current default
 	function getDefaults()
 	{
@@ -142,7 +142,7 @@ class user_import
 	}
 
 
-	// Add a user record to the DB - pass array as parameter. 
+	// Add a user record to the DB - pass array as parameter.
 	// Returns an error code on failure. TRUE on success
 	function saveData($userRecord)
 	{
@@ -152,29 +152,29 @@ class user_import
 			return true;
 			// return 1;
 		}
-		
+
 		$extendedFields = array();
 		$userFields 	= array_keys($this->userDefaults);
-		
+
 		foreach ($userRecord as $k => $v)
 		{
-			if (!in_array($k, $userFields)) // Not present in e107_user table. 
+			if (!in_array($k, $userFields)) // Not present in e107_user table.
 			{
-		    	if (in_array($k,$this->actualExtended)) // Present in e107_user_extended table. 
+		    	if (in_array($k,$this->actualExtended)) // Present in e107_user_extended table.
 				{
 					 $extendedFields[$k] = $v;		// Pull out any extended field values which are needed
 				}
-				else 
+				else
 				{
-					e107::getMessage()->addDebug("Removing user-field due to missing user-extended field {$k} ");	
-				}			
-				
+					e107::getMessage()->addDebug("Removing user-field due to missing user-extended field {$k} ");
+				}
+
 				unset($userRecord[$k]);			// And always delete from the original data record
 			}
 		}
-				
+
 		foreach ($userRecord as $k => $v) // Check only valid fields being passed
-		{	
+		{
 		  	if (!array_key_exists($k,$this->userDefaults) && !in_array($k,$this->userSpecial) && !in_array($k,$this->userMandatory)   )         //
 			{
 				e107::getMessage()->addDebug("Failed on {$k} => {$v} ");
@@ -184,16 +184,16 @@ class user_import
 		// Check user names for invalid characters
 		$userRecord['user_name'] = $this->vetUserName($userRecord['user_name'],FALSE);
 		$userRecord['user_loginname'] = $this->vetUserName($userRecord['user_loginname'],FALSE);
-		
+
 		if (($userRecord['user_name'] === FALSE) || ($userRecord['user_name'] === FALSE))
 		{
 			e107::getMessage()->addDebug("user_name was empty");
 			return 5;
 		}
-		
+
 		if (trim($userRecord['user_name']) == '') $userRecord['user_name'] = trim($userRecord['user_loginname']);
 		if (trim($userRecord['user_loginname']) == '') $userRecord['user_loginname'] = trim($userRecord['user_name']);
-		
+
 		foreach ($this->userMandatory as $k)
 		{
 			if (!isset($userRecord[$k]))
@@ -201,28 +201,28 @@ class user_import
 				e107::getMessage()->addDebug("Failed userMandatory on {$k}");
 				return 3;
 			}
-			
+
 			if (strlen($userRecord[$k]) < 3)
 			{
 			//	e107::getMessage()->addDebug("Failed userMandatory length on {$k}");
 				// return 3;
 			}
 		}
-		
+
 		if (!isset($userRecord['user_join'])) $userRecord['user_join'] = time();
-		
+
 		$userRecord['user_realm'] 		= '';		// Never carry across these fields
 	    $userRecord['user_pwchange'] 	= 0;
-	
+
 		if(!$result = $this->userDB->replace('user',$userRecord))
 		{
 	     	return 4;
 		}
-	
+
 		if (count($extendedFields))
 		{
 			$extendedFields['user_extended_id'] = varset($userRecord['user_id'],0) ? $userRecord['user_id'] : $result;
-			
+
 			if($this->userDB->replace('user_extended',$extendedFields) === false)
 			{
 				e107::getMessage()->addDebug("Failed to insert extended fields: ".print_a($extendedFields));
@@ -232,21 +232,21 @@ class user_import
 		}
 		return TRUE;
 	}
- 
 
- 
+
+
 	function getErrorText($errnum)    // these errors are presumptuous and misleading. especially '4' .
 	{
 		$errorTexts = array(
-	    	0 => 'No error', 
-	    	1 => 'Can\'t change main admin data', 
+	    	0 => 'No error',
+	    	1 => 'Can\'t change main admin data',
 	    	2 => 'invalid field passed',
-			3 => 'Mandatory field not set', 
-			4 => 'User already exists', 
+			3 => 'Mandatory field not set',
+			4 => 'User already exists',
 			5 => 'Invalid characters in user or login name',
 			6 => 'Error saving extended user fields'
 		);
-		
+
 		if (isset($errorTexts[$errnum])) return $errorTexts[$errnum];
 		return 'Unknown: '.$errnum;
 	}

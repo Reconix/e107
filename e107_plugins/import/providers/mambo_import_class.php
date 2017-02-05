@@ -31,8 +31,8 @@ class mambo_import extends base_import_class
 	public $description	= 'Import data from Mambo CMS';
 	public $supported	=  array('users');
 	public $mprefix		= 'mos_';
-	
-	
+
+
   // Set up a query for the specified task.
   // Returns TRUE on success. FALSE on error
 	function setupQuery($task, $blank_user=FALSE)
@@ -56,7 +56,7 @@ class mambo_import extends base_import_class
   //------------------------------------
   //	Internal functions below here
   //------------------------------------
-  
+
   // Copy data read from the DB into the record to be returned.
 	function copyUserData(&$target, &$source)
 	{

@@ -23,14 +23,14 @@ require_once('import_classes.php');
 
 class PHPNuke_import extends base_import_class
 {
-	
-	
+
+
 	public $title			= 'PHP Nuke';
 	public $description		= 'Supports users only - uses PHPBB2';
 	public $supported		= array('users');
 	public $mprefix			= 'nuke_';
 
-	
+
   // Set up a query for the specified task.
   // Returns TRUE on success. FALSE on error
 	function setupQuery($task, $blank_user=FALSE)
@@ -54,7 +54,7 @@ class PHPNuke_import extends base_import_class
   //------------------------------------
   //	Internal functions below here
   //------------------------------------
-  
+
   // Copy data read from the DB into the record to be returned.
   // Very similar to PHPBB fields (as far as the bits we can convert are concerned)
   function copyUserData(&$target, &$source)
@@ -74,7 +74,7 @@ class PHPNuke_import extends base_import_class
 
 	switch ($source['user_avatar_type'])
 	{
-	  default: 
+	  default:
 	    $target['user_image'] = $source['user_avatar'];
 	}
 	$target['user_timezone'] = $source['user_timezone'];		// source is decimal(5,2)
@@ -87,7 +87,7 @@ class PHPNuke_import extends base_import_class
 	$target['user_homepage'] = $source['user_website'];
 	$target['user_ip'] = $source['last_ip'];
 //	$target['user_'] = $source[''];
-	
+
 //	$source['user_rank'];
 //	$target['user_admin'] = ($source['user_level'] == 1) ? 1 : 0;		// Guess
 //	if ($target['user_admin'] != 0) $target['user_perms'] = '0.';

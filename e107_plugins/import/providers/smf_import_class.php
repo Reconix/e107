@@ -13,79 +13,79 @@ require_once('import_classes.php');
 
 class smf_import extends base_import_class
 {
-	
+
 	public $title			= 'SMF v2.x (Simple Machines Forum)';
 	public $description		= 'Supports users only';
 	public $supported		= array('users');
 	public $mprefix			= 'smf_';
-	public $sourceType 		= 'db';		
-	
+	public $sourceType 		= 'db';
+
 	function init()
 	{
-	
-		
-	} 	
-	
+
+
+	}
+
   // Set up a query for the specified task.
   // Returns TRUE on success. FALSE on error
 	function setupQuery($task, $blank_user=FALSE)
 	{
 		if ($this->ourDB == NULL) return FALSE;
-		
+
 	    switch ($task)
 		{
 			case 'users' :
-				
-				// Set up Userclasses. 
+
+				// Set up Userclasses.
 				if($this->ourDB && $this->ourDB->gen("SELECT * FROM {$this->DBPrefix}membergroups WHERE group_name = 'Jr. Member' "))
 				{
-					e107::getMessage()->addDebug("Userclasses Found");	
-				}	
-				
+					e107::getMessage()->addDebug("Userclasses Found");
+				}
+
 		    	$result = $this->ourDB->gen("SELECT * FROM {$this->DBPrefix}members WHERE `is_activated`=1");
 				if ($result === FALSE) return FALSE;
 			break;
-				
-				
+
+
  			case 'forum' :
 				$result = $this->ourDB->gen("SELECT * FROM `{$this->DBPrefix}boards`");
-				if ($result === FALSE) return FALSE;	  
+				if ($result === FALSE) return FALSE;
 			break;
-				
+
 			case 'forumthread' :
 				$result = $this->ourDB->gen("SELECT t.*,m.* FROM `{$this->DBPrefix}topics` AS t LEFT JOIN `{$this->DBPrefix}messages` AS m ON t.id_first_msg = m.id_msg GROUP BY t.id_topic");
-				if ($result === FALSE) return FALSE;	  
+				if ($result === FALSE) return FALSE;
 			break;
-				
+
 			case 'forumpost' :
 				//$result = $this->ourDB->gen("SELECT * FROM `{$this->DBPrefix}posts`");
-				//if ($result === FALSE) return FALSE;	  
-			break;				
+				//if ($result === FALSE) return FALSE;
+			break;
 
 			case 'forumtrack' :
 				//$result = $this->ourDB->gen("SELECT * FROM `{$this->DBPrefix}forums_track`");
-				//if ($result === FALSE) return FALSE;	  
+				//if ($result === FALSE) return FALSE;
 			break;
-				
+
 			default :
 		    return FALSE;
 		}
-		
+
 		$this->copyUserInfo = false;
 		$this->currentTask = $task;
 		return TRUE;
 	}
 
-	
-	
+
+
 	function convertUserclass($data)
 	{
-		
+
 		if($data == 1)
 		{
-			
+
 		}
-		
+
 		/*
 		1	Administrator		#FF0000	-1	0	5#staradmin.gif	1	0	-2
 		2	Global Moderator		#0000FF	-1	0	5#stargmod.gif	0	0	-2
@@ -94,24 +94,24 @@ class smf_import extends base_import_class
 		5	Jr. Member			50	0	2#star.gif	0	0	-2
 		6	Full Member			100	0	3#star.gif	0	0	-2
 		7	Sr. Member			250	0	4#star.gif	0	0	-2
-		8	Hero Member			500	0	5#star.gif	0	0	-2	
+		8	Hero Member			500	0	5#star.gif	0	0	-2
 		*/
-	}	
-	
+	}
+
 	function convertAdmin($data)
 	{
-		
+
 		if($data == 1)
 		{
-			return 1;	
-		}	
-		
+			return 1;
+		}
+
 	}
 
   //------------------------------------
   //	Internal functions below here
   //------------------------------------
-  
+
   // Copy data read from the DB into the record to be returned.
 	function copyUserData(&$target, &$source)
 	{
@@ -119,7 +119,7 @@ class smf_import extends base_import_class
 		{
 			 $target['user_id'] = 0; // $source['id_member'];
 		}
-		
+
 		$target['user_name'] 		= $source['real_name'];
 		$target['user_login'] 		= $source['member_name'];
 		$target['user_loginname'] 	= $source['memberName'];
@@ -145,10 +145,10 @@ class smf_import extends base_import_class
 		$target['user_birthday']	= $source['birthdate'];
 		$target['user_admin']		= $this->convertadmin($source['id_group']);
 		$target['user_class']		= $this->convertadmin($source['id_group']);
-		
+
 		$target['user_plugin_forum_viewed'] = 0;
 		$target['user_plugin_forum_posts']	= $source['posts'];
-		
+
 	//    $target['user_language'] = $source['lngfile'];			// Guess to verify
 		return $target;
 		}
@@ -157,11 +157,11 @@ class smf_import extends base_import_class
 
  	/**
 	 * $target - e107_forum table
-	 * $source - smf table boards  
+	 * $source - smf table boards
 	 */
 	function copyForumData(&$target, &$source)
 	{
-		
+
 		$target['forum_id'] 				= $source['id_board'];
 		$target['forum_name'] 				= $source['name'];
 		$target['forum_description'] 		= $source['description'];
@@ -169,7 +169,7 @@ class smf_import extends base_import_class
 		$target['forum_sub']				= "";
 		$target['forum_datestamp']			= time();
 		$target['forum_moderators']			= "";
-	
+
 		$target['forum_threads'] 			= $source['num_topics'];
 		$target['forum_replies']			= $source['num_posts'];
 		$target['forum_lastpost_user']		= '';
@@ -177,14 +177,14 @@ class smf_import extends base_import_class
 		$target['forum_lastpost_info']		= '';
 		//	$target['forum_class']				= "";
 		$target['forum_order']				= $source['board_order'];
-		// $target['forum_postclass']	
-		// $target['forum_threadclass']	
-		// $target['forum_options']	
-		
+		// $target['forum_postclass']
+		// $target['forum_threadclass']
+		// $target['forum_options']
+
 		return $target;
-		
-		
-		/* 
+
+
+		/*
 
 			 CREATE TABLE {$db_prefix}boards (
 		  id_board smallint(5) unsigned NOT NULL auto_increment,
@@ -213,18 +213,18 @@ class smf_import extends base_import_class
 		  KEY member_groups (member_groups(48))
 		) ENGINE=MyISAM;
 	 * */
-	
-		
+
+
 	}
 
-	
+
 	/**
 	 * $target - e107 forum_threads
-	 * $source - smf topics. 
+	 * $source - smf topics.
 	 */
 	function copyForumThreadData(&$target, &$source)
 	{
-		
+
 		$target['thread_id'] 				= $source['topic_id'];
 		$target['thread_name'] 				= $source['topic_title'];
 		$target['thread_forum_id'] 			= $source['forum_id'];
@@ -239,9 +239,9 @@ class smf_import extends base_import_class
 		$target['thread_lastuser_anon'] 	= $source['topic_last_poster_name'];
 		$target['thread_total_replies'] 	= $source['topic_replies'];
 	//	$target['thread_options'] 			= $source['topic_'];
-	
+
 		return $target;
-		
+
 		/*
 		  CREATE TABLE {$db_prefix}topics (
 		  id_topic mediumint(8) unsigned NOT NULL auto_increment,
@@ -271,11 +271,11 @@ class smf_import extends base_import_class
 		  KEY board_news (id_board, id_first_msg)
 		) ENGINE=MyISAM;
 		 */
-		
-		
+
+
 	}
 
- 	
+
 	/**
 	 * $target - e107_forum_post table
 	 * $source -smf //TODO
@@ -295,11 +295,11 @@ class smf_import extends base_import_class
 	//	$target['post_user_anon'] 			= $source[''];
 	//	$target['post_attachments'] 		= $source[''];
 	//	$target['post_options'] 			= $source[''];
-		
-		
+
+
 		return $target;
-		
-		
+
+
 		/*CREATE TABLE {$db_prefix}messages (
 		  id_msg int(10) unsigned NOT NULL auto_increment,
 		  id_topic mediumint(8) unsigned NOT NULL default '0',
@@ -330,12 +330,12 @@ class smf_import extends base_import_class
 		  KEY current_topic (id_topic, id_msg, id_member, approved),
 		  KEY related_ip (id_member, poster_ip, id_msg)
 		) ENGINE=MyISAM;
-		 * 
-		
+		 *
+
 		INSERT INTO {$db_prefix}messages
 			(id_msg, id_msg_modified, id_topic, id_board, poster_time, subject, poster_name, poster_email, poster_ip, modified_name, body, icon)
 		VALUES (1, 1, 1, 1, UNIX_TIMESTAMP(), '{$default_topic_subject}', 'Simple Machines', 'info@simplemachines.org', '127.0.0.1', '', '{$default_topic_message}', 'xx');
-		 
+
 		 */
 
 	}
@@ -371,12 +371,12 @@ CREATE TABLE {$db_prefix}polls (
   poster_name varchar(255) NOT NULL default '',
   PRIMARY KEY (id_poll)
 ) ENGINE=MyISAM;
- * 
- * 
- * 
- 
+ *
+ *
+ *
 
- * 
+
+ *
  * INSERT INTO {$db_prefix}membergroups
 	(id_group, group_name, description, online_color, min_posts, stars, group_type)
 VALUES (1, '{$default_administrator_group}', '', '#FF0000', -1, '5#staradmin.gif', 1),
@@ -389,10 +389,10 @@ VALUES (1, '{$default_administrator_group}', '', '#FF0000', -1, '5#staradmin.gif
 	(8, '{$default_hero_group}', '', '', 500, '5#star.gif', 0);
 # --------------------------------------------------------
 
- * 
+ *
 
- * 
- *  * 
+ *
+ *  *
 
 CREATE TABLE {$db_prefix}membergroups (
   id_group smallint(5) unsigned NOT NULL auto_increment,
@@ -407,7 +407,7 @@ CREATE TABLE {$db_prefix}membergroups (
   id_parent smallint(5) NOT NULL default '-2',
   PRIMARY KEY (id_group),
   KEY min_posts (min_posts)
-) ENGINE=MyISAM; 
+) ENGINE=MyISAM;
 
 CREATE TABLE {$db_prefix}members (
   id_member mediumint(8) unsigned NOT NULL auto_increment,

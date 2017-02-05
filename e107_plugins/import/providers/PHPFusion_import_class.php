@@ -23,12 +23,12 @@ require_once('import_classes.php');
 
 class PHPFusion_import extends base_import_class
 {
-	
+
 	public $title		= 'PHP Fusion';
 	public $description	= 'Based on V5.1';
 	public $supported	=  array('users');
 	public $mprefix		= false;
-	
+
   // Set up a query for the specified task.
   // Returns TRUE on success. FALSE on error
 	function setupQuery($task, $blank_user=FALSE)
@@ -52,7 +52,7 @@ class PHPFusion_import extends base_import_class
   //------------------------------------
   //	Internal functions below here
   //------------------------------------
-  
+
   // Copy data read from the DB into the record to be returned.
   function copyUserData(&$target, &$source)
   {
@@ -78,7 +78,7 @@ class PHPFusion_import extends base_import_class
 	$target['user_ip'] = $source['user_ip'];
 //	$target['user_'] = $source[''];
 //	$target['user_'] = $source[''];
-	
+
 //	$target['user_ban'] = ($source['user_status'] ? 2 : 0);					// Guess
 	return $target;
   }

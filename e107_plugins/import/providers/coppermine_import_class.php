@@ -29,14 +29,14 @@ require_once('import_classes.php');
 
 class coppermine_import extends base_import_class
 {
-	
+
 	public $title		= 'Coppermine';
 	public $description	= 'Standalone gallery version';
 	public $supported	= array('users');
 	public $mprefix		= 'CPG_';
-	
-	
-	
+
+
+
   // Set up a query for the specified task.
   // Returns TRUE on success. FALSE on error
   function setupQuery($task, $blank_user=FALSE)
@@ -60,7 +60,7 @@ class coppermine_import extends base_import_class
   //------------------------------------
   //	Internal functions below here
   //------------------------------------
-  
+
   // Copy data read from the DB into the record to be returned.
   function copyUserData(&$target, &$source)
   {
@@ -72,7 +72,7 @@ class coppermine_import extends base_import_class
 	$target['user_email'] 		= $source['user_email'];
 	$target['user_join'] 		= strtotime($source['user_regdate']);
 	$target['user_lastvisit'] 	= strtotime($source['user_lastvisit']);
-	
+
 	switch ($source['user_group'])
 	{
 	  case 1 : 		// Admin
@@ -85,7 +85,7 @@ class coppermine_import extends base_import_class
 		$target['user_ban'] = 2;
 		break;
 	}
-	
+
 	return $target;
 
 	/* Unused fields:
