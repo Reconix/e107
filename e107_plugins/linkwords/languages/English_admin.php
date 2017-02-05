@@ -88,7 +88,7 @@ define("LAN_LW_HELP_01","
   <b>Areas to enable</b><br />
   many areas of text have an associated \"context\", and linkwords will only be displayed in areas matching that context.<br /><br />
   <b>Linkwords Disable</b><br />
-  Linkwords may be disabled on specific pages, or pages matching a pattern. Enter these here (same syntax as for menus), one pattern per line. 
+  Linkwords may be disabled on specific pages, or pages matching a pattern. Enter these here (same syntax as for menus), one pattern per line.
   If the pattern ends in \"!\", this corresponds to \"end of query\", and is usually an exact match. Otherwise any URL containing the specified string will match.<br />
   Note that linkwords are <i>never</i> displayed on admin pages.<br /><br />
   <b>Enable Ajax Functionality</b><br />

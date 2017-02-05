@@ -28,7 +28,7 @@
  */
 
 if (!defined('e107_INIT')) { exit; }
-// if (!e107::isInstalled('linkwords')) exit; // This will completely break a site during  upgrades. 
+// if (!e107::isInstalled('linkwords')) exit; // This will completely break a site during  upgrades.
 
 define('LW_CACHE_ENABLE', FALSE);
 
@@ -52,7 +52,7 @@ class e_tohtml_linkwords
 	protected $wordCount    = array();
 //	protected $maxPerWord   = 3;
 
-	
+
 	/* constructor */
 	function __construct()
 	{
@@ -84,12 +84,12 @@ class e_tohtml_linkwords
 					$p = substr($p, 0, -1);
 					if(substr($check_url, strlen($p)*-1) == $p) return;
 				}
-				else 
+				else
 				{
 					if(strpos($check_url, $p) !== FALSE) return;
 				}
 			}
-		} 
+		}
 
 		// Will probably need linkwords on this page - so get the info
 		define('LW_CACHE_TAG', 'nomd5_linkwords');		// Put it here to avoid conflict on admin pages
@@ -196,14 +196,14 @@ class e_tohtml_linkwords
 
 	function to_html($text,$area = 'olddefault')
 	{
-			
+
 		if(is_string($this->area_opts))
 		{
-			$this->area_opts = e107::unserialize($this->area_opts);	
-		}	
-			
+			$this->area_opts = e107::unserialize($this->area_opts);
+		}
+
 		if (!$this->lw_enabled || !count($this->area_opts) || !array_key_exists($area,$this->area_opts) || !$this->area_opts[$area]) return $text;		// No linkwords in disabled areas
-	
+
 // Split up by HTML tags and process the odd bits here
 		$ptext = "";
 		$lflag = FALSE;
@@ -217,7 +217,7 @@ class e_tohtml_linkwords
 				$ptext .= $cont;
 				if (substr($cont,0,2) == "<a") $lflag = TRUE;
 				if (substr($cont,0,3) == "</a") $lflag = FALSE;
-			} 
+			}
 			else   // Its the text in between
 			{
 				if ($lflag) // Its probably within a link - leave unchanged
@@ -366,7 +366,7 @@ class e_tohtml_linkwords
 			}
 		}
 		return $ret;
-	} 
+	}
 }
 
 

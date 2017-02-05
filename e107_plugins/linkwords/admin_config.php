@@ -254,7 +254,7 @@ function lw_act_opts($curval)
   return $ret;
 }
 
-		
+
 $deltest = array_flip($_POST);
 
 if(isset($deltest[LAN_DELETE]))
@@ -284,7 +284,7 @@ if (!isset($action)) $action = 'words';
 if (isset($_POST['saveopts_linkword']))
 {  // Save options page
   // Array of context flags
-	$pref['lw_context_visibility'] = array(			
+	$pref['lw_context_visibility'] = array(
 			'OLDDEFAULT' => FALSE,
 			'TITLE' => FALSE,
 			'USER_TITLE' => FALSE,
@@ -304,7 +304,7 @@ if (isset($_POST['saveopts_linkword']))
 	}
 	// Text area for 'exclude' pages - use same method as for menus
 	$pagelist = explode("\r\n", $_POST['linkword_omit_pages']);
-	for ($i = 0 ; $i < count($pagelist) ; $i++) 
+	for ($i = 0 ; $i < count($pagelist) ; $i++)
 	{
 		$pagelist[$i] = trim($pagelist[$i]);
 	}
@@ -393,7 +393,7 @@ else
 
 if (($action == 'words') || ($action == 'edit'))
 {
-		
+
 $text = "
 <form method='post' action='".e_SELF."?words'>
 <table class='table adminform'>
@@ -470,7 +470,7 @@ if (($action == 'words') || ($action == 'edit'))
 	  	<col style='width: 5%; vertical-align:top;' />
 	  	<col style='width: 10%; vertical-align:top; text-align: center;' />
 	  	<col style='width: 15%; vertical-align:top; text-align: center;' />
-		</colgroup>	
+		</colgroup>
 	<tr>
 		<td>".LAN_ID."</td>
 		<td>".LWLAN_5."</td>
@@ -570,7 +570,7 @@ $ns -> tablerender(LAN_OPTIONS, $text);
 
 function admin_config_adminmenu()
 {
-  if (e_QUERY) 
+  if (e_QUERY)
   {
 	$tmp = explode(".", e_QUERY);
 	$action = $tmp[0];
@@ -581,14 +581,14 @@ function admin_config_adminmenu()
   }
   $var['words']['text'] = LWLAN_24;
   $var['words']['link'] = "admin_config.php";
-	
+
   $var['options']['text'] = LAN_OPTIONS;
   $var['options']['link'] ="admin_config.php?options";
-	
+
   show_admin_menu(LWLAN_23, $action, $var);
 }
 
-	
+
 require_once(e_ADMIN."footer.php");
 */
 ?>

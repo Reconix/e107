@@ -22,7 +22,7 @@
 */
 
 if (!defined('e107_INIT')) { exit; }
-// if (!e107::isInstalled('linkwords')) exit; // This will break a site completely under some circumstance. 
+// if (!e107::isInstalled('linkwords')) exit; // This will break a site completely under some circumstance.
 
 
 class e_linkwords
@@ -32,9 +32,9 @@ class e_linkwords
 		global $pref, $admin_log;
 		/* constructor */
 		// Do an auto-update on the variable used to hook parsers - so we should only be called once
-		
+
 		e107::lan('linkwords',e_LANGUAGE); // e_PLUGIN."linkwords/languages/".e_LANGUAGE.".php"
-		
+
 		$hooks = explode(",",$pref['tohtml_hook']);
 		if (($key=array_search('linkwords',$hooks)) !== FALSE)
 		{
@@ -73,11 +73,11 @@ class e_linkwords
 	{
 		return $text;
 	}
-	
+
 	function linksproc($text,$first,$limit)
-	{  
+	{
 		return $text;		// Shouldn't get called - but just in case
-	} 
+	}
 }
 
 ?>
