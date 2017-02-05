@@ -44,17 +44,17 @@ class adminDownload extends download
          $this->advancedSearchFields = $_POST['download_advanced_search'];
       }
    }
-   
+
   /*
    function show_filter_form($action, $subAction, $id, $from, $amount)
      {
         global $e107, $mySQLdefaultdb, $pref, $user_pref;
         $frm = new e_form();
-  
+
         $filterColumns = ($user_pref['admin_download_disp'] ? $user_pref['admin_download_disp'] : array("download_name","download_class"));
       //   $url = $e107->url->getUrl('forum', 'thread', array('func' => 'view', 'id' => 123));
          $url = "admin_download.php";
-  
+
         // Search field
         $text .= "
              <script type='text/javascript'>
@@ -68,15 +68,15 @@ class adminDownload extends download
                        <td>".DOWLAN_198." ".$frm->text('download-search-text', $this->searchField, 50, array('size'=>50, 'class' => 'someclass'))."&nbsp;<a href='#download_search#download_advanced_search' class='e-swapit'>Switch to Advanced-Search</a></td>
                     </tr>
                  </table>
-  
+
                  ";
                     // Filter should use ajax to filter the results automatically after typing.
-  
+
   //			   $text .= "
      //         <div class='buttons-bar center'>
       //           <button type='submit' class='update' name='download_search_submit' value='no-value'><span>".DOWLAN_51."</span></button>
       //           <br/>
-  
+
       //        </div>";
                     $text.= "
               </fieldset>
@@ -175,16 +175,16 @@ class adminDownload extends download
               </fieldset>
               </div>
            </form>";
-  
+
         return $text;
      }
   */
-  
-   
-   
+
+
+
    /*
-   
-      
+
+
       function show_existing_items($action, $subAction, $id, $from, $amount)
       {
          global $sql, $rs, $ns, $tp, $mySQLdefaultdb, $pref, $user_pref;
@@ -220,10 +220,10 @@ class adminDownload extends download
             "download_visible"         => array("title"=>DOWLAN_43,  "type"=>"", "width"=>"auto", "thclass"=>""),
             "options"			        => array("title"=>LAN_OPTIONS, "width"=>"10%", "thclass"=>"center last", "forced"=>true)
            );
-   
+
          $filterColumns = ($user_pref['admin_download_disp']) ? $user_pref['admin_download_disp'] : array("download_name","download_class");
          $query = "SELECT d.*, dc.* FROM `#download` AS d LEFT JOIN `#download_category` AS dc ON dc. download_category_id=d.download_category";
-   
+
          if ($this->searchField) {
             $where = array();
             array_push($where, "download_name REGEXP('".$this->searchField."')");
@@ -286,14 +286,14 @@ class adminDownload extends download
                array_push($where, "download_class=".$this->advancedSearchFields['class']);
             }
             $where = (count($where) > 0 ? " WHERE ".implode(" AND ", $where) : "");
-   
+
             $query .= "$where ORDER BY {$sortorder} {$sortdirection}";
          }
          else
          {
             $query .= " ORDER BY ".($subAction ? $subAction : $sortorder)." ".($id ? $id : $sortdirection)."  LIMIT $from, $amount";
          }
-   
+
          $text .= "<fieldset id='downloads-list'><legend class='e-hideme'>".DOWLAN_7."</legend>";
          if ($dl_count = $sql->db_Select_gen($query))
          {
@@ -303,21 +303,21 @@ class adminDownload extends download
                       .$frm->thead($columnInfo,$filterColumns,"main.[FIELD].[ASC].[FROM]")."
                   <tbody>
                ";
-   
+
             $rowStyle = "even";
-   
+
             while ($row = $sql->db_Fetch())
             {
                $mirror = strlen($row['download_mirror']) > 0;
                $text .= "<tr>\n
                   <td class='center'>".$frm->checkbox("dl_selected[".$row["download_id"]."]", $row['download_id'])."</td>
                <td>".$row['download_id']."</td>\n";
-   
+
                // Display Chosen options
-   
+
                foreach($filterColumns as $disp)
                {
-   
+
                   switch ($disp)
                   {
                      case "download_name" :
@@ -410,7 +410,7 @@ class adminDownload extends download
                   }
                   $text .= "</td>";
                }
-   
+
                $text .= "
                      <td class='center'>
                         <a href='".e_SELF."?create.edit.".$row['download_id']."'>".ADMIN_EDIT_ICON."</a>
@@ -425,7 +425,7 @@ class adminDownload extends download
          {   // 'No downloads yet'
            $text .= "<div style='text-align:center'>".DOWLAN_6."</div>";
          }
-   
+
          // Next-Previous.
          $downloads = $sql->db_Count("download");
          if ($downloads > $amount && !$this->searchFields && !$this->advancedSearchFields)
@@ -434,17 +434,17 @@ class adminDownload extends download
             $text .= "<div class='buttons-bar center nextprev'>".$this->batch_options().
               $tp->parseTemplate("{NEXTPREV={$parms}}")."</div>";
          }
-   
+
          $text .= "</form></fieldset>";
-   
+
          return $text;
       }
    */
-   
+
 // ---------------------------------------------------------------------------
-  
+
   /*
-  
+
    function batch_options()
 	{
 	   $frm = new e_form();
@@ -477,7 +477,7 @@ class adminDownload extends download
 		}
 	}
 
-	
+
 	function batch_userclass($download_ids,$uclass,$mode='download_class')
 		{
 			$emessage = &eMessage::getInstance();
@@ -490,7 +490,7 @@ class adminDownload extends download
 				$emessage->add("It Failed", E_MESSAGE_ERROR);
 			}
 		}*/
-	
+
 
    // Given the string which is stored in the DB, turns it into an array of mirror entries
    // If $byID is true, the array index is the mirror ID. Otherwise its a simple array
@@ -1596,15 +1596,15 @@ class adminDownload extends download
          ";
          $ns->tablerender(LAN_DL_OPTIONS, $text);
       }
-    * 
+    *
     */
-   
 
-   
+
+
 /*
-   
-   
-   
+
+
+
    function show_upload_list() {
       global $ns, $sql, $gen, $e107, $tp;
 
@@ -2124,7 +2124,7 @@ class adminDownload extends download
           ";
        return $text;
     }*/
- 
+
    /**
     *
     * @private
@@ -2143,7 +2143,7 @@ class adminDownload extends download
         return $text;
      }
   */
- 
+
 
 
 
@@ -2200,6 +2200,6 @@ class adminDownload extends download
 		save_prefs('user');
 	}
  */
- 
+
 }
 ?>

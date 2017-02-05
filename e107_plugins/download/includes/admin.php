@@ -12,7 +12,7 @@
  * $Id: admin.php 12212 2011-05-11 22:25:02Z e107coders $
 */
 
-if (!defined('e107_INIT')){ exit; } 
+if (!defined('e107_INIT')){ exit; }
 
 class plugin_download_admin extends e_admin_dispatcher
 {
@@ -42,7 +42,7 @@ class plugin_download_admin extends e_admin_dispatcher
 			'path' 			=> null,
 			'ui' 			=> 'download_mirror_form_ui',
 			'uipath' 		=> null
-		),	
+		),
 	);
 
 	/* Both are optional
@@ -58,23 +58,23 @@ class plugin_download_admin extends e_admin_dispatcher
 	protected $adminMenu = array(
 		'main/list'			=> array('caption'=> LAN_MANAGE, 'perm' => 'P'),
 		'main/create' 		=> array('caption'=> LAN_CREATE, 'perm' => 'P'),
-		
+
 		'other0' 		=> array('divider'=> true),
-		
+
 		'cat/list'			=> array('caption'=> LAN_CATEGORIES, 'perm'=>'P'),
 		'cat/create' 		=> array('caption'=> LAN_CREATE_CATEGORY, 'perm' => 'Q'),
-		
+
 		'other1' 		=> array('divider'=> true),
-		
+
 		'mirror/list'		=> array('caption'=> DOWLAN_128, 'perm' => 'P'),
 		'mirror/create'		=> array('caption'=> DOWLAN_143, 'perm' => 'P'),
-		
+
 		'other2' 		=> array('divider'=> true),
-			
+
 		'main/settings' 	=> array('caption'=> LAN_PREFS, 'perm' => 'P'),
 	//	'main/maint' 		=> array('caption'=> DOWLAN_165, 'perm' => 'P'),
 		'main/limits'		=> array('caption'=> DOWLAN_112, 'perm' => 'P'),
-	
+
 	//	'main/mirror'		=> array('caption'=> DOWLAN_128, 'perm' => 'P')
 	);
 /*
@@ -125,7 +125,7 @@ class plugin_download_admin extends e_admin_dispatcher
 
 
 class download_cat_ui extends e_admin_ui
-{ 	 	 
+{
 		protected $pluginTitle	= LAN_PLUGIN_DOWNLOAD_NAME;
 		protected $pluginName	= 'download';
 		protected $table 		= "download_category";
@@ -133,23 +133,23 @@ class download_cat_ui extends e_admin_ui
 		protected $perPage 		= 0; //no limit
 		protected $listOrder = 'download_category_order';
 		// protected $defaultOrderField = 'download_category_parent,download_category_order';
-	//	protected $listQry = "SELECT * FROM #faq_info"; // without any Order or Limit. 
+	//	protected $listQry = "SELECT * FROM #faq_info"; // without any Order or Limit.
 	//	protected $editQry = "SELECT * FROM #faq_info WHERE faq_info_id = {ID}";
-	 	 	
+
 		protected $fields = array(
 			'checkboxes'						=> array('title'=> '',				'type' => null, 			'width' =>'5%', 'forced'=> TRUE, 'thclass'=>'center', 'class'=>'center'),
 			'download_category_icon' 			=> array('title'=> LAN_ICON,		'type' => 'method',			'width' => '5%', 'thclass' => 'center','class'=>'center','writeParms'=>'glyphs=1' ),
-			'download_category_id'				=> array('title'=> LAN_ID,			'type' => 'number',			'width' =>'5%', 'forced'=> TRUE),     		
+			'download_category_id'				=> array('title'=> LAN_ID,			'type' => 'number',			'width' =>'5%', 'forced'=> TRUE),
          	'download_category_name' 			=> array('title'=> LAN_TITLE,		'type' => 'text',			'inline' => true, 'width' => 'auto', 'thclass' => 'left', 'writeParms'=>'size=xxlarge'),
        		'download_category_sef' 			=> array('title'=> LAN_SEFURL,		'type' => 'text',			'inline' => true,	'width' => 'auto', 'thclass' => 'left', 'writeParms'=>'size=xxlarge'),
-         
+
 	     	'download_category_description' 	=> array('title'=> LAN_DESCRIPTION,	'type' => 'bbarea',			'width' => '30%', 'readParms' => 'expand=...&truncate=50&bb=1'), // Display name
-		 	'download_category_parent' 			=> array('title'=> LAN_PARENT,		'type' => 'method',			'width' => '5%', 'batch' => TRUE, 'filter'=>TRUE),		
+		 	'download_category_parent' 			=> array('title'=> LAN_PARENT,		'type' => 'method',			'width' => '5%', 'batch' => TRUE, 'filter'=>TRUE),
 			'download_category_class' 			=> array('title'=> LAN_VISIBILITY,	'type' => 'userclass',		'inline' => true, 'width' => 'auto', 'data' => 'int', 'batch' => TRUE, 'filter'=>TRUE),
 			'download_category_order' 			=> array('title'=> LAN_ORDER,		'type' => 'number',	'data'=>'int',		'width' => '5%', 'thclass' => 'right', 'class'=> 'right' ),
 			'options' 							=> array('title'=> LAN_OPTIONS,		'type' => null,				'width' => '10%', 'forced'=>TRUE, 'thclass' => 'center last', 'class' => 'center')
-		);	
-		
+		);
+
 
 	function getDownloadCategoryTree($id = false, $default = 'n/a')
 	{
@@ -162,22 +162,22 @@ class download_cat_ui extends e_admin_ui
 		{
 			$cats[$row['download_category_id']] = $row['download_category_name'];
 		}
-		
+
 		if($id)
 		{
 			return $cats[$id];
 		}
-		
+
 		return $cats;
-	}	
-		
+	}
+
 }
 
 class download_cat_form_ui extends e_admin_form_ui
 {
 	public function download_category_parent($curVal,$mode)
 	{
-		// TODO - catlist combo without current cat ID in write mode, parents only for batch/filter 
+		// TODO - catlist combo without current cat ID in write mode, parents only for batch/filter
 		// Get UI instance
 		$controller = $this->getController();
 		switch($mode)
@@ -185,11 +185,11 @@ class download_cat_form_ui extends e_admin_form_ui
 			case 'read':
 				return e107::getParser()->toHTML($controller->getDownloadCategoryTree($curVal), false, 'TITLE');
 			break;
-			
+
 			case 'write':
 				return $this->selectbox('download_category_parent', $controller->getDownloadCategoryTree(), $curVal);
 			break;
-			
+
 			case 'filter':
 			case 'batch':
 				return $controller->getDownloadCategoryTree();
@@ -240,10 +240,10 @@ class download_main_admin_ui extends e_admin_ui
 		protected $eventName = 'download';
 		protected $table = "download"; // DB Table, table alias is supported. Example: 'r.release'
 		protected $listQry = "SELECT m.*,u.user_id,u.user_name FROM #download AS m LEFT JOIN #user AS u ON m.download_author = u.user_id "; // without any Order or Limit.
-		
+
 		//required - default column user prefs
 		protected $fieldpref = array('checkboxes', 'download_image', 'download_id', 'download_datestamp', 'download_category', 'download_name', 'download_active', 'download_class', 'fb_order', 'options');
-	
+
 		//
 
 		// optional - required only in case of e.g. tables JOIN. This also could be done with custom model (set it in init())
@@ -251,57 +251,57 @@ class download_main_admin_ui extends e_admin_ui
 
 		// required - if no custom model is set in init() (primary id)
 		protected $pid = "download_id";
-		
+
 		// optional
 		protected $perPage = 10;
 
 		// default - true - TODO - move to displaySettings
 		protected $batchDelete = true;
 
-	
+
     	protected  $fields = array(
 			'checkboxes'				=> array('title'=> '', 					'type' => null,			'data' => null,			'width'=>'5%', 		'thclass' =>'center', 'forced'=> TRUE,  'class'=>'center', 'toggle' => 'e-multiselect'),
 			'download_id'				=> array('title'=> ID, 					'type' => 'number',		'data' => 'int',		'width'=>'5%',		'thclass' => '',	'forced'=> TRUE, 'primary'=>TRUE/*, 'noedit'=>TRUE*/), //Primary ID is not editable
-            'download_name' 			=> array('title'=> LAN_TITLE, 			'type' => 'text', 		'data' => 'str',		'inline'=>true, 'width' => 'auto',	'thclass' => ''),		
+            'download_name' 			=> array('title'=> LAN_TITLE, 			'type' => 'text', 		'data' => 'str',		'inline'=>true, 'width' => 'auto',	'thclass' => ''),
             'download_url'	   			=> array('title'=> DOWLAN_13, 			'type' => 'url', 	'data' => 'str',		'width'=>'auto',	'thclass' => '', 'batch' => TRUE, 'filter'=>TRUE),
 		    'download_sef'	   			=> array('title'=> LAN_SEFURL, 			'type' => 'text', 	'inline'=>true, 'data' => 'str',		'width'=>'auto',	'thclass' => '', 'batch' => TRUE, 'filter'=>TRUE, 'writeParms'=>'sef=download_name'),
 		  	'download_keywords'	   	=> array('title'=> LAN_KEYWORDS, 		'type' => 'tags', 	'inline'=>true, 'data' => 'str',		'width'=>'auto',	'thclass' => ''),
-		
+
 			'download_author' 			=> array('title'=> LAN_AUTHOR,			'type' => 'user', 		'data' => 'str',		'width' => 'auto',	'thclass' => 'left'),
-         	'download_author_email' 	=> array('title'=> DOWLAN_16, 			'type' => 'email', 		'data' => 'str',		'width' => 'auto',	'thclass' => 'left'),  
+         	'download_author_email' 	=> array('title'=> DOWLAN_16, 			'type' => 'email', 		'data' => 'str',		'width' => 'auto',	'thclass' => 'left'),
          	'download_author_website' 	=> array('title'=> DOWLAN_17, 			'type' => 'url', 		'data' => 'str',		'width' => 'auto',	'thclass' => 'left'),
             'download_description' 		=> array('title'=> LAN_DESCRIPTION,		'type' => 'bbarea',			'width' => '30%', 'readParms' => 'expand=...&truncate=50&bb=1'), // Display name
-		 	
-		 	'download_filesize' 		=> array('title'=> DOWLAN_66,			'type' => 'text', 		'data' => 'str',		'width' => 'auto',	'thclass' => 'right', 'class' => 'right'),			
+
+		 	'download_filesize' 		=> array('title'=> DOWLAN_66,			'type' => 'text', 		'data' => 'str',		'width' => 'auto',	'thclass' => 'right', 'class' => 'right'),
 		 	'download_requested' 		=> array('title'=> DOWLAN_29, 			'type' => 'text', 		'data' => 'str',		'width' => 'auto',	'thclass' => 'right', 'class' => 'right'),
-			'download_category' 		=> array('title'=> LAN_CATEGORY,		'type' => 'dropdown',	'width' => 'auto',	'inline'=>true, 'batch' => TRUE, 'filter'=>TRUE),		
+			'download_category' 		=> array('title'=> LAN_CATEGORY,		'type' => 'dropdown',	'width' => 'auto',	'inline'=>true, 'batch' => TRUE, 'filter'=>TRUE),
 			'download_active'			=> array('title'=> DOWLAN_21,			'type' => 'method', 		'data' => 'int',		'width' => '5%',	'thclass' => 'center', 'class' => 'center',	'batch' => TRUE, 'filter'=>TRUE, 'noedit' => true),
 			'download_datestamp' 		=> array('title'=> LAN_DATE, 			'type' => 'datestamp', 	'data' => 'int',		'width' => 'auto',	'thclass' => '', 'readParms' => 'long', 'writeParms' => ''),
-			
+
 			'download_thumb' 			=> array('title'=> DOWLAN_20,			'type' => 'image', 		'data' => 'str',		'width' => '100px',	'thclass' => 'center', 'class'=>'center', 'readParms'=>'thumb=60&thumb_urlraw=0&thumb_aw=60&legacyPath={e_FILE}downloadthumbs',  'readonly'=>TRUE ),
 			'download_image' 			=> array('title'=> DOWLAN_19,			'type' => 'image', 		'data' => 'str',		'width' => '100px',	'thclass' => 'center', 'class'=>'center', 'readParms'=>'thumb=60&thumb_urlraw=0&thumb_aw=60&legacyPath={e_FILE}downloadimages', 'readonly'=>TRUE,	'batch' => FALSE, 'filter'=>FALSE),
 			'download_comment'			=> array('title'=> DOWLAN_102,			'type' => 'boolean', 		'data' => 'int',		'width' => '5%',	'thclass' => 'center',	'batch' => TRUE, 'filter'=>TRUE, 'noedit' => true),
-			
-			'download_class' 			=> array('title'=> DOWLAN_113,			'type' => 'userclass',		'width' => 'auto', 'inline'=>true, 'data' => 'int','batch' => TRUE, 'filter'=>TRUE),		
+
+			'download_class' 			=> array('title'=> DOWLAN_113,			'type' => 'userclass',		'width' => 'auto', 'inline'=>true, 'data' => 'int','batch' => TRUE, 'filter'=>TRUE),
 			'download_visible' 			=> array('title'=> LAN_VISIBILITY,		'type' => 'userclass',		'width' => 'auto', 'data' => 'int', 'batch' => TRUE, 'filter'=>TRUE),
-			
+
 			'download_mirror' 			=> array('title'=> DOWLAN_128,			'type' => 'text', 		'data' => 'str',		'width' => '10%',	'thclass' => 'center' ),
 			'download_mirror_type' 		=> array('title'=> DOWLAN_195,			'type' => 'method', 		'data' => 'str',		'width' => '10%',	'thclass' => 'center' ),
-		
-	
-		//	'download_order' 	=> array('title'=> LAN_ORDER,	'type' => 'text',			'width' => '5%', 'thclass' => 'left' ),					
+
+
+		//	'download_order' 	=> array('title'=> LAN_ORDER,	'type' => 'text',			'width' => '5%', 'thclass' => 'left' ),
 			'issue' 					=> array('title'=> 'Issue', 		'type' => 'method', 		'data' => null,	'nolist'=>TRUE, 'noedit'=>TRUE, 'filter'=>TRUE),
 			'options' 					=> array('title'=> LAN_OPTIONS, 		'type' => null, 		'data' => null,			'width' => '10%',	'thclass' => 'center last', 'class' => 'center last', 'forced'=>TRUE)
 		);
-		
-		
+
+
 		protected $action 		= array();
 		protected $subAction 	= array();
 		protected $id			= "";
-		
-		
-		
-/*		
+
+
+
+/*
 $columnInfo = array(
 		 "checkboxes"	   			=> array("title" => "", "forced"=> TRUE, "width" => "3%", "thclass" => "center first", "toggle" => "dl_selected"),
          "download_id"              => array("title"=>LAN_ID,  "type"=>"", "width"=>"auto", "thclass"=>"", "forced"=>true),
@@ -311,13 +311,13 @@ $columnInfo = array(
          "download_author_email"    => array("title"=>DOWLAN_16,  "type"=>"", "width"=>"auto", "thclass"=>""),
          "download_author_website"  => array("title"=>DOWLAN_17,  "type"=>"", "width"=>"auto", "thclass"=>""),
          "download_description"     => array("title"=>DOWLAN_18,  "type"=>"", "width"=>"auto", "thclass"=>""),
-         
+
  * 		 "download_filesize"        => array("title"=>DOWLAN_66,  "type"=>"", "width"=>"auto", "thclass"=>"right"),
          "download_requested"       => array("title"=>DOWLAN_29,  "type"=>"", "width"=>"auto", "thclass"=>"center"),
          "download_category"        => array("title"=>DOWLAN_11,  "type"=>"", "width"=>"auto", "thclass"=>""),
          "download_active"          => array("title"=>DOWLAN_21,  "type"=>"", "width"=>"auto", "thclass"=>"center"),
          "download_datestamp"       => array("title"=>DOWLAN_182, "type"=>"", "width"=>"auto", "thclass"=>""),
-         
+
  * 		 "download_thumb"           => array("title"=>DOWLAN_20,  "type"=>"", "width"=>"auto", "thclass"=>"center"),
          "download_image"           => array("title"=>DOWLAN_19,  "type"=>"", "width"=>"auto", "thclass"=>""),
          "download_comment"         => array("title"=>DOWLAN_102, "type"=>"", "width"=>"auto", "thclass"=>"center"),
@@ -327,8 +327,8 @@ $columnInfo = array(
          "download_visible"         => array("title"=>DOWLAN_43,  "type"=>"", "width"=>"auto", "thclass"=>""),
 		 "options"			        => array("title"=>LAN_OPTIONS, "width"=>"10%", "thclass"=>"center last", "forced"=>true)
 		);
-*/		
-		
+*/
+
 
 
 
@@ -348,43 +348,43 @@ $columnInfo = array(
 			'pref_name' 				=> array('title'=> 'name', 'type' => 'text', 'data' => 'string', 'validate' => 'regex', 'rule' => '#^[\w]+$#i', 'help' => 'allowed characters are a-zA-Z and underscore')
 		);
 
-		
+
 		public function observe()
 		{
-			if (isset($_POST['submit_download'])) // Create or Update a Download. 
+			if (isset($_POST['submit_download'])) // Create or Update a Download.
 			{
 				$this->submit_download();
 			}
-			
-			if (isset($_POST['updatedownlaodoptions'])) // Save Download Options. 
+
+			if (isset($_POST['updatedownlaodoptions'])) // Save Download Options.
 			{
 				$this->saveSettings();
 			}
-			
+
 			if (isset($_POST['submit_mirror']))
 			{
 				$this->submit_mirror();
 			}
-					
+
 			if (isset($_POST))
 			{
 				e107::getCache()->clear("download_cat");
 			}
 		}
-		
-		
-		
+
+
+
 		// optional
 		public function init()
 		{
-			
+
 			$this->action 		= vartrue($_GET['mode']);
 			$this->subAction 	= vartrue($_GET['action']);
 			$this->id			= vartrue($_GET['id']);
-			
+
 			$this->observe();
-			
-			
+
+
 			$categories = array();
 			if(e107::getDb()->select('download_category'))
 			{
@@ -395,29 +395,29 @@ $columnInfo = array(
 					$categories[$id] = $row['download_category_name'];
 				}
 			}
-	
+
 			$this->fields['download_category']['writeParms'] 		= $categories;
 			// DEPRECATED
 			//$this->fields['fb_rendertype']['writeParms'] 	= array(FBLAN_23,FBLAN_24);
 			//$this->fields['fb_mode']['writeParms'] 			= array(FBLAN_13,FBLAN_14);
-			
+
 			$this->fields['download_category']['readParms'] 		= $categories;
-			
-			// Custom filter queries 
+
+			// Custom filter queries
 			if(vartrue($_GET['filter_options']))
 			{
 				list($filter,$mode) = explode("__",$_GET['filter_options']);
-				
+
 				if($mode == 'missing')
 				{
 					$this->filterQry = $this->missingFiles();
 				}
-				
+
 				if($mode == 'nocategory')
 				{
 					$this->filterQry = "SELECT * FROM `#download` WHERE download_category=0";
 				}
-      
+
 	  			if($mode == 'duplicates')
 				{
 					$this->filterQry = "SELECT GROUP_CONCAT(d.download_id SEPARATOR ',') as gc, d.download_id, d.download_name, d.download_url, dc.download_category_name
@@ -426,58 +426,58 @@ $columnInfo = array(
                       GROUP BY d.download_url
                       HAVING COUNT(d.download_id) > 1";
 				}
-				
+
 				if($mode == "filesize")
 				{
-					$this->filterQry = $this->missingFiles('filesize');	
+					$this->filterQry = $this->missingFiles('filesize');
 				}
 
-			}	
-			
+			}
+
 		}
 
 
 		/*
-		 * Return a query for Missing Files and Filesize mismatch 
+		 * Return a query for Missing Files and Filesize mismatch
 		 */
 		public function missingFiles($mode='missing')
 		{
-			
+
 			$sql = e107::getDb();
 			$count = array();
-			
+
             if ($sql->gen("SELECT * FROM `#download` ORDER BY download_id"))
             {
                while($row = $sql->fetch())
 			   {
                		if (!is_readable(e_DOWNLOAD.$row['download_url']))
-					{		 
-					 	$count[] = $row['download_id']; 				 
+					{
+					 	$count[] = $row['download_id'];
 					}
 					elseif($mode == 'filesize')
 					{
 					 	$filesize = filesize(e_DOWNLOAD.$row['download_url']);
                      	if ($filesize <> $row['download_filesize'])
 						{
-							$count[] = $row['download_id'];	
+							$count[] = $row['download_id'];
 						}
 					}
-					 
+
                }
             }
-            
+
 			if($count > 0)
 			{
 				return "SELECT * FROM `#download` WHERE download_id IN (".implode(",",$count).")";
 			}
-			
+
 		}
-		
-		
-		
+
+
+
 		function orphanFiles() //TODO
 		{
-			
+
 			$files = e107::getFile()->get_files(e_DOWNLOAD);
             $foundSome = false;
             foreach($files as $file)
@@ -534,34 +534,34 @@ $columnInfo = array(
 			global $adminDownload;
 			$this->create_download();
 		}
-			
+
 		function importPage()
 		{
 			$this->batchImportForm();
 		}
-	
+
 		function settingsPage()
 		{
 			// global $adminDownload;
 			$this->show_download_options();
 		}
-		
+
 		function limitsPage()
 		{
 			$this->showLimits();
 		}
-		
+
 		function maintPage()
 		{
-			showMaint();	
+			showMaint();
 		}
-	
+
 		function mirrorPage()
 		{
 			global $adminDownload;
 			$this->show_existing_mirrors();
 		}
-		
+
 
 
 		function showLimits()
@@ -570,9 +570,9 @@ $columnInfo = array(
 			$ns = e107::getRender();
 			$tp = e107::getParser();
 			$pref = e107::getPref();
-			
+
 			//global $pref;
-			
+
 			if ($sql->select('userclass_classes','userclass_id, userclass_name'))
 			{
 				$classList = $sql->db_getList();
@@ -598,7 +598,7 @@ $columnInfo = array(
 				{
 					$chk = "";
 				}
-		
+
 				$txt .= "
 					<input type='checkbox' name='download_limits' value='on'{$chk}/> ".DOWLAN_125."
 					</td>
@@ -610,7 +610,7 @@ $columnInfo = array(
 					<th class='fcaption'>".DOWLAN_108."</th>
 				</tr>
 			";
-		
+
 			if(is_array(vartrue($limitList)))
 			{
 				foreach($limitList as $row)
@@ -636,7 +636,7 @@ $columnInfo = array(
 			<div class='buttons-bar center'>
 			<input type='submit' class='btn btn-default button' name='updatelimits' value='".DOWLAN_115."'/>
 			</div>
-			
+
 			<table class='table adminlist'>
 			<tr>
 			<td colspan='4'><br/><br/></td>
@@ -653,33 +653,33 @@ $columnInfo = array(
 			</td>
 			</tr>
 			<tr>
-			
+
 			";
-		
+
 			$txt .= "</table>
 			<div class='buttons-bar center'>
 			<input type='submit' class='btn btn-default button' name='addlimit' value='".DOWLAN_114."'/>
 			</div></form>";
 			echo $txt;
-		
+
 		//	$ns->tablerender(DOWLAN_112, $txt);
 			// require_once(e_ADMIN.'footer.php');
 			// exit;
 		}
 
 
-		
-		function showMaint() //XXX Deprecated. 
+
+		function showMaint() //XXX Deprecated.
 		{
 			$mes = e107::getMessage();
 			$mes->addInfo("Deprecated Area - please use filter instead under 'Manage' ");
-			
+
 			global $pref;
 			$ns = e107::getRender();
 			$sql = e107::getDb();
 			$frm = e107::getForm();
 			$tp = e107::getParser();
-			
+
 		   if (isset($_POST['dl_maint'])) {
 		      switch ($_POST['dl_maint'])
 		      {
@@ -785,7 +785,7 @@ $columnInfo = array(
 		            else
 		            {
 		            	e107::getMessage()->addInfo(DOWLAN_174);
-		  
+
 		            }
 		            break;
 		         }
@@ -802,7 +802,7 @@ $columnInfo = array(
 		                     if (!$foundSome)
 							 {
 		   		              // $text .= $rs->form_open("post", e_SELF."?".e_QUERY, "myform");
-								 
+
 		                        $text .= '<form method="post" action="'.e_SELF.'?'.e_QUERY.'" id="myform">
 		                        		<table class="adminlist">';
 		                        $text .= '<tr>';
@@ -860,7 +860,7 @@ $columnInfo = array(
 		                     $text .= '</tr>';
 		                     $foundSome = true;
 		                  }
-		                  
+
 		                  $text .= '<tr>';
 		                  $text .= '<td>'.$row['download_id'].'</td>';
 		                  $text .= "<td><a href='".e_PLUGIN."download/download.php?view.".$row['download_id']."'>".$e107->tp->toHTML($row['download_name']).'</a></td>';
@@ -1062,7 +1062,7 @@ $columnInfo = array(
 		      						".$eform->radio('dl_maint', 'log').$eform->label(DOWLAN_191, 'dl_maint', 'log')."
 		      					</td>
 		      				</tr>
-		
+
 		      				</tbody>
 		      			</table>
 		      			<div class='buttons-bar center'>
@@ -1072,20 +1072,20 @@ $columnInfo = array(
 		      	</form>
 		      	";
 		   }
-		   
+
 		   echo $text;
 		   // 	$ns->tablerender(DOWLAN_165.$title, $text);
 		}
 
 
-		
-		
+
+
 		function saveSettings()
 		{
 			global $admin_log,$pref;
-					
+
 			$tp = e107::getParser();
-			
+
 			$temp = array();
 			$temp['download_php'] = $_POST['download_php'];
 			$temp['download_view'] = $_POST['download_view'];
@@ -1098,36 +1098,36 @@ $columnInfo = array(
 			$temp['agree_text'] = $tp->toDB($_POST['agree_text']);
 			$temp['download_denied'] = $tp->toDB($_POST['download_denied']);
 			$temp['download_reportbroken'] = $_POST['download_reportbroken'];
-						
+
 			if ($_POST['download_subsub']) $temp['download_subsub'] = '1'; else $temp['download_subsub'] = '0';
 			if ($_POST['download_incinfo']) $temp['download_incinfo'] = '1'; else $temp['download_incinfo'] = '0';
-			
+
 			e107::getConfig('core')->setPref($temp)->save(false);
 
 		}
 
-			
-		// Create Download FORM. 
+
+		// Create Download FORM.
 	   function create_download()
 	   {
 	   		$action		= $this->action;
 			$subAction	= $this->subAction;
 			$id			= $this->id;
-	   	
+
 			$sql = e107::getDb();
 			$tp = e107::getParser();
 			$fl = e107::getFile();
 			$mes = e107::getMessage();
-			
+
 		//	print_a($this);
-	
+
 	      	global $e107, $cal, $rs, $ns, $file_array, $image_array, $thumb_array;
 	      	require_once(e_PLUGIN.'download/download_shortcodes.php');
 			require_once(e_PLUGIN.'download/handlers/download_class.php');
 	      	require_once(e_HANDLER."form_handler.php");
-			
+
 			$download = new download;
-	
+
 		    if ($file_array = $fl->get_files(e_DOWNLOAD, "","standard",5))
 		    {
 		    	sort($file_array);
@@ -1156,18 +1156,18 @@ $columnInfo = array(
 	      {
 	         sort($thumb_array);
 	      }
-	
+
 	      $frm = new e_form();
 	      $mirrorArray = array();
-	
+
 	      $download_status[0] = DOWLAN_122;
 	      $download_status[1] = DOWLAN_123;
 	      $download_status[2] = DOWLAN_124;
-	
+
 	      if (!$sql->select("download_category"))
 	      {
 	         //$ns->tablerender(ADLAN_24, "<div style='text-align:center'>".DOWLAN_5."</div>");
-	         $mes->addInfo(DOWLAN_5); 
+	         $mes->addInfo(DOWLAN_5);
 	         return;
 	      }
 	      $download_active = 1;
@@ -1177,18 +1177,18 @@ $columnInfo = array(
 	         {
 	            $row = $sql->fetch();
 	            extract($row);
-	
+
 	            $mirrorArray = $this->makeMirrorArray($row['download_mirror']);
 	         }
 	      }
-	
+
 	      if ($subAction == "dlm" && !$_POST['submit'])
 	      {
 	         require_once(e_PLUGIN.'download/download_shortcodes.php');
 	         if ($sql->select("upload", "*", "upload_id=".$id))
 	         {
 	            $row = $sql->fetch();
-	
+
 	            $download_category = $row['upload_category'];
 	            $download_name = $row['upload_name'].($row['upload_version'] ? " v" . $row['upload_version'] : "");
 	            $download_url = $row['upload_file'];
@@ -1201,10 +1201,10 @@ $columnInfo = array(
 	            $download_author = substr($row['upload_poster'], (strpos($row['upload_poster'], ".")+1));
 	         }
 	      }
-	
-	
+
+
 	      $text = "
-	     
+
 	         <ul class='nav nav-tabs'>
 	            <li class='active'><a data-toggle='tab' href='#download-create'>".DOWLAN_175."</a></li>
 	            <li><a data-toggle='tab' href='#download-edit-external'>".DOWLAN_176."</a></li>
@@ -1213,18 +1213,18 @@ $columnInfo = array(
 	         <form method='post' action='".e_SELF."?".e_QUERY."' id='myform'>
 	          <div class='tab-content'>
 	          <div class='tab-pane active' id='download-create'>
-	            
-	               
+
+
 	                  <table class='table adminform' style='margin:0'>
 	                     <tr>
 	                        <td>".DOWLAN_13."</td>
 	                        <td style='width:80%'>
 	                           <div>".DOWLAN_131."&nbsp;&nbsp;";
-							  
+
 	                   //       $text .= "<select name='download_url' class='form-control'>
 	                  //               <option value=''>&nbsp;</option>\n";
-	   
-	
+
+
 	      $counter = 0;
 	      while (isset($file_array[$counter]))
 	      {
@@ -1235,32 +1235,32 @@ $columnInfo = array(
 	            $selected = " selected='selected'";
 	            $found = 1;
 	         }
-	
+
 	     //    $text .= "<option value='".$fpath."' $selected>".$fpath."</option>\n";
 	         $counter++;
 	      }
-	
+
 	      if (preg_match("/http:|https:|ftp:/", $download_url))
 	      {
 	         $download_url_external = $download_url;
 	         $download_url = '';
 	      }
-	
+
 	      $etext = " - (".DOWLAN_68.")";
 	      if (file_exists(e_UPLOAD.$download_url))
 	      {
 	         $etext = "";
 	      }
-	
+
 	      if (!$found && $download_url)
 	      {
 	    //     $text .= "<option value='".$download_url."' selected='selected'>".$download_url.$etext."</option>\n";
 	      }
-	
+
 	  //    $text .= "             </select>";
-	  
+
 	  	$text .= e107::getForm()->filepicker("download_url",$download_url,DOWLAN_131,"media=download_file&title=Choose a file");
-	  
+
 	      $text .= "
 	                        </div>
 	                     </td>
@@ -1295,7 +1295,7 @@ $columnInfo = array(
 	                  <tr>
 	                     <td style='width:20%'><span title='".DOWLAN_129."' style='cursor:help'>".DOWLAN_128."</span></td>
 	                     <td style='width:80%'>";
-	
+
 	      // See if any mirrors to display
 	      if (!$sql -> select("download_mirror"))
 	      {   // No mirrors defined here
@@ -1313,13 +1313,13 @@ $columnInfo = array(
 	                        <div {$opt}>
 	                           <select name='download_mirror_name[]' class='form-control'>
 	                              <option value=''>&nbsp;</option>";
-	
+
 	            foreach ($mirrorList as $mirror)
 	            {
 	               extract($mirror);
 	               $text .= "<option value='{$mirror_id}'".($mirror_id == $mirrorArray[($count-1)]['id'] ? " selected='selected'" : "").">{$mirror_name}</option>\n";
 	            }
-	
+
 	            $text .= "</select>
 	                           <input  class='form-control' type='text' name='download_mirror[]' style='width: 60%;' value=\"".$mirrorArray[($count-1)]['url']."\" maxlength='200'/>
 	                           <input  class='form-control' type='text' name='download_mirror_size[]' style='width: 15%;' value=\"".$mirrorArray[($count-1)]['filesize']."\" maxlength='10'/>";
@@ -1348,7 +1348,7 @@ $columnInfo = array(
 	                     </td>
 	                  </tr>";
 	      }      // End of mirror-related stuff
-	
+
 	      $download_author = $subAction != "edit" && $download_author == "" ? USERNAME : $download_author;//TODO what if editing an no author specified
 	      $download_author_email = $subAction != "edit" && $download_author_email == "" ? USEREMAIL : $download_author_email;
 	      $text .= "
@@ -1360,11 +1360,11 @@ $columnInfo = array(
 	                  <tr>
 	                     <td style='width:20%'>".DOWLAN_11."</td>
 	                     <td style='width:80%'>";
-	                     
-	                     
+
+
 	      $text .= $download->getCategorySelectList($download_category);
 	   // $text .= download::getCategorySelectList($download_category);
-		
+
 	      $text .= "     </td>
 	                  </tr>
 	                  <tr>
@@ -1396,10 +1396,10 @@ $columnInfo = array(
 	                     <td style='width:80%'>
 	      ";
 	      $text .= $frm->bbarea('download_description',$download_description);
-		  
+
 	      $text .= "     </td>
 	                  </tr>
-	                 
+
 	                  <tr>
 	                     <td style='width:20%'>".DOWLAN_19."</td>
 	                     <td style='width:80%'>";
@@ -1414,9 +1414,9 @@ $columnInfo = array(
 					 }
 									 $text .= "     </select>";
 										   */
-		   
+
 		$text .= $frm->imagepicker('download_image', $download_image,'',array('media'=>'download_image', 'legacyPath'=>'{e_FILE}downloadimages'));
-		  
+
 	      if ($subAction == "dlm" && $download_image)
 	      {
 	         $text .= "
@@ -1424,12 +1424,12 @@ $columnInfo = array(
 	      }
 	      $text .= "     </td>
 	                  </tr>";
-	                  
-	                  
-	                  
-	      if(is_dir(e_FILE."downloadthumbs")) // Legacy 
-	      {            
-	                  
+
+
+
+	      if(is_dir(e_FILE."downloadthumbs")) // Legacy
+	      {
+
 	           $text .= "
 	                 <tr>
 			            <td style='width:20%'>".DOWLAN_20."</td>
@@ -1445,17 +1445,17 @@ $columnInfo = array(
 						   }
 										 $text .= "        </select>";
 						   */
-				 
+
 				 $text .= $frm->imagepicker('download_thumb', $download_thumb,'',array('media'=>'download_thumb', 'legacyPath'=>'{e_FILE}downloadthumbs'));
-				 
-				 
+
+
 			    $text .= "
 			                </td>
 			              </tr>";
-	      }   
-	      
-		  
-		           
+	      }
+
+
+
 			$text .= "
 	                  <tr>
 	                     <td style='width:20%'>".LAN_DATESTAMP."</td>
@@ -1463,33 +1463,33 @@ $columnInfo = array(
 	      if (!$download_datestamp){
 	           $download_datestamp = time();
 	      }
-	
+
 			$text .= $frm->datepicker('download_datestamp',$download_datestamp);
-			
+
 	  //    $update_checked = ($_POST['update_datestamp']) ? "checked='checked'" : "";
 	  //    $text .= "        &nbsp;&nbsp;<span><input type='checkbox' value='1' name='update_datestamp' $update_checked/>".DOWLAN_148."</span>";
-		  
+
 		  $text .= "
 	                     </td>
 	                  </tr>
-	                  
+
 	     			 <tr>
 	                     <td >".LAN_SEFURL."</td>
 	                     <td class='input-group' style='width:80%'>
 	                        ".$frm->renderElement('download_sef',$download_sef, array('type'=>'text', 'writeParms'=>array('sef'=>'download_name','size'=>'xxlarge')))."
 	                     </td>
-	                  </tr> 
-	                  
-	                  
+	                  </tr>
+
+
 	                 <tr>
 	                     <td >".LAN_KEYWORDS."</td>
 	                     <td style='width:80%'>".$frm->tags('download_keywords',$download_keywords)."
-	                    
+
 	                     </td>
-	                  </tr>  
-	                  
-					                
-	                  
+	                  </tr>
+
+
+
 	                  <tr>
 	                     <td style='width:20%'>".DOWLAN_21."</td>
 	                     <td style='width:80%'>
@@ -1552,20 +1552,20 @@ $columnInfo = array(
 	                     </td>
 	                  </tr>";
 	      }
-	
+
 	      //triggerHook
 	      $data = array('method'=>'form', 'table'=>'download', 'id'=>$id, 'plugin'=>'download', 'function'=>'create_download');
 	      $text .= $frm->renderHooks($data);
-		  
-	 
-	
+
+
+
 	      $text .= "
-	      	   
+
 	               </table>
 	        <div class='buttonsbar center'>";
-	                     
-		
-						 
+
+
+
 	      if ($id && $subAction == "edit")
 		  {
 	         $text .= "<input class='btn btn-success' type='submit' name='submit_download' value='".DOWLAN_24."'/> ";
@@ -1573,14 +1573,14 @@ $columnInfo = array(
 	      {
 	         $text .= "<input class='btn btn-success' type='submit' name='submit_download' value='".DOWLAN_25."'/>";
 	      }
-	
+
 	      $text .= "
 	                     </div>
-	             
+
 	            </fieldset>
 	         </form>
-	    
-	        
+
+
 	        ";
 	     // $ns->tablerender(ADLAN_24, $text);
 	     echo $text;
@@ -1612,19 +1612,19 @@ $columnInfo = array(
 	   function submit_download()
 	   {
 			global $e107, $tp, $sql, $DOWNLOADS_DIRECTORY, $e_event;
-		  
+
 			$action		= $this->action;
 			$subAction	= $this->subAction;
 			$id			= $this->id;
-		
+
 	   		$sql = e107::getDb();
 			$tp = e107::getParser();
 			$fl = e107::getFile();
 			$mes = e107::getMessage();
-	
+
 			$dlInfo = array();
 			$dlMirrors = array();
-	
+
 		    if ($subAction == 'edit')
 		    {
 		    	if ($_POST['download_url_external'] == '')
@@ -1632,12 +1632,12 @@ $columnInfo = array(
 		        	$_POST['download_filesize_external'] = FALSE;
 		       	}
 			}
-	
+
 			if (!empty($_POST['download_url_external']) && empty($_POST['download_url']) && !empty($_POST['download_filesize_unit']))
 			{
 				$dlInfo['download_url'] = $tp->toDB($_POST['download_url_external']);
 			//	$filesize = intval($_POST['download_filesize_external']);
-				$filesize = $this->calc_filesize($_POST['download_filesize_external'], $_POST['download_filesize_unit']);		
+				$filesize = $this->calc_filesize($_POST['download_filesize_external'], $_POST['download_filesize_unit']);
 			}
 			else
 			{
@@ -1645,7 +1645,7 @@ $columnInfo = array(
 				if ($_POST['download_filesize_external'])
 				{
 	            	$filesize = intval($_POST['download_filesize_external']);
-					
+
 	         	}
 	         	else
 	         	{
@@ -1658,12 +1658,12 @@ $columnInfo = array(
 						$filesize = filesize($tp->replaceConstants($dlInfo['download_url']));
 					}
 		            else
-		            {  	
+		            {
 		               $filesize = filesize(e_BASE.$DOWNLOADS_DIRECTORY.$dlInfo['download_url']);
 		            }
 				}
 			}
-	
+
 	      if (!$filesize)
 	      {
 	         if ($sql->select("upload", "upload_filesize", "upload_file='{$dlInfo['download_url']}'"))
@@ -1673,8 +1673,8 @@ $columnInfo = array(
 	         }
 	      }
 	      $dlInfo['download_filesize'] = $filesize;
-	
-	
+
+
 	      //  ----   Move Images and Files ------------
 	      if ($_POST['move_image'])
 	      {
@@ -1697,7 +1697,7 @@ $columnInfo = array(
 	            }
 	         }
 	      }
-	
+
 	        if ($_POST['move_file'] && $_POST['download_url'])
 	      {
 	           $oldname = e_UPLOAD.$_POST['download_url'];
@@ -1708,11 +1708,11 @@ $columnInfo = array(
 	         }
 	            $dlInfo['download_url'] = str_replace(e_DOWNLOAD,"",$newname);
 	      }
-	
-	
+
+
 	       // ------------------------------------------
-	
-	
+
+
 			$dlInfo['download_description'] 		= $tp->toDB($_POST['download_description']);
 			$dlInfo['download_name'] 				= $tp->toDB($_POST['download_name']);
 			$dlInfo['download_sef'] 				= vartrue($_POST['download_sef']) ? eHelper::secureSef($_POST['download_sef']) : eHelper::title2sef($_POST['download_name']);
@@ -1728,19 +1728,19 @@ $columnInfo = array(
 	      	$dlInfo['download_class']				= $tp->toDB($_POST['download_class']);
 	      	$dlInfo['download_visible']				= $tp->toDB($_POST['download_visible']);
 			$dlInfo['download_datestamp']			= intval($_POST['download_datestamp']);
-			
-	
+
+
 	      if($_POST['update_datestamp'])
 	      {
 				$dlInfo['download_datestamp'] = time();
 	      }
-	
+
 	      $mirrorStr = "";
 	      $mirrorFlag = FALSE;
-	
+
 	      // See if any mirrors defined
 	      // Need to check all the possible mirror names - might have deleted the first one if we're in edit mode
-	      
+
 	      if(count($_POST['download_mirror_name']))
 		  {
 				foreach ($_POST['download_mirror_name'] as $mn)
@@ -1750,9 +1750,9 @@ $columnInfo = array(
 		        	   $mirrorFlag = TRUE;
 		        	   break;
 		        	}
-		     	}	
+		     	}
 		  }
-	      
+
 	      if ($mirrorFlag)
 	      {
 	         $mirrors = count($_POST['download_mirror_name']);
@@ -1789,51 +1789,51 @@ $columnInfo = array(
 	         }
 	         $mirrorStr = $this->compressMirrorArray($newMirrorArray);
 	      }
-	
+
 	      $dlMirrors['download_mirror']=$mirrorStr;
 	      $dlMirrors['download_mirror_type']=intval($_POST['download_mirror_type']);
-	
+
 	      if ($id) // Its an edit
-	      {  	
+	      {
 	         	// Process triggers before calling admin_update so trigger messages can be shown
 	         	$data = array('method'=>'update', 'table'=>'download', 'id'=>$id, 'plugin'=>'download', 'function'=>'update_download');
 	         	$hooks = $e107->e_event->triggerHook($data);
-	        
+
 	   			$mes->add($hooks, E_MESSAGE_SUCCESS);
-		
+
 				$updateArray = array_merge($dlInfo,$dlMirrors);
 				$updateArray['WHERE'] = 'download_id='.intval($id);
-				
+
 				$mes->addAuto($sql->db_Update('download',$updateArray), 'update', DOWLAN_2." (<a href='".e_PLUGIN."download/download.php?view.".$id."'>".$_POST['download_name']."</a>)");
-	                
+
 				$dlInfo['download_id'] = $id;
 				$this->downloadLog('DOWNL_06',$dlInfo,$dlMirrors);
 				$dlInfo['download_datestamp'] = $time;      // This is what 0.7 did, regardless of settings
 				unset($dlInfo['download_class']);         // Also replicating 0.7
-				$e_event->trigger('dlupdate', $dlInfo); // @deprecated 
-				
-				e107::getEvent()->trigger('admin_download_update',$dlInfo); 
+				$e_event->trigger('dlupdate', $dlInfo); // @deprecated
+
+				e107::getEvent()->trigger('admin_download_update',$dlInfo);
 	      }
-	      else // Its a new entry. 
+	      else // Its a new entry.
 	      {
 		         if ($download_id = $sql->insert('download',array_merge($dlInfo,$dlMirrors)))
 		         {
 		            // Process triggers before calling admin_update so trigger messages can be shown
 		            $data = array('method'=>'create', 'table'=>'download', 'id'=>$download_id, 'plugin'=>'download', 'function'=>'create_download');
 		            $hooks = $e107->e_event->triggerHook($data);
-		       
+
 		            $mes->add($hooks, E_MESSAGE_SUCCESS);
-		
+
 		            $mes->addAuto($download_id, 'insert', DOWLAN_1." (<a href='".e_PLUGIN."download/download.php?view.".$download_id."'>".$_POST['download_name']."</a>)");
-		
+
 		            $dlInfo['download_id'] = $download_id;
 		            $this->downloadLog('DOWNL_05',$dlInfo,$dlMirrors);
 		            $dlInfo['download_datestamp'] = $time;      // This is what 0.7 did, regardless of settings
 		            unset($dlInfo['download_class']);         // Also replicating 0.7
-		            $e_event->trigger("dlpost", $dlInfo); // @deprecated 
-					
-					e107::getEvent()->trigger('admin_download_create',$dlInfo); 
-		
+		            $e_event->trigger("dlpost", $dlInfo); // @deprecated
+
+					e107::getEvent()->trigger('admin_download_create',$dlInfo);
+
 		            if ($_POST['remove_upload'])
 		            {
 		               $sql->db_Update("upload", "upload_active='1' WHERE upload_id='".$_POST['remove_id']."'");
@@ -1870,24 +1870,24 @@ $columnInfo = array(
 			$tp 		= e107::getParser();
 			$mes 		= e107::getMessage();
 			$fl			= e107::getFile();
-			
+
 			$action		= $this->action;
 			$subAction	= $this->subAction;
 			$id			= $this->id;
-			
+
 			global $delete, $del_id, $admin_log;
-	
+
 	      require_once(e_HANDLER."form_handler.php");
 	      $frm = new e_form();
-		  
-		  
+
+
 	      if ($delete == "mirror")
 	      {
 	         $mes->addAuto($sql -> db_Delete("download_mirror", "mirror_id=".$del_id), delete, DOWLAN_135);
 	         e107::getLog()->add('DOWNL_14','ID: '.$del_id,E_LOG_INFORMATIVE,'');
 	      }
-	
-	
+
+
 	      if (!$sql -> select("download_mirror"))
 	      {
 	   			$mes->addInfo(DOWLAN_144);
@@ -1895,7 +1895,7 @@ $columnInfo = array(
 	      }
 	      else
 	      {
-	
+
 	         $text = "<div>
 	         <form method='post' action='".e_SELF."?".e_QUERY."'>
 	         <table style='".ADMIN_WIDTH."' class='adminlist'>
@@ -1906,14 +1906,14 @@ $columnInfo = array(
 	         <td style='width: 30%; text-align: center;' class='forumheader'>".LAN_OPTIONS."</td>
 	         </tr>
 	         ";
-	
+
 	         $mirrorList = $sql -> db_getList();
-	
+
 	         foreach($mirrorList as $mirror)
 	         {
 	            extract($mirror);
 	            $text .= "
-	
+
 	            <tr>
 	            <td style='width: 10%; text-align: center;'>$mirror_id</td>
 	            <td style='width: 30%;'>".$tp -> toHTML($mirror_name)."</td>
@@ -1926,14 +1926,14 @@ $columnInfo = array(
 	            ";
 	         }
 	         $text .= "</table></form></div>";
-	
+
 	      }
-	
+
 	     // $ns -> tablerender(DOWLAN_138, $text);
 		  echo $text;
-	
+
 	      $imagelist = $fl->get_files(e_FILE.'downloadimages/');
-	
+
 	      if ($subAction == "edit" && !defined("SUBMITTED"))
 	      {
 	         $sql -> select("download_mirror", "*", "mirror_id='".intval($id)."' ");
@@ -1946,92 +1946,92 @@ $columnInfo = array(
 	         unset($mirror_name, $mirror_url, $mirror_image, $mirror_location, $mirror_description);
 	         $edit = FALSE;
 	      }
-	
+
 	      $text = "<div>
 	      <form method='post' action='".e_SELF."?".e_QUERY."' id='dataform'>\n
 	      <table class='table adminform'>
-	
+
 	      <tr>
 	      <td style='width: 30%;'>".DOWLAN_12."</td>
 	      <td style='width: 70%;'>
 	      <input class='form-control input-xxlarge' type='text' name='mirror_name' size='60' value='{$mirror_name}' maxlength='200'/>
 	      </td>
 	      </tr>
-	
+
 	      <tr>
 	      <td style='width: 30%;'>".DOWLAN_139."</td>
 	      <td style='width: 70%;'>
 	      <input class='form-control input-xxlarge' type='text' name='mirror_url' size='70' value='{$mirror_url}' maxlength='255'/>
 	      </td>
 	      </tr>
-	
+
 	      <tr>
 	      <td style='width: 30%;'>".DOWLAN_136."</td>
 	      <td style='width: 70%;'>
 	      <input class='form-control input-xxlarge' type='text' id='mirror_image' name='mirror_image' size='60' value='{$mirror_image}' maxlength='200'/>
-	
-	
+
+
 	      <br /><input class='btn btn-default button' type ='button' style='cursor:pointer' size='30' value='".DOWLAN_42."' onclick='expandit(this)'/>
 	      <div id='imagefile' style='display:none;{head}'>";
-	
+
 	      $text .= DOWLAN_140."<br/>";
 	      foreach($imagelist as $file)
 	      {
 	         $text .= "<a href=\"javascript:insertext('".$file['fname']."','mirror_image','imagefile')\"><img src='".e_FILE."downloadimages/".$file['fname']."' alt=''/></a> ";
 	      }
-	
+
 	      $text .= "</div>
 	      </td>
 	      </tr>
-	
+
 	      <tr>
 	      <td style='width: 30%;'>".DOWLAN_141."</td>
 	      <td style='width: 70%;'>
 	      <input class='form-control' type='text' name='mirror_location' size='60' value='$mirror_location' maxlength='200'/>
 	      </td>
 	      </tr>
-	
+
 	      <tr>
 	      <td style='width: 30%;'>".DOWLAN_18."</td>
 	      <td style='width: 70%;'>";
 	      $text .= $frm->bbarea('mirror_description',$mirror_description);
 	      $text .= "</td>
 	      </tr>
-	
+
 	      <tr>
 	      <td colspan='2' class='forumheader' style='text-align:center;'>
 	      ".($edit ? "<input class='btn btn-default button' type='submit' name='submit_mirror' value='".DOWLAN_142."'/><input type='hidden' name='id' value='{$mirror_id}'/>" : "<input class='btn button' type='submit' name='submit_mirror' value='".DOWLAN_143."'/>")."
 	      </td>
 	      </tr>
-	
+
 	      </table>
 	      </form>
 	      </div>";
-	
+
 	      $caption = ($edit ? DOWLAN_142 : DOWLAN_143);
 			echo $text;
 	      // $ns -> tablerender($caption, $text);
 	   }
-	
+
 		function submit_mirror()
 	   	{
 			global $admin_log;
-			
+
 			$tp = e107::getParser();
 			$sql = e107::getDb();
 			$mes = e107::getMessage();
-			
+
 	 		define("SUBMITTED", TRUE);
-	 		
+
 		      if (isset($_POST['mirror_name']) && isset($_POST['mirror_url']))
 		      {
 		         $name = $tp -> toDB($_POST['mirror_name']);
 		         $url = $tp -> toDB($_POST['mirror_url']);
 		         $location = $tp -> toDB($_POST['mirror_location']);
 		         $description = $tp -> toDB($_POST['mirror_description']);
-		
+
 		         $logString = $name.'[!br!]'.$url.'[!br!]'.$location.'[!br!]'.$description;
-		
+
 		         if (isset($_POST['id']))
 		         {
 		            $mes->addAuto($sql -> db_Update("download_mirror", "mirror_name='{$name}', mirror_url='{$url}', mirror_image='".$tp->toDB($_POST['mirror_image'])."', mirror_location='{$location}', mirror_description='{$description}' WHERE mirror_id=".intval($_POST['id'])), 'update', DOWLAN_133);
@@ -2048,10 +2048,10 @@ $columnInfo = array(
 		function show_download_options()
 		{
 		   	global $pref, $ns;
-		
+
 				require_once(e_HANDLER."form_handler.php");
 				$frm = new e_form(true); //enable inner tabindex counter
-		
+
 		   	$agree_flag = $pref['agree_flag'];
 		   	$agree_text = $pref['agree_text'];
 		      $c = $pref['download_php'] ? " checked = 'checked' " : "";
@@ -2067,16 +2067,16 @@ $columnInfo = array(
 		         "ASC"    => DOWLAN_62,
 		         "DESC"   => DOWLAN_63
 		      );
-		
+
 		   	$text = "
-				   
+
 					   <ul class='nav nav-tabs'>
 						   <li class='active'><a data-toggle='tab' href='#core-download-download1'>".LAN_DL_DOWNLOAD_OPT_GENERAL."</a></li>
 						   <li><a data-toggle='tab' href='#core-download-download2'>".LAN_DL_DOWNLOAD_OPT_BROKEN."</a></li>
 						   <li><a data-toggle='tab' href='#core-download-download3'>".LAN_DL_DOWNLOAD_OPT_AGREE."</a></li>
 						   <li><a data-toggle='tab' href='#core-download-download4'>".LAN_DL_UPLOAD."</a></li>
 					   </ul>
-						
+
 		        		<form method='post' action='".e_SELF."?".e_QUERY."'>\n
 		        		<div class='tab-content'>
 		   				<div class='tab-pane active' id='core-download-download1'>
@@ -2194,7 +2194,7 @@ $columnInfo = array(
 						   <div class='buttons-bar center'>
 		                  <input class='btn btn-default button' type='submit' name='updatedownlaodoptions' value='".DOWLAN_64."'/>
 		               </div>
-		              
+
 		           </div>
 		           </form>
 		      ";
@@ -2230,20 +2230,20 @@ $columnInfo = array(
 
 		function move_file($oldname,$newname)
 		{
-		
+
 			$mes = e107::getMessage();
-			
+
 			if (file_exists($newname))
 		    {
 		    	return TRUE;
 		    }
-		
+
 			if (!file_exists($oldname) || is_dir($oldname))
 			{
 				$mes->addError(DOWLAN_68 . " : ".$oldname);
 		        return FALSE;
 			}
-		
+
 			$directory = dirname($newname);
 			if (is_writable($directory))
 			{
@@ -2280,7 +2280,7 @@ $columnInfo = array(
 	      if ($source)
 	      {
 	         $mirrorTArray = explode(chr(1), $source);
-	
+
 	         $count = 0;
 	         foreach($mirrorTArray as $mirror)
 	         {
@@ -2294,14 +2294,14 @@ $columnInfo = array(
 	      }
 	      return $ret;
 	   }
-	   
-	   
-	   
+
+
+
 }
 
 class download_main_admin_form_ui extends e_admin_form_ui
 {
-	
+
 	function download_category($curVal,$mode) // not really necessary since we can use 'dropdown' - but just an example of a custom function.
 	{
 		if($mode == 'read')
@@ -2329,17 +2329,17 @@ class download_main_admin_form_ui extends e_admin_form_ui
 		$text .= "</select>";
 		return $text;
 	}
-	
-	
+
+
 	function download_active($curVal,$mode)
 	{
-		$download_status[0] = DOWLAN_122; // Inactive; 
+		$download_status[0] = DOWLAN_122; // Inactive;
       	$download_status[1] = DOWLAN_123; // Active
       	$download_status[2] = DOWLAN_124;
-		
+
 		if($mode == 'read')
 		{
-			$status = array(ADMIN_FALSE_ICON,ADMIN_TRUE_ICON,ADMIN_WARNING_ICON);		
+			$status = array(ADMIN_FALSE_ICON,ADMIN_TRUE_ICON,ADMIN_WARNING_ICON);
 			return $status[$curVal];
 		}
 
@@ -2347,15 +2347,15 @@ class download_main_admin_form_ui extends e_admin_form_ui
 		{
 			return $download_status;
 		}
-		 
+
 		return "&nbsp;";
 	}
-	
-	
-	// Filter List for 'Issues' 
+
+
+	// Filter List for 'Issues'
 	function issue($curVal,$mode)
-	{	
-		if($mode == 'filter') 
+	{
+		if($mode == 'filter')
 		{
 			return array(
 				'duplicates'	=> DOWLAN_166,
@@ -2365,13 +2365,13 @@ class download_main_admin_form_ui extends e_admin_form_ui
 				'filesize'		=> DOWLAN_66,
 				'log'			=> DOWLAN_171
 			);
-			
+
 		}
-		 
+
 		return "&nbsp;";
 	}
-	
-	
+
+
 	function download_mirror_type($curVal,$mode)
 	{
 		switch ($curVal)
@@ -2385,25 +2385,25 @@ class download_main_admin_form_ui extends e_admin_form_ui
 	}
 }
 
-				
+
 class download_mirror_ui extends e_admin_ui
 {
-			
+
 		protected $pluginTitle		= LAN_PLUGIN_DOWNLOAD_NAME;
 		protected $pluginName		= 'download';
 		protected $table			= 'download_mirror';
 		protected $pid				= 'mirror_id';
-		protected $perPage			= 10; 
+		protected $perPage			= 10;
 		protected $batchDelete		= true;
-	//	protected $batchCopy		= true;		
+	//	protected $batchCopy		= true;
 	//	protected $sortField		= 'somefield_order';
 	//	protected $orderStep		= 10;
-	//	protected $tabs			= array('Tabl 1','Tab 2'); // Use 'tab'=>0  OR 'tab'=>1 in the $fields below to enable. 
-		
+	//	protected $tabs			= array('Tabl 1','Tab 2'); // Use 'tab'=>0  OR 'tab'=>1 in the $fields below to enable.
+
 	//	protected $listQry      	= "SELECT * FROM #tableName WHERE field != '' "; // Example Custom Query. LEFT JOINS allowed. Should be without any Order or Limit.
-	
+
 		protected $listOrder		= 'mirror_id DESC';
-	
+
 		protected $fields 		= array (  'checkboxes' =>   array ( 'title' => '', 'type' => null, 'data' => null, 'width' => '5%', 'thclass' => 'center', 'forced' => '1', 'class' => 'center', 'toggle' => 'e-multiselect',  ),
 		  'mirror_id' 			=>   array ( 'title' => LAN_ID, 'data' => 'int', 'width' => '5%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 		  'mirror_name' 		=>   array ( 'title' => LAN_TITLE, 'type' => 'text', 'data' => 'str', 'width' => 'auto', 'inline' => true, 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
@@ -2413,33 +2413,33 @@ class download_mirror_ui extends e_admin_ui
 		  'mirror_description' 	=>   array ( 'title' => LAN_DESCRIPTION, 'type' => 'bbarea', 'data' => 'str', 'width' => '40%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 		  'mirror_count' 		=>   array ( 'title' => 'Count', 'type' => 'hidden', 'data' => 'int', 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'center', 'thclass' => 'center',  ),
 		  'options' 			=>   array ( 'title' => LAN_OPTIONS, 'type' => null, 'data' => null, 'width' => '10%', 'thclass' => 'center last', 'class' => 'center last', 'forced' => '1',  ),
-		);		
-		
+		);
+
 		protected $fieldpref = array('mirror_name', 'mirror_url', 'mirror_image', 'mirror_location');
-		
-	
+
+
 		public function init()
 		{
-			// Set drop-down values (if any). 
-	
+			// Set drop-down values (if any).
+
 		}
-	
-	/*	
-		// optional - override edit page. 
+
+	/*
+		// optional - override edit page.
 		public function customPage()
 		{
 			$ns = e107::getRender();
 			$text = 'Hello World!';
-			$ns->tablerender('Hello',$text);	
-			
+			$ns->tablerender('Hello',$text);
+
 		}
 	*/
-			
+
 }
-				
+
 
 
 class download_mirror_form_ui extends e_admin_form_ui
 {
 
-}		
+}

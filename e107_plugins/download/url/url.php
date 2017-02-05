@@ -7,14 +7,14 @@
 * PM Default URL configuration
 * TODO - SEF URL configuration
 */
-if (!defined('e107_INIT')){ exit; } 
+if (!defined('e107_INIT')){ exit; }
 
 class plugin_download_url extends eUrlConfig
 {
 	public function config()
 	{
 		return array(
-		
+
 			'config' => array(
 				'allowMain'    => true,
 				'noSingleEntry' => true,	// [optional] default false; disallow this module to be shown via single entry point when this config is used
@@ -23,17 +23,17 @@ class plugin_download_url extends eUrlConfig
 				'selfCreate' 	=> true,	// [optional] default false; use only this->create() method, no core routine URL creating
 				'defaultRoute'	=> 'list', // [optional] default empty; route (no leading module) used when module is found with no additional controller/action information e.g. /news/
 			),
-			
+
 			// rule set array
-			'rules' => array() 
+			'rules' => array()
 		);
 
 	}
 
 	/**
-	 * Describe all pm routes. 
+	 * Describe all pm routes.
 	 * Routes vs legacy queries:
-	 * list/ 			-> {no query} 
+	 * list/ 			-> {no query}
 	 * list/category	-> download.php?action=list&id={category-id}
 	 * view/item 		-> download.php?action=view&id={download-id}
 	 * request/item 	-> request.php?{download-id}
@@ -42,37 +42,37 @@ class plugin_download_url extends eUrlConfig
 	{
 		if(is_string($route)) $route = explode('/', $route, 2);
 		if(!varset($route[0]) || 'index' == $route[0]) $route[0] = 'list';
-		
+
 		$base = e107::getInstance()->getFolder('plugins').'download/';
-		
+
 	//	var_dump($options, $route, $params);
-	
+
 //	print_a($route);
-	
-	
+
+
 		if($route[0] == 'list')
 		{
 			if(!isset($params['id']) && isset($params['download_category_id'])) $params['id'] = $params['download_category_id'];
-			
+
 			switch($route[1])
 			{
-				case 'index':		
+				case 'index':
 					$this->legacyQueryString = '';
-					return $base.'download.php';	
+					return $base.'download.php';
 				break;
-						
+
 				case 'category':
 					$url = 'action=list&id='.$params['id'];
-					
+
 					if(isset($params['from']))
 					{
-						$url .= "&from=".$params['from']."&view=".$params['view']."&order=".$params['order']."&sort=".$params['sort'];		
+						$url .= "&from=".$params['from']."&view=".$params['view']."&order=".$params['order']."&sort=".$params['sort'];
 					}
-					
+
 					$this->legacyQueryString = $url;
 					return $base.'download.php?'.$url;
 				break;
-					
+
 			}
 		}
 		elseif($route[0] == 'view')
@@ -81,20 +81,20 @@ class plugin_download_url extends eUrlConfig
 			{
 				 $params['id'] = $params['download_id'];
 			}
-			
+
 			switch($route[1])
-			{						
+			{
 				case 'item':
 					$this->legacyQueryString = 'action=view&id='.$params['id'];
 					return $base.'download.php?action=view&id='.$params['id'];
 				break;
-					
+
 			}
 		}
 		elseif($route[0] == 'request')
 		{
 			$this->legacyQueryString = $params['id'];
-			return $base.'request.php?'.$params['id'];	
+			return $base.'request.php?'.$params['id'];
 		}
 
 		return false;
@@ -117,7 +117,7 @@ class plugin_download_url extends eUrlConfig
 			'form' => array(), // Under construction - additional configuration options
 			'callbacks' => array(), // Under construction - could be used for e.g. URL generator functionallity
 		);
-		
+
 		return $admin;
 	}
 }

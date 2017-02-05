@@ -66,14 +66,14 @@ switch(vartrue($action)) {
       $text .= " <img src='".ADMIN_WARNING_ICON_PATH."' title='".DOWLAN_124."' alt='' style='cursor:help'/> ".DOWLAN_124."<br/>";
       $text .= " <img src='".ADMIN_FALSE_ICON_PATH."' title='".DOWLAN_122."' alt='' style='cursor:help'/> ".DOWLAN_122."<br/>";
       $text .= "</div>";
-	 
+
 	 */
     $text = "";
    }
 }
 if($text)
 {
-	$ns -> tablerender(DOWLAN_HELP_1, $text);	
+	$ns -> tablerender(DOWLAN_HELP_1, $text);
 }
 
 ?>

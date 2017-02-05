@@ -8,25 +8,25 @@ if (!defined('e107_INIT'))
 e107::lan('download','download');
 
 
-$log = e107::getAdminLog(); 
+$log = e107::getAdminLog();
 $id = FALSE;
 
 
 
 
-if (!is_numeric(e_QUERY) && empty($_GET['id'])) 
+if (!is_numeric(e_QUERY) && empty($_GET['id']))
 {
-	if ($sql->select('download', 'download_id', "download_url='".$tp->toDB(e_QUERY)."'")) 
+	if ($sql->select('download', 'download_id', "download_url='".$tp->toDB(e_QUERY)."'"))
 	{
 		$row = $sql->fetch();
 		$type = 'file';
 		$id = $row['download_id'];
-	} 
-	elseif((strpos(e_QUERY, "http://") === 0) || (strpos(e_QUERY, "ftp://") === 0) || (strpos(e_QUERY, "https://") === 0)) 
+	}
+	elseif((strpos(e_QUERY, "http://") === 0) || (strpos(e_QUERY, "ftp://") === 0) || (strpos(e_QUERY, "https://") === 0))
 	{
 		header("location: ".e_QUERY);
 		exit();
-	} 
+	}
 	elseif(file_exists(e_DOWNLOAD.e_QUERY)) 		// 1 - should we allow this?
 	{
 		e107::getFile()->send(e_DOWNLOAD.e_QUERY);
@@ -36,33 +36,33 @@ if (!is_numeric(e_QUERY) && empty($_GET['id']))
 
 
 
-if(strstr(e_QUERY, "mirror")) 
+if(strstr(e_QUERY, "mirror"))
 {	// Download from mirror
 	list($action, $download_id, $mirror_id) = explode(".", e_QUERY);
 	$download_id = intval($download_id);
 	$mirror_id = intval($mirror_id);
 	$qry = "SELECT d.*, dc.download_category_class FROM #download as d LEFT JOIN #download_category AS dc ON dc.download_category_id = d.download_category WHERE d.download_id = {$download_id}";
-	if ($sql->gen($qry)) 
+	if ($sql->gen($qry))
 	{
 		$row = $sql->fetch();
 		extract($row);
-		if (check_class($download_category_class) && check_class($download_class)) 
+		if (check_class($download_category_class) && check_class($download_class))
 		{
-			if($pref['download_limits'] && $download_active == 1) 
+			if($pref['download_limits'] && $download_active == 1)
 			{
 				check_download_limits();
 			}
 			$mirrorList = explode(chr(1), $download_mirror);
 			$mstr = "";
-			foreach($mirrorList as $mirror) 
+			foreach($mirrorList as $mirror)
 			{
-				if($mirror) 
+				if($mirror)
 				{
 					$tmp = explode(",", $mirror);
 					$mid = intval($tmp[0]);
 					$address = $tmp[1];
 					$requests = $tmp[2];
-					if($tmp[0] == $mirror_id) 
+					if($tmp[0] == $mirror_id)
 					{
 						$gaddress = trim($address);
 						$requests ++;
@@ -84,28 +84,28 @@ if(strstr(e_QUERY, "mirror"))
 }
 
 $tmp = explode(".", e_QUERY);
-if (!$tmp[1] || strstr(e_QUERY, "pub_")) 
+if (!$tmp[1] || strstr(e_QUERY, "pub_"))
 {
 	$id = intval($tmp[0]);
 	$type = "file";
-} 
-else 
+}
+else
 {
 	$table = preg_replace("#\W#", "", $tp->toDB($tmp[0], true));
 	$id = intval($tmp[1]);
 	$type = "image";
 }
 
-if(vartrue($_GET['id'])) // SEF URL 
+if(vartrue($_GET['id'])) // SEF URL
 {
-	$id = intval($_GET['id']);	
+	$id = intval($_GET['id']);
 	$type = 'file';
 }
 
 
 
 
-if (preg_match("#.*\.[a-z,A-Z]{3,4}#", e_QUERY)) 
+if (preg_match("#.*\.[a-z,A-Z]{3,4}#", e_QUERY))
 {
 	if(strstr(e_QUERY, "pub_"))
 	{
@@ -117,7 +117,7 @@ if (preg_match("#.*\.[a-z,A-Z]{3,4}#", e_QUERY))
 		}
 		$log->addError("Line".__LINE__.": Couldn't find ".e_UPLOAD.$bid."");
 	}
-	if (file_exists(e_DOWNLOAD.e_QUERY)) 
+	if (file_exists(e_DOWNLOAD.e_QUERY))
 	{
 		e107::getFile()->send(e_DOWNLOAD.e_QUERY);
 		exit();
@@ -133,13 +133,13 @@ if (preg_match("#.*\.[a-z,A-Z]{3,4}#", e_QUERY))
 if ($type == "file")
 {
 	$qry = "SELECT d.*, dc.download_category_class FROM #download as d LEFT JOIN #download_category AS dc ON dc.download_category_id = d.download_category WHERE d.download_id = {$id}";
-	if ($sql->gen($qry)) 
+	if ($sql->gen($qry))
 	{
 		$row = $sql->fetch();
-		
+
 		$row['download_url'] = $tp->replaceConstants($row['download_url']);
 
-		if (check_class($row['download_category_class']) && check_class($row['download_class'])) 
+		if (check_class($row['download_category_class']) && check_class($row['download_class']))
 		{
 			if ($row['download_active'] == 0) // Inactive download - don't allow
 			{
@@ -152,16 +152,16 @@ if ($type == "file")
 				exit();
 			}
 
-			if($pref['download_limits'] && $row['download_active'] == 1) 
+			if($pref['download_limits'] && $row['download_active'] == 1)
 			{
 				check_download_limits();
 			}
 			extract($row);
-			if($download_mirror) 
+			if($download_mirror)
 			{
 				$array = explode(chr(1), $download_mirror);
 				$c = (count($array)-1);
-				for ($i=1; $i < $c; $i++) 
+				for ($i=1; $i < $c; $i++)
 				{
 					$d = mt_rand(0, $i);
 					$tmp = $array[$i];
@@ -171,15 +171,15 @@ if ($type == "file")
 				$tmp = explode(",", $array[0]);
 				$mirror_id = $tmp[0];
 				$mstr = "";
-				foreach($array as $mirror) 
+				foreach($array as $mirror)
 				{
-					if($mirror) 
+					if($mirror)
 					{
 						$tmp = explode(",", $mirror);
 						$mid = $tmp[0];
 						$address = $tmp[1];
 						$requests = $tmp[2];
-						if($tmp[0] == $mirror_id) 
+						if($tmp[0] == $mirror_id)
 						{
 							$gaddress = trim($address);
 							$requests ++;
@@ -201,7 +201,7 @@ if ($type == "file")
 			$request_data = "'0', '{$user_id}', '{$ip}', '{$id}', '".time()."'";
 			//add request info to db
 			$sql->db_Insert("download_requests", $request_data, FALSE);
-			if (preg_match("/Binary\s(.*?)\/.*/", $download_url, $result)) 
+			if (preg_match("/Binary\s(.*?)\/.*/", $download_url, $result))
 			{
 				$bid = $result[1];
 				$result = @mysql_query("SELECT * FROM ".MPREFIX."rbinary WHERE binary_id = '{$bid}'");
@@ -218,20 +218,20 @@ if ($type == "file")
 			if (strstr($download_url, "http://") || strstr($download_url, "ftp://") || strstr($download_url, "https://")) {
 				header("Location: {$download_url}");
 				exit();
-			} 
-			else 
+			}
+			else
 			{
-				if (file_exists(e_DOWNLOAD.$download_url)) 
+				if (file_exists(e_DOWNLOAD.$download_url))
 				{
 					e107::getFile()->send(e_DOWNLOAD.$download_url);
 					exit();
-				} 
-				elseif(file_exists($download_url)) 
+				}
+				elseif(file_exists($download_url))
 				{
 					e107::getFile()->send($download_url);
 					exit();
 				}
-				elseif(file_exists(e_UPLOAD.$download_url)) 
+				elseif(file_exists(e_UPLOAD.$download_url))
 				{
 					e107::getFile()->send(e_UPLOAD.$download_url);
 					exit();
@@ -239,8 +239,8 @@ if ($type == "file")
 				$log->addError("Couldn't find ".e_DOWNLOAD.$download_url." or ".$download_url." or ".e_UPLOAD.$download_ur);
 				$log->toFile('download_requests','Download Requests', true); // Create a log file and add the log messages
 			}
-		} 
-		else 
+		}
+		else
 		{	// Download Access Denied.
 			if((!strpos($pref['download_denied'],".php") &&
 				!strpos($pref['download_denied'],".htm") &&
@@ -277,8 +277,8 @@ if ($type == "file")
 			exit();
 		}
 	}
-	
-	
+
+
 	$log->addError("Line".__LINE__.": Couldn't find ".e_DOWNLOAD.e_QUERY);
 	$log->toFile('download_requests','Download Requests', true); // Create a log file and add the log messages
 	require_once(HEADERF);
@@ -291,7 +291,7 @@ $sql->select($table, "*", "{$table}_id = '{$id}'");
 $row = $sql->fetch();
 extract($row);
 $image = ($table == "upload" ? $upload_ss : $download_image);
-if (preg_match("/Binary\s(.*?)\/.*/", $image, $result)) 
+if (preg_match("/Binary\s(.*?)\/.*/", $image, $result))
 {
 	$bid = $result[1];
 	$result = @mysql_query("SELECT * FROM ".MPREFIX."rbinary WHERE binary_id = '{$bid}'");
@@ -307,27 +307,27 @@ if (preg_match("/Binary\s(.*?)\/.*/", $image, $result))
 
 $image = ($table == "upload" ? $upload_ss : $download_image);
 
-if (strpos($image, "http") !== FALSE) 
+if (strpos($image, "http") !== FALSE)
 {
 	e107::redirect($image);
 	exit();
-} 
-else 
+}
+else
 {
-	if ($table == "download") 
+	if ($table == "download")
 	{
 		require_once(HEADERF);
          $imagecaption = ''; // TODO ?name or text Screenshot
 
-		if (file_exists(e_FILE."download/{$image}")) 
+		if (file_exists(e_FILE."download/{$image}"))
 		{
 			$disp = "<div style='text-align:center'><img class='img-responsive img-fluid' src='".e_FILE."download/{$image}' alt='' /></div>";
 		}
-		else if(file_exists(e_FILE."downloadimages/{$image}")) 
+		else if(file_exists(e_FILE."downloadimages/{$image}"))
 		{
 			$disp = "<div style='text-align:center'><img class='img-responsive img-fluid' src='".e_FILE."downloadimages/{$image}' alt='' /></div>";
-		} 
-		else 
+		}
+		else
 		{
              $image = $tp->replaceConstants($image);
 			$disp = "<div style='text-align:center'><img class='img-responsive img-fluid' src='".$image."' alt='' /></div>";
@@ -338,17 +338,17 @@ else
 		$ns->tablerender($imagecaption, $disp);
 
 		require_once(FOOTERF);
-	} else 
+	} else
 	{
-		if (is_file(e_UPLOAD.$image)) 
+		if (is_file(e_UPLOAD.$image))
 		{
 			echo "<img src='".e_UPLOAD.$image."' alt='' />";
-		} 
-		elseif(is_file(e_FILE."downloadimages/{$image}")) 
+		}
+		elseif(is_file(e_FILE."downloadimages/{$image}"))
 		{
 			echo "<img src='".e_FILE."downloadimages/{$image}' alt='' />";
-		} 
-		else 
+		}
+		else
 		{
 			require_once(HEADERF);
 			$ns->tablerender(LAN_ERROR, "<div style='text-align:center'>".LAN_FILE_NOT_FOUND."<br /><br /><a href='javascript:history.back(1)'>".LAN_BACK."</a></div>");
@@ -361,29 +361,29 @@ else
 
 
 
-function check_download_limits() 
+function check_download_limits()
 {
 	global $pref, $sql, $ns, $HEADER, $e107, $tp;
 	// Check download count limits
 	$qry = "SELECT gen_intdata, gen_chardata, (gen_intdata/gen_chardata) as count_perday FROM #generic WHERE gen_type = 'download_limit' AND gen_datestamp IN (".USERCLASS_LIST.") AND (gen_chardata >= 0 AND gen_intdata >= 0) ORDER BY count_perday DESC";
-	if($sql->gen($qry)) 
+	if($sql->gen($qry))
 	{
 		$limits = $sql->fetch();
 		$cutoff = time() - (86400 * $limits['gen_chardata']);
-		if(USER) 
+		if(USER)
 		{
 			$where = "dr.download_request_datestamp > {$cutoff} AND dr.download_request_userid = ".USERID;
-		} 
-		else 
+		}
+		else
 		{
 			$ip = e107::getIPHandler()->getIP(FALSE);
 			$where = "dr.download_request_datestamp > {$cutoff} AND dr.download_request_ip = '{$ip}'";
 		}
 		$qry = "SELECT COUNT(d.download_id) as count FROM #download_requests as dr LEFT JOIN #download as d ON dr.download_request_download_id = d.download_id AND d.download_active = 1 WHERE {$where} GROUP by dr.download_request_userid";
-		if($sql->gen($qry)) 
+		if($sql->gen($qry))
 		{
 			$row = $sql->fetch();
-			if($row['count'] >= $limits['gen_intdata']) 
+			if($row['count'] >= $limits['gen_intdata'])
 			{
 				// Exceeded download count limit
 				$goUrl = e107::getUrl()->create('download/index')."?action=error&id=2";
@@ -398,25 +398,25 @@ function check_download_limits()
 	}
 	// Check download bandwidth limits
 	$qry = "SELECT gen_user_id, gen_ip, (gen_user_id/gen_ip) as bw_perday FROM #generic WHERE gen_type='download_limit' AND gen_datestamp IN (".USERCLASS_LIST.") AND (gen_user_id >= 0 AND gen_ip >= 0) ORDER BY bw_perday DESC";
-	if($sql->gen($qry)) 
+	if($sql->gen($qry))
 	{
 		$limit = $sql->fetch();
 		$cutoff = time() - (86400*$limit['gen_ip']);
-		if(USER) 
+		if(USER)
 		{
 			$where = "dr.download_request_datestamp > {$cutoff} AND dr.download_request_userid = ".USERID;
-		} 
-		else 
+		}
+		else
 		{
 			$ip = e107::getIPHandler()->getIP(FALSE);
 			$where = "dr.download_request_datestamp > {$cutoff} AND dr.download_request_ip = '{$ip}'";
 		}
 		$qry = "SELECT SUM(d.download_filesize) as total_bw FROM #download_requests as dr LEFT JOIN #download as d ON dr.download_request_download_id = d.download_id AND d.download_active = 1 WHERE {$where} GROUP by dr.download_request_userid";
-		if($sql->gen($qry)) 
+		if($sql->gen($qry))
 		{
 			$row = $sql->fetch();
-			
-			if($row['total_bw'] / 1024 > $limit['gen_user_id']) 
+
+			if($row['total_bw'] / 1024 > $limit['gen_user_id'])
 			{	//Exceed bandwith limit
 				$goUrl = e107::getUrl()->create('download/index')."?action=error&id=2";
 				 e107::redirect($goUrl);

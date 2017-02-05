@@ -23,12 +23,12 @@ define("LAN_dl_14", "Rate this download");
 //define("LAN_dl_15", "Thanks for rating");LAN_THANK_YOU
 define("LAN_dl_16", "download(s) from");
 //define("LAN_dl_17", "files"); //LAN_FILES
-// define("LAN_dl_18", "Downloads");	
+// define("LAN_dl_18", "Downloads");
 //define("LAN_dl_19", "Category"); //FIXME Use Generic LAN_CATEGORY
 //define("LAN_dl_20", "Files"); LAN_FILES
 //define("LAN_dl_21", "Size");  LAN_SIZE
 //define("LAN_dl_22", "Date"); //FIXME Use Generic LAN_DATE
-//define("LAN_dl_23", "Filename"); //LAN_FILE 
+//define("LAN_dl_23", "Filename"); //LAN_FILE
 //define("LAN_dl_24", "Author"); //FIXME Use Generic LAN_AUTHOR
 //define("LAN_dl_25", "Ascending");LAN_ASCENDING
 //define("LAN_dl_26", "Descending");LAN_DESCENDING
@@ -39,14 +39,14 @@ define("LAN_dl_30", "Author email");
 define("LAN_dl_31", "Author website");
 //define("LAN_dl_32", "Download");//LAN_DOWNLOAD
 // define("LAN_dl_33", "Previous");
-// define("LAN_dl_34", "Next"); 
+// define("LAN_dl_34", "Next");
 //define("LAN_dl_35", "Back to list"); //FIXME Use Generic LAN_BACK
 define("LAN_dl_36", "New downloads");
 
 //define("LAN_dl_37", "View"); //FIXME Use Generic LAN_VIEW
 //define("LAN_dl_38", "Order by"); //LAN_ORDER_BY
 //define("LAN_dl_39", "Sort"); //FIXME Use Generic //LAN_SORT
- 
+
 define("LAN_dl_40", "Click here for screenshot");
 //define("LAN_dl_41", "Search Downloads");//LAN_SEARCH
 

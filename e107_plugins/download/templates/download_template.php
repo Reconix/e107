@@ -346,7 +346,7 @@ if(!isset($DOWNLOAD_MIRROR_END))
 // ##### ------------------------------------------------------------------------------------------
 
 
-// v2.x Bootstrap Template.  - Overrides the above templates. 
+// v2.x Bootstrap Template.  - Overrides the above templates.
 
 
 $DOWNLOAD_TEMPLATE['categories']['start'] = "
@@ -408,7 +408,7 @@ $DOWNLOAD_TEMPLATE['categories']['subchild'] = "
 	            		</small>
 	            		</div>
 	          		</td>
-	            	
+
 	               <td>{DOWNLOAD_CAT_SUBSUB_COUNT} </td>
 	               <td>{DOWNLOAD_CAT_SUBSUB_SIZE} </td>
 	               <td>{DOWNLOAD_CAT_SUBSUB_DOWNLOADED} </td>
@@ -427,7 +427,7 @@ $DOWNLOAD_TEMPLATE['categories']['end'] = "
 // ##### ------------------------------------------------------------------------------------------
 
 
-//FIXME - not being utilized at the moment. 
+//FIXME - not being utilized at the moment.
 
 $DOWNLOAD_WRAPPER['view']['DOWNLOAD_VIEW_AUTHOR_LAN'] 			= "<tr><td style='width:20%'>{---}</td>";
 $DOWNLOAD_WRAPPER['view']['DOWNLOAD_VIEW_AUTHOR'] 				= "<td style='width:80%'>{---}</td>";
@@ -489,7 +489,7 @@ $DOWNLOAD_TEMPLATE['view']['item'] = "
 		      </tr>
 			{DOWNLOAD_REPORT_LINK}
 		   </table>
-		   
+
 		</div>\n";
 
 $DOWNLOAD_TEMPLATE['view']['end'] = "";
@@ -549,8 +549,8 @@ $DOWNLOAD_TEMPLATE['list']['start'] = "
                   <th class='text-center'>{DOWNLOAD_LIST_CAPTION=link}</th>
                </tr>";
 
-               
-               
+
+
 $DOWNLOAD_TEMPLATE['list']['item'] = "
 		         <tr>
 		            <td>
@@ -576,8 +576,8 @@ $DOWNLOAD_TEMPLATE['list']['item'] = "
 		            </td>
 		         </tr>";
 
-		         
-		         
+
+
 $DOWNLOAD_TEMPLATE['list']['end'] = "
 		         <tr>
 		         	<td colspan='3'>{DOWNLOAD_BACK_TO_CATEGORY_LIST}</td>
@@ -590,19 +590,19 @@ $DOWNLOAD_TEMPLATE['list']['end'] = "
 
 
 
-$DOWNLOAD_TEMPLATE['list']['nextprev'] = "		
+$DOWNLOAD_TEMPLATE['list']['nextprev'] = "
 			<div class='text-center'>
-			{DOWNLOAD_LIST_NEXTPREV}					
+			{DOWNLOAD_LIST_NEXTPREV}
 			</div>";
 
-/*	
+/*
 $sc_style['DOWNLOAD_LIST_NEXTPREV']['pre'] = "<div class='nextprev'>";
 $sc_style['DOWNLOAD_LIST_NEXTPREV']['post'] = "	</div>";
-*/		
-			
-// ##### ------------------------------------------------------------------------------------------			
-			
-			
+*/
+
+// ##### ------------------------------------------------------------------------------------------
+
+
 $DOWNLOAD_TEMPLATE['mirror']['start'] = "
 	<div class='table-responsive'>
 	   <table id='download' class='table table-striped'>
@@ -624,9 +624,9 @@ $DOWNLOAD_TEMPLATE['mirror']['start'] = "
 	         <th>".LAN_SIZE."</th>
 	         <th>".LAN_DOWNLOAD."</th>
 	      </tr>
-	";			
-			
-			
+	";
+
+
 $DOWNLOAD_TEMPLATE['mirror']['item']  = "
 	      <tr>
 	         <td>{DOWNLOAD_MIRROR_IMAGE}</td>
@@ -647,11 +647,11 @@ $DOWNLOAD_TEMPLATE['mirror']['item']  = "
 $DOWNLOAD_TEMPLATE['mirror']['end'] = "
 	   </table>
 	</div>
-	";			
+	";
 
-	
-// All Download Pgaes.. 	
-	
+
+// All Download Pgaes..
+
 $DOWNLOAD_TEMPLATE['header'] = '{DOWNLOAD_BREADCRUMB}';
 $DOWNLOAD_TEMPLATE['footer'] = '';
 

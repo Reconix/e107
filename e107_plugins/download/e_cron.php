@@ -23,28 +23,28 @@ class download_cron // include plugin-folder in the name.
 	function config()
 	{
 		$cron = array();
-	
+
 		$cron[] = array(
 			'name'			=> "Prune Download Log older than 12 months", // Prune downloads history
 			'function'		=> "pruneLog",
 			'category'		=> '',
 			'description' 	=> "Non functional at the moment"
-		);	
-		
+		);
+
 		return $cron;
 	}
-	
-	
 
-	function pruneLog() 
+
+
+	function pruneLog()
 	{
 	    // Whatever code you wish.
 	    e107::getMessage()->add("Executed dummy function within download/e_cron.php");
 	    return ;
 	}
-	
-	
-	
+
+
+
 
 }
 

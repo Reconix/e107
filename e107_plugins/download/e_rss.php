@@ -28,7 +28,7 @@ if (!defined('e107_INIT')) { exit; }
 	$feed['class']		= '0';
 	$feed['limit']		= '9';
 	$eplug_rss_feed[]	= $feed;
-		
+
 // ------------------------------------------------------------------------------------
 
 	// Download categories for admin import.

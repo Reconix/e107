@@ -12,57 +12,57 @@ if (!e107::isInstalled('download')) { exit(); }
 
 class download
 {
-	
+
 	private $qry = array();
-	
+
 	private $orderOptions = array('download_id','download_datestamp','download_filesize','download_name','download_author','download_requested');
-	
+
 	private $templateHeader = '';
 	private $templateFooter = '';
-	
+
 	function __construct()
 	{
-				
+
 		require_once(e_PLUGIN."download/download_shortcodes.php");
-		
-		if(deftrue('BOOTSTRAP')) // v2.x 
+
+		if(deftrue('BOOTSTRAP')) // v2.x
 		{
 			$this->templateHeader = e107::getTemplate('download','download','header');
 			$this->templateFooter = e107::getTemplate('download','download','footer');
 		}
-		else 
+		else
 		{
 			$this->templateHeader = '';
 			$this->templateFooter = '';
 		}
-		
+
 	}
-	
+
 	public function init()
 	{
 
 		$tp = e107::getParser();
 		$pref = e107::getPref();
-	
+
 		$tmp = explode('.', e_QUERY);
-		
+
 		$order = str_replace("download_","",$pref['download_order']);
-						
+
 		// Set Defaults
 		$this->qry['action']		= 'maincats';
 		$this->qry['order'] 		= vartrue($order, 'datestamp');
 		$this->qry['sort']			= vartrue($pref['download_sort'], 'desc');
 		$this->qry['view'] 			= vartrue($pref['download_view'], 10);
 		$this->qry['from']			= 0;
-			
-		// v2.x 
+
+		// v2.x
 		if(!empty($_GET['action']))
 		{
 			$this->qry['action'] 	= (string) $_GET['action'];
 			$this->qry['view'] 		= varset($_GET['view']) ? intval($_GET['view']) : $this->qry['view'];
 			$this->qry['id']		= intval($_GET['id']);
 			$this->qry['order'] 	= vartrue($_GET['order']) && in_array("download_".$_GET['order'],$this->orderOptions) ? $_GET['order'] : $this->qry['order'];
-			$this->qry['sort'] 		= (varset($_GET['sort']) == 'asc') ? "asc" : 'desc';	
+			$this->qry['sort'] 		= (varset($_GET['sort']) == 'asc') ? "asc" : 'desc';
 			$this->qry['from']		= vartrue($_GET['from'],0);
 
 			if($this->qry['action'] == 'error')
@@ -70,7 +70,7 @@ class download
 				$this->qry['error'] = intval($this->qry['id']);
 			}
 		}
-		else // v1.x Legacy URL support. 
+		else // v1.x Legacy URL support.
 		{
 			if (is_numeric($tmp[0]))	//legacy		// $tmp[0] at least must be valid
 			{
@@ -85,62 +85,62 @@ class download
 			   $this->qry['action'] 	= preg_replace("#\W#", "", $tp->toDB($tmp[0]));
 			   $this->qry['id'] 		= intval($tmp[1]);
 			   $this->qry['error']		= intval(varset($tmp[2],0));
-			}	
-			
-		}	
-		
+			}
+
+		}
+
 		// v1.x
-		if(varset($_POST['view'])) 
+		if(varset($_POST['view']))
 		{
 			$this->qry['view'] 		= varset($_POST['view']) ? intval($_POST['view']) : 10;
 			$this->qry['order'] 	= varset($_POST['order']) && in_array("download_".$_POST['order'],$this->orderOptions) ? $_POST['order'] : 'datestamp';
-			$this->qry['sort'] 		= (strtolower($_POST['sort']) == 'asc') ? "asc" : 'desc';	
-		}	
-		
+			$this->qry['sort'] 		= (strtolower($_POST['sort']) == 'asc') ? "asc" : 'desc';
+		}
 
-	}  
+
+	}
 
 
 
 
 	/**
-	 * Auto-detected Render of the appropriate download page. 
+	 * Auto-detected Render of the appropriate download page.
 	 */
 	public function render()
 	{
-		
+
 		$pref = e107::getPref();
-		
+
 		if($this->qry['action'] == 'maincats')
 		{
 			return $this->renderCategories();
 		}
-	
+
 		if($this->qry['action'] == 'list')
 		{
 			return $this->renderList();
 		}
-		
+
 		if($this->qry['action'] == 'view')
 		{
-			return $this->renderView();	
+			return $this->renderView();
 		}
-		
+
 		if ($this->qry['action'] == "report" && check_class($pref['download_reportbroken']))
 		{
-			return $this->renderReport();		
+			return $this->renderReport();
 		}
-		
+
 		if($this->qry['action'] == 'mirror')
 		{
-			return $this->renderMirror();	
+			return $this->renderMirror();
 		}
-		
+
 		if($this->qry['action'] == 'error')
 		{
-			return $this->renderError();	
-		}	
-		
+			return $this->renderError();
+		}
+
 	}
 
 
@@ -149,41 +149,41 @@ class download
 
 
 	/**
-	 * Render Download Categories. 
-	 * @todo Cache 
+	 * Render Download Categories.
+	 * @todo Cache
 	 */
 	private function renderCategories()
 	{
 		$tp = e107::getParser();
 		$ns = e107::getRender();
 		$pref = e107::getPref();
-		
-		
+
+
 	//	if ($cacheData = $e107cache->retrieve("download_cat".$maincatval,720)) // expires every 12 hours. //TODO make this an option
 		{
 	   //  	echo $cacheData;
 		//	return;
 		}
-		
-		
-		if(deftrue('BOOTSTRAP')) // v2.x 
+
+
+		if(deftrue('BOOTSTRAP')) // v2.x
 		{
 			$template = e107::getTemplate('download','download','categories');
-			
+
 			$DOWNLOAD_CAT_TABLE_START 	= varset($template['start']);
 			$DOWNLOAD_CAT_PARENT_TABLE	= $template['parent'];
 			$DOWNLOAD_CAT_CHILD_TABLE	= $template['child'];
 			$DOWNLOAD_CAT_SUBSUB_TABLE	= $template['subchild'];
 			$DOWNLOAD_CAT_TABLE_END		= varset($template['end']);
-				
+
 //			$DL_VIEW_NEXTPREV			= varset($template['nextprev']);
 //			$DL_VIEW_PAGETITLE			= varset($template['pagetitle']);
 //			$DL_VIEW_CAPTION			= varset($template['caption'],"{DOWNLOAD_VIEW_CAPTION}");
 		}
-		else // Legacy v1.x 
+		else // Legacy v1.x
 		{
 			$template_name = 'download_template.php';
-			
+
 			if (is_readable(THEME."templates/".$template_name))
 			{
 				require_once(THEME."templates/".$template_name);
@@ -195,15 +195,15 @@ class download
 			else
 			{
 				require_once(e_PLUGIN."download/templates/".$template_name);
-			}	
+			}
 		}
-		
+
 		$sc = e107::getScBatch('download',true);
 		$sc->wrapper('download/categories');
-		$sc->qry 	= $this->qry;	
-		
-	
-		
+		$sc->qry 	= $this->qry;
+
+
+
 		if(!defined("DL_IMAGESTYLE")){ define("DL_IMAGESTYLE","border:1px solid blue");}
 
 	   // Read in tree of categories which this user is allowed to see
@@ -213,20 +213,20 @@ class download
 	   	{
 			return $ns->tablerender(LAN_PLUGIN_DOWNLOAD_NAME, "<div ".(deftrue('BOOTSTRAP')?"class='alert alert-warning' >":"")."style='text-align:center'>".LAN_NO_RECORDS_FOUND."</div>",'download-categories',true);
 		}
-				
+
 		$download_cat_table_string = "";
 		foreach($dlcat->cat_tree as $dlrow)  // Display main category headings, then sub-categories, optionally with sub-sub categories expanded
 		{
-			$sc->setVars($dlrow); 
+			$sc->setVars($dlrow);
 			$download_cat_table_string .= $tp->parseTemplate($DOWNLOAD_CAT_PARENT_TABLE, TRUE, vartrue($sc));
-			
+
 			foreach($dlrow['subcats'] as $dlsubrow)
 			{
 				$sc->dlsubrow = $dlsubrow;
-				
-				
+
+
 				$download_cat_table_string .= $tp->parseTemplate($DOWNLOAD_CAT_CHILD_TABLE, TRUE, $sc);
-				
+
 				foreach($dlsubrow['subsubcats'] as $dlsubsubrow)
 				{
 					$sc->dlsubsubrow = $dlsubsubrow;
@@ -234,24 +234,24 @@ class download
 				}
 			}
 	   }
-	  
+
 		$dl_text .= $tp->parseTemplate($this->templateHeader, TRUE, $sc);
 		$dl_text .= $tp->parseTemplate($DOWNLOAD_CAT_TABLE_START, TRUE, $sc);
 		$dl_text .= $download_cat_table_string;
 		$dl_text .= $tp->parseTemplate($DOWNLOAD_CAT_TABLE_END, TRUE, $sc);
-	   
+
 		$caption = varset($DOWNLOAD_CAT_CAPTION) ? $tp->parseTemplate($DOWNLOAD_CAT_CAPTION, TRUE, $sc) : LAN_PLUGIN_DOWNLOAD_NAME;
-		
+
 		//ob_start();
-		
+
 		$dl_text .= $tp->parseTemplate($this->templateFooter, TRUE, $sc);
-	   
+
 		return $ns->tablerender($caption, $dl_text, 'download-categories',true);
 
 	  // $cache_data = ob_get_flush();
-	 //  $e107cache->set("download_cat".$maincatval, $cache_data);	
-		
-		
+	 //  $e107cache->set("download_cat".$maincatval, $cache_data);
+
+
 	}
 
 
@@ -268,10 +268,10 @@ class download
 	 */
 	private function renderView()
 	{
-		if(deftrue('BOOTSTRAP')) // v2.x 
+		if(deftrue('BOOTSTRAP')) // v2.x
 		{
 			$template = e107::getTemplate('download','download','view');
-			
+
 			$DOWNLOAD_VIEW_TABLE_START 	= varset($template['start']);
 			$DOWNLOAD_VIEW_TABLE		= $template['item'];
 			$DOWNLOAD_VIEW_TABLE_END	= varset($template['end']);
@@ -279,10 +279,10 @@ class download
 		//	$DL_VIEW_PAGETITLE			= varset($template['pagetitle']);
 			$DL_VIEW_CAPTION			= varset($template['caption'],"{DOWNLOAD_VIEW_CAPTION}");
 		}
-		else // Legacy v1.x 
+		else // Legacy v1.x
 		{
 			$template_name = 'download_template.php';
-			
+
 			if (is_readable(THEME."templates/".$template_name))
 			{
 				require_once(THEME."templates/".$template_name);
@@ -294,25 +294,25 @@ class download
 			else
 			{
 				require_once(e_PLUGIN."download/templates/".$template_name);
-			}	
+			}
 		}
-		
+
 		$sql = e107::getDb();
 		$tp = e107::getParser();
 		$ns = e107::getRender();
-		
+
 		$gen = new convert;
-	
+
 		$sc = e107::getScBatch('download',true);
 		$sc->wrapper('download/view');
 		$sc->qry 	= $this->qry;
-		
+
 		$highlight_search = FALSE;
-		if (isset($_POST['highlight_search'])) 
+		if (isset($_POST['highlight_search']))
 		{
 			$highlight_search = TRUE;
 		}
-	
+
 	    $query = "
 			SELECT d.*, dc.* FROM #download AS d
 			LEFT JOIN #download_category AS dc ON d.download_category = dc.download_category_id
@@ -320,7 +320,7 @@ class download
 			AND d.download_visible IN (".USERCLASS_LIST.")
 			AND dc.download_category_class IN (".USERCLASS_LIST.")
 			LIMIT 1";
-	
+
 		if(!$sql->gen($query))
 		{
 			//require_once(HEADERF);
@@ -328,34 +328,34 @@ class download
 			//require_once(FOOTERF);
 			//exit;
 		}
-	
-	
+
+
 		$dlrow = $sql->fetch();
 		$sc->setVars($dlrow);
-	
+
 	//	$comment_edit_query = 'comment.download.'.$id;
-		
+
 		if(!defined("DL_IMAGESTYLE"))
 		{
 			define("DL_IMAGESTYLE","border:0px");
 		}
-		
+
 	    if(!isset($DL_VIEW_PAGETITLE))
 		{
 	    	$DL_VIEW_PAGETITLE = LAN_PLUGIN_DOWNLOAD_NAME." / {DOWNLOAD_CATEGORY} / {DOWNLOAD_VIEW_NAME}";
 		}
-	
+
 	    $DL_TITLE = $tp->parseTemplate($DL_VIEW_PAGETITLE, TRUE, $sc);
-	
+
 		define("e_PAGETITLE", $DL_TITLE);
-	
+
 		$DL_TEMPLATE = $DOWNLOAD_VIEW_TABLE_START.$DOWNLOAD_VIEW_TABLE.$DOWNLOAD_VIEW_TABLE_END;
-		
-		
+
+
 		$text = $tp->parseTemplate($this->templateHeader, TRUE, $sc);
-		
+
 		$text .= $tp->parseTemplate($DL_TEMPLATE, TRUE, $sc);
-	
+
 		if(!isset($DL_VIEW_NEXTPREV))
 		{
 	    	$DL_VIEW_NEXTPREV = "
@@ -370,32 +370,32 @@ class download
 				</div>
 				";
 	   }
-		
-		
-		
+
+
+
 			// ------- Next/Prev -----------
 	   	$text .= $tp->parseTemplate($DL_VIEW_NEXTPREV,TRUE, $sc);
-	
+
 		$caption = $tp->parseTemplate($DL_VIEW_CAPTION, TRUE, $sc);
-		
+
 		$text .= $tp->parseTemplate($this->templateFooter, TRUE, $sc);
-		
+
 		$ret = $ns->tablerender($caption, $text, 'download-view', true);
-	
+
 		unset($text);
-	
-		if ($dlrow['download_comment']) 
-		{			
+
+		if ($dlrow['download_comment'])
+		{
 			$comments = e107::getComment()->compose_comment("download", "comment", $dlrow['download_id'], null, $dlrow['download_name'], FALSE, true);
 			$ret .= $ns->tablerender($comments['caption'], $comments['comment'].$comments['comment_form'], 'download-comments', true);
-		}	
-		
-		
-		
+		}
+
+
+
 	//	print_a($comments);
-		
+
 		return $ret;
-		
+
 	}
 
 
@@ -407,34 +407,34 @@ class download
 
 
 
-	
+
 	/**
-	 * Render a list of files in a particular download category. 
-	 * 
+	 * Render a list of files in a particular download category.
+	 *
 	 */
 	private function renderList()
 	{
-		
-		if(deftrue('BOOTSTRAP')) // v2.x 
+
+		if(deftrue('BOOTSTRAP')) // v2.x
 		{
 			$template = e107::getTemplate('download','download');
-			
-			$DOWNLOAD_LIST_CAPTION 		= $template['list']['caption'];	
-			$DOWNLOAD_LIST_TABLE_START 	= $template['list']['start'];	
+
+			$DOWNLOAD_LIST_CAPTION 		= $template['list']['caption'];
+			$DOWNLOAD_LIST_TABLE_START 	= $template['list']['start'];
 			$DOWNLOAD_LIST_TABLE 		= $template['list']['item'];
-			$DOWNLOAD_LIST_TABLE_END 	= $template['list']['end'];		
+			$DOWNLOAD_LIST_TABLE_END 	= $template['list']['end'];
 			$DOWNLOAD_LIST_NEXTPREV		= $template['list']['nextprev'];
-			
+
 			$DOWNLOAD_CAT_TABLE_START 	= varset($template['categories']['start']);
 			$DOWNLOAD_CAT_PARENT_TABLE	= $template['categories']['parent'];
 			$DOWNLOAD_CAT_CHILD_TABLE	= $template['categories']['child'];
 			$DOWNLOAD_CAT_SUBSUB_TABLE	= $template['categories']['subchild'];
 			$DOWNLOAD_CAT_TABLE_END		= varset($template['categories']['end']);
 		}
-		else // Legacy v1.x 
+		else // Legacy v1.x
 		{
-			$template_name = 'download_template.php';	
-			
+			$template_name = 'download_template.php';
+
 			if (is_readable(THEME."templates/".$template_name))
 			{
 				require_once(THEME."templates/".$template_name);
@@ -446,32 +446,32 @@ class download
 			else
 			{
 				require_once(e_PLUGIN."download/templates/".$template_name);
-			}	
+			}
 		}
-		
-		
+
+
 		$sql = e107::getDb();
 		$tp = e107::getParser();
 		$ns = e107::getRender();
-		
+
 	//	$sc 		= new download_shortcodes;
 		$sc = e107::getScBatch('download',true);
 		$sc->wrapper('download/list');
 		$sc->qry 	= $this->qry;
-		
-		
-		
+
+
+
 		//if (!isset($this->qry['from'])) $this->qry['from'] = 0;
 
 	      // Get category type, page title
 		if ($sql->select("download_category", "download_category_name,download_category_sef,download_category_description,download_category_parent,download_category_class", "(download_category_id='{$this->qry['id']}') AND (download_category_class IN (".USERCLASS_LIST."))") )
 		{
 	   	   $dlrow = $sql->fetch();
-	   	   $sc->setVars($dlrow);	// Used below for header / breadcrumb. 
+	   	   $sc->setVars($dlrow);	// Used below for header / breadcrumb.
 	   	   $type = $dlrow['download_category_name'];
-		   
+
 		   $this->qry['name'] = $dlrow['download_category_sef'];
-		   
+
 	   	   define("e_PAGETITLE", LAN_PLUGIN_DOWNLOAD_NAME." / ".$dlrow['download_category_name']);
 		}
 		else
@@ -479,25 +479,25 @@ class download
 	   	   define("e_PAGETITLE", LAN_PLUGIN_DOWNLOAD_NAME);
 	   	   return $ns->tablerender(LAN_PLUGIN_DOWNLOAD_NAME, "<div class='alert alert-info' style='text-align:center'>".LAN_dl_3."</div>",'download-list',true);
 		}
-		
+
 		if ($dlrow['download_category_parent'] == 0)  // It's a main category - change the listing type required
-	      { 
+	      {
 	      //   $action = 'maincats';
 	  // 	  	 $maincatval = $id;
 		}
-		
+
 		$dl_text = $tp->parseTemplate($this->templateHeader, TRUE, $sc);
-						
+
 		$total_downloads = $sql->count("download", "(*)", "WHERE download_category = '{$this->qry['id']}' AND download_active > 0 AND download_visible REGEXP '" . e_CLASS_REGEXP . "'");
-		
-		
+
+
 		/* SHOW SUBCATS ... */
 		$qry = "SELECT download_category_id,download_category_class FROM #download_category WHERE download_category_parent=".intval($this->qry['id']);
-		
+
 		if($sql->gen($qry))
 		{
-			
-				
+
+
 			/* there are subcats - display them ... */
 			$qry = "
 			SELECT dc.*, dc2.download_category_name AS parent_name, dc2.download_category_icon as parent_icon, SUM(d.download_filesize) AS d_size,
@@ -510,49 +510,49 @@ class download
 			WHERE dc.download_category_class IN (" . USERCLASS_LIST . ") AND dc.download_category_parent='{$this->qry['id']}'
 			GROUP by dc.download_category_id ORDER by dc.download_category_order
 			";
-			
+
 			if($sql->gen($qry))
 			{
-				
+
 				$scArray = $sql->db_getList();
-								
+
 				/** @DEPRECATED **/
 			//	if(!defined("DL_IMAGESTYLE"))
 			//	{
 			//		define("DL_IMAGESTYLE", "border:1px solid blue");
 			//	}
-	
+
 				$download_cat_table_string = "";
-				
+
 				$dl_text .= $tp->parseTemplate($DOWNLOAD_CAT_TABLE_PRE, TRUE, $sc);
 				$dl_text .= $tp->parseTemplate($DOWNLOAD_CAT_TABLE_START, TRUE, $sc);
-				
+
 				foreach($scArray as $dlsubsubrow)
 				{
 					$sc->dlsubsubrow = $dlsubsubrow;
 					$dl_text .= $tp->parseTemplate($DOWNLOAD_CAT_SUBSUB_TABLE, TRUE, $sc);
-					
+
 				}
-				
+
 				$dl_text .= $tp->parseTemplate($DOWNLOAD_CAT_TABLE_END, TRUE, $sc);
-				
+
 		 	    $text = $ns->tablerender($dl_title, $dl_text, 'download-list', true);
 			}
-			
+
 		}// End of subcategory display
 
 		// Now display individual downloads
 		$download_category_class = 0;
-		
+
 		if(!check_class($download_category_class))
 		{
-	
-			
+
+
 			$ns->tablerender(LAN_PLUGIN_DOWNLOAD_NAME, "
 			<div style='text-align:center'>
 				" . LAN_dl_3 . "
 			</div>");
-			
+
 			return;
 		//	require_once (FOOTERF);
 		//	exit ;
@@ -562,7 +562,7 @@ class download
 			$this->qry['from'] = 0;
 		}
 
-	
+
 		if(!defined("DL_IMAGESTYLE"))
 		{
 			define("DL_IMAGESTYLE", "border:1px solid blue");
@@ -576,33 +576,33 @@ class download
 		// $this->qry['view'] - number of entries per page
 		// $total_downloads - total number of entries matching search criteria
 		$filetotal = $sql->select("download", "*", "download_category='{$this->qry['id']}' AND download_active > 0 AND download_visible IN (" . USERCLASS_LIST . ") ORDER BY download_{$this->qry['order']} {$this->qry['sort']} LIMIT {$this->qry['from']}, ".$this->qry['view']);
-		
+
 		if($filetotal)
 		{
 	  		$caption = varset($DOWNLOAD_LIST_CAPTION) ? $tp->parseTemplate($DOWNLOAD_LIST_CAPTION, TRUE, $sc) : LAN_PLUGIN_DOWNLOAD_NAME;
 
 			// Only show list if some files in it
 			$dl_text .= $tp->parseTemplate($DOWNLOAD_LIST_TABLE_START, TRUE, $sc);
-			
+
 			global $dlft, $dltdownloads;
-			
+
 			$dlft = ($filetotal < $this->qry['view'] ? $filetotal: $this->qry['view']);
 
 			while($dlrow = $sql->fetch())
 			{
-				$sc->setVars($dlrow);	
-				
+				$sc->setVars($dlrow);
+
 				$agreetext = $tp->toHTML($pref['agree_text'], TRUE, 'DESCRIPTION');
 				$current_row = ($current_row) ? 0: 1;
 				// Alternating CSS for each row.(backwards compatible)
 				$template = ($current_row == 1)? $DOWNLOAD_LIST_TABLE: str_replace("forumheader3", "forumheader3 forumheader3_alt", $DOWNLOAD_LIST_TABLE);
-				
+
 				$dltdownloads += $dlrow['download_requested'];
-				
+
 				$dl_text .= $tp->parseTemplate($template, TRUE, $sc);
-				
-			
-				
+
+
+
 			}
 
 			$dl_text .= $tp->parseTemplate($DOWNLOAD_LIST_TABLE_END, TRUE, $sc);
@@ -624,7 +624,7 @@ class download
 				";
 						$sc_style['DOWNLOAD_LIST_NEXTPREV']['post'] = "
 			</div>";
-			
+
 						$DOWNLOAD_LIST_NEXTPREV = "
 			<div style='text-align:center;margin-left:auto;margin-right:auto'>
 				{DOWNLOAD_BACK_TO_CATEGORY_LIST}
@@ -634,12 +634,12 @@ class download
 			</div>";
 		}
 
-		
+
 	//	$newUrl = e_SELF . "?action=list&id={$this->qry['id']}&from=[FROM]&view={$this->qry['view']}&order={$this->qry['order']}&sort={$this->qry['sort']}.";
-			
+
 		$nextprevQry = $this->qry;
 		$nextprevQry['from'] = '[FROM]';
-		
+
 		$newUrl = e107::getUrl()->create('download/list/category',$nextprevQry);
 
 		$nextprev = array(
@@ -651,19 +651,19 @@ class download
 		);
 
 		global $nextprev_parms;
-	
+
 		$nextprev_parms  = http_build_query($nextprev,false,'&'); // 'tmpl_prefix='.deftrue('NEWS_NEXTPREV_TMPL', 'default').'&total='. $total_downloads.'&amount='.$amount.'&current='.$newsfrom.$nitems.'&url='.$url;
 
-		$text .= $tp->parseTemplate($DOWNLOAD_LIST_NEXTPREV, TRUE, $sc);	
+		$text .= $tp->parseTemplate($DOWNLOAD_LIST_NEXTPREV, TRUE, $sc);
 
 		return $text;
-		
+
 	}
 
 
 
 	/**
-	 * Render a 'Broken Download' Report form. 
+	 * Render a 'Broken Download' Report form.
 	 */
 	private function renderReport()
 	{
@@ -672,7 +672,7 @@ class download
 		$ns = e107::getRender();
 		$frm = e107::getForm();
 		$pref = e107::getPref();
-						
+
 		$query = "
 		SELECT d.*, dc.* FROM #download AS d
 		LEFT JOIN #download_category AS dc ON d.download_category = dc.download_category_id
@@ -684,18 +684,18 @@ class download
 		{
 			return;
 		}
-	
+
 		$dlrow = $sql->fetch();
-		
+
 		extract($dlrow);
-	
-		if (isset($_POST['report_download'])) 
+
+		if (isset($_POST['report_download']))
 		{
 			$report_add = $tp->toDB($_POST['report_add']);
 			$download_name = $tp->toDB($download_name);
 			$user = USER ? USERNAME : LAN_GUEST;
-	
-			if ($pref['download_email']) 
+
+			if ($pref['download_email'])
 			{    // this needs to be moved into the NOTIFY, with an event.
 				require_once(e_HANDLER."mail.php");
 				$subject = LAN_dl_60." ".SITENAME;
@@ -703,30 +703,30 @@ class download
 				".LAN_dl_59." ".$user."\n".$report_add;
 				sendemail(SITEADMINEMAIL, $subject, $report);
 			}
-	
+
 			$sql->insert('generic', "0, 'Broken Download', ".time().",'".USERID."', '{$download_name}', {$id}, '{$report_add}'");
-	
+
 			define("e_PAGETITLE", LAN_PLUGIN_DOWNLOAD_NAME." / ".LAN_dl_47);
-			
-	
+
+
 			$text = LAN_dl_48."<br /><br /><a href='".e_PLUGIN."download/download.php?action=view&id=".$download_id."'>".LAN_dl_49."</a>";
 
-	   
+
 			return $ns->tablerender(LAN_PLUGIN_DOWNLOAD_NAME, $text, 'download-report', true);
 		}
-		else 
+		else
 		{
 			define("e_PAGETITLE", LAN_PLUGIN_DOWNLOAD_NAME." / ".LAN_dl_51." ".$download_name);
 		//	require_once(HEADERF);
-		
+
 			$breadcrumb 	= array();
 			$breadcrumb[]	= array('text' => LAN_PLUGIN_DOWNLOAD_NAME,						'url' => e_SELF);
 			$breadcrumb[]	= array('text' => $dlrow['download_category_name'],	'url' => e_SELF."?action=list&id=".$dlrow['download_category_id']);
 			$breadcrumb[]	= array('text' => $dlrow['download_name'],			'url' => e_SELF."?action=view&id=".$dlrow['download_id']);
 			$breadcrumb[]	= array('text' => LAN_dl_50,						'url' => null);
-		
+
 			$text = $frm->breadcrumb($breadcrumb);
-	
+
 			$text .= "<form action='".e_SELF."?report.{$download_id}' method='post'>
 			   <div>
 			   	      ".LAN_DOWNLOAD.": <a href='".e_PLUGIN."download/download?action=view&id={$download_id}'>".$download_name."</a>
@@ -737,35 +737,35 @@ class download
 					".$frm->button('report_download',LAN_dl_45,'submit')."
 				</div>
 		   </form>";
-		   	  
+
 			return $ns->tablerender(LAN_PLUGIN_DOWNLOAD_NAME, $text, 'download-report', true);
 		}
 	}
-				
-			
+
+
 	/**
-	 * Render Download Mirrors for the selected file. 
+	 * Render Download Mirrors for the selected file.
 	 */
 	private function renderMirror()
 	{
-		
+
 		$sql = e107::getDb();
 		$tp = e107::getParser();
 		$ns = e107::getRender();
-		
-		if(deftrue('BOOTSTRAP')) // v2.x 
+
+		if(deftrue('BOOTSTRAP')) // v2.x
 		{
 			$template = e107::getTemplate('download','download','mirror');
-			
-			$DOWNLOAD_MIRROR_START 		= $template['start'];	
+
+			$DOWNLOAD_MIRROR_START 		= $template['start'];
 			$DOWNLOAD_MIRROR	 		= $template['item'];
-			$DOWNLOAD_MIRROR_END 		= $template['end'];		
+			$DOWNLOAD_MIRROR_END 		= $template['end'];
 
 		}
-		else // Legacy v1.x 
+		else // Legacy v1.x
 		{
-			$template_name = 'download_template.php';	
-			
+			$template_name = 'download_template.php';
+
 			if (is_readable(THEME."templates/".$template_name))
 			{
 				require_once(THEME."templates/".$template_name);
@@ -777,38 +777,38 @@ class download
 			else
 			{
 				require_once(e_PLUGIN."download/templates/".$template_name);
-			}	
-		
+			}
+
 		}
-		
+
 		$sc = e107::getScBatch('download',true);
 		$sc->wrapper('download/mirror');
 		$sc->qry 	= $this->qry;
-		
+
 	//	$load_template = 'download_template';
 	//	if (!isset($DOWNLOAD_MIRROR_START)) eval($template_load_core);
-	
+
 		$sql->select("download_mirror");
 		$mirrorList = $sql->db_getList("ALL", 0, 200, "mirror_id");
-	
+
 	    $query = "
 			SELECT d.*, dc.* FROM #download AS d
 			LEFT JOIN #download_category AS dc ON d.download_category = dc.download_category_id
 			WHERE d.download_id = ".$this->qry['id']."
 			LIMIT 1";
-	
-	//	global $dlmirrorfile, $dlmirror;	
-	
-	
+
+	//	global $dlmirrorfile, $dlmirror;
+
+
 		if($sql->gen($query))
 		{
 			$dlrow = $sql->fetch();
 		//	$dlrow['mirrorlist'] = $mirrorList;
 			$sc->setVars($dlrow);
 
-			
+
 			$array = explode(chr(1), $dlrow['download_mirror']);
-			
+
 			if (2 == varset($pref['mirror_order']))
 			{
 	         // Order by name, sort array manually
@@ -830,35 +830,35 @@ class download
 				     $array[$d] = $tmp;
 				   }
 			}
-	
+
 			$dl_text = $tp->parseTemplate($this->templateHeader, TRUE, $sc);
-	
+
 		   	$dl_text .= $tp->parseTemplate($DOWNLOAD_MIRROR_START, TRUE, $sc);
 			$download_mirror = 1;
-				
-		
-				
+
+
+
 			foreach($array as $mirrorstring)
 			{
 				if($mirrorstring)
 				{
 					$dlmirrorfile = explode(",", $mirrorstring);
 				//	$dlmirror = $mirrorList[$dlmirrorfile[0]];
-					
+
 					$sc->mirror['dlmirrorfile'] = $dlmirrorfile;
 					$sc->mirror['dlmirror'] = $mirrorList[$dlmirrorfile[0]];
-					
+
 					$dl_text .= $tp->parseTemplate($DOWNLOAD_MIRROR, TRUE, $sc);
 				}
 			}
-			   
+
 			$dl_text .= $tp->parseTemplate($DOWNLOAD_MIRROR_END, TRUE, $sc);
-			
+
 			$dl_text .= $tp->parseTemplate($this->templateFooter, TRUE, $sc);
-			
-		   	return $ns->tablerender(LAN_PLUGIN_DOWNLOAD_NAME, $dl_text, 'download-mirror', true);	
-		
-		
+
+		   	return $ns->tablerender(LAN_PLUGIN_DOWNLOAD_NAME, $dl_text, 'download-mirror', true);
+
+
 		}
 
 
@@ -866,47 +866,47 @@ class download
 
 
 	/**
-	 * Render Download Errors. 
+	 * Render Download Errors.
 	 */
 	private function renderError()
 	{
 		$ns = e107::getRender();
 		$pref = e107::getPref();
 		$tp = e107::getParser();
-		
+
 		$sc = e107::getScBatch('download',true);
-		
+
 		$header = $tp->parseTemplate($this->templateHeader,true, $sc);
 		$footer = $tp->parseTemplate($this->templateFooter,true, $sc);
-		
+
 		switch ($this->qry['error'])
 		{
 			case 1 :	// No permissions
-	            if (strlen($pref['download_denied']) > 0) 
+	            if (strlen($pref['download_denied']) > 0)
 	            {
 					$errmsg = $tp->toHTML($pref['download_denied'],true);
-	   	      	} 
-	   	      	else 
+	   	      	}
+	   	      	else
 	   	      	{
 					$errmsg = LAN_dl_63;
 				}
 			break;
-			  
+
 			case 2 :	// Quota exceeded
 				$errmsg = LAN_dl_62;
 			break;
-			
+
 			default: // Generic error - shouldn't happen
-	   	     $errmsg = LAN_ERROR." ".$this->qry['error'];		
+	   	     $errmsg = LAN_ERROR." ".$this->qry['error'];
 		}
-		
+
 		return $ns->tablerender(LAN_PLUGIN_DOWNLOAD_NAME, $header. "<div class='alert alert-error alert-danger alert-block' style='text-align:center'>".$errmsg."</div>". $footer, 'download-error', true);
-		
+
 	}
-   
-   
-   
-   
+
+
+
+
    function getCategorySelectList($currentID=0, $incSubSub=true, $groupOnMain=true, $blankText="&nbsp;", $name="download_category")
    {
       global $sql,$parm;

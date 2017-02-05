@@ -37,7 +37,7 @@ if (!e107::isInstalled('download'))
 	e107::getLanguage()->bcDefs($bcList);
 
 
-	
+
 	require_once(e_PLUGIN.'download/handlers/download_class.php');
 	require_once(e_PLUGIN.'download/handlers/category_class.php');
 
@@ -53,19 +53,19 @@ if (!e107::isInstalled('download'))
 	if(deftrue('BOOTSTRAP'))
 	{
 		define("IMAGE_DOWNLOAD", (file_exists(THEME."images/download.png") ? THEME."images/download.png" : 'icon-download.glyph'));
-		define("IMAGE_NEW", (file_exists(THEME."images/new.png") ? THEME."images/new.png" : 'icon-star.glyph'));	
+		define("IMAGE_NEW", (file_exists(THEME."images/new.png") ? THEME."images/new.png" : 'icon-star.glyph'));
 	}
-	else 
+	else
 	{
 		define("IMAGE_DOWNLOAD", (file_exists(THEME."images/download.png") ? THEME."images/download.png" : e_IMAGE."generic/download.png"));
 		define("IMAGE_NEW", (file_exists(THEME."images/new.png") ? THEME."images/new.png" : e_IMAGE."generic/new.png"));
 	}
-	
+
 
 
 	$dl->init();
 
-	// Legacy Comment Save. 
+	// Legacy Comment Save.
 	if (isset($_POST['commentsubmit']))
 	{
 		if (!$sql->select("download", "download_comment", "download_id = '{$id}' "))
@@ -81,7 +81,7 @@ if (!e107::isInstalled('download'))
 				$clean_authorname = $_POST['author_name'];
 				$clean_comment = $_POST['comment'];
 				$clean_subject = $_POST['subject'];
-	
+
 				e107::getComment()->enter_comment($clean_authorname, $clean_comment, "download", $id, $pid, $clean_subject);
 	//			$e107cache->clear("comment.download.{$sub_action}");	$sub_action not used here
 				e107::getCache()->clear("comment.download");
@@ -90,16 +90,16 @@ if (!e107::isInstalled('download'))
 	}
 
 
-	$texts = $dl->render(); // Load before header. 
+	$texts = $dl->render(); // Load before header.
 
 	require_once (HEADERF);
-	
-	
-	
+
+
+
 	echo $texts;
-	
+
 	require_once (FOOTERF);
-	
-	
+
+
 exit ;
 ?>
