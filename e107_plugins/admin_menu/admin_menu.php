@@ -16,15 +16,15 @@ if (!defined('e107_INIT')) { exit; }
 
 if (ADMIN == TRUE)
 {
-	
+
 	e107::lan('core','admin', true); // We're not in admin - load generic admin phrases
 
 	$tp 	= e107::getParser();
 	$pref 	= e107::getPref();
 	$ns 	= e107::getRender();
 	$nav 	= e107::getNav();
-	
-	
+
+
     $array_functions = $nav->adminLinks();
 
 	$amtext = "<div class='text-center' style='text-align:center'>
