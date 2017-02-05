@@ -362,7 +362,7 @@ class forum_shortcodes extends e_shortcode
 	}
 
 
-	function sc_forumname()
+	function sc_forumname($parm = null)
 	{
 		//    global $f;
 		//	$tp = e107::getParser();
@@ -373,8 +373,22 @@ class forum_shortcodes extends e_shortcode
 		$this->var['forum_name'] = e107::getParser()->toHTML($this->var['forum_name'], true, 'no_hook');
 
 		$url = e107::url('forum', 'forum', $this->var);
-		return "<a href='".$url."'>{$this->var['forum_name']}</a>";
 
+		// parameter extention
+		switch ($parm['ext'])
+		{
+			// {FORUMNAME:ext=title}
+			case "title":
+		        return "{$this->var['forum_name']}";
+		        break;
+			// {FORUMNAME:ext=url}
+		    case "url":
+		        return $url;
+		        break;
+			// {FORUMNAME}
+		    default:
+		        return "<a href='".$url."'>{$this->var['forum_name']}</a>";
+		}
 	}
 
 
@@ -461,7 +475,6 @@ class forum_shortcodes extends e_shortcode
 
 		return $this->lastpostdata('post');
 */
-
 
 		if (empty($this->var['forum_lastpost_info']))
 		{
