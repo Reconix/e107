@@ -5,9 +5,9 @@
 	<category>content</category>
 	<copyright>Copyright e107 Inc e107.org, Licensed under GPL (http://www.gnu.org/licenses/gpl.txt)</copyright>
 	<adminLinks>
-		<link url='admin_config.php' description='Configure Newsfeeds' icon='images/newsfeed_32.png' iconSmall='images/newsfeed_16.png' primary='true' >Configure Newsfeeds</link>	
+		<link url='admin_config.php' description='Configure Newsfeeds' icon='images/newsfeed_32.png' iconSmall='images/newsfeed_16.png' primary='true' >Configure Newsfeeds</link>
 	</adminLinks>
 	<siteLinks>
 		<link url="{e_PLUGIN}newsfeed/newsfeed.php" sef="index" >LAN_PLUGIN_NEWSFEEDS_NAME</link>
-	</siteLinks>	
+	</siteLinks>
 </e107Plugin>

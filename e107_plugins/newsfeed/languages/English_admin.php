@@ -64,7 +64,7 @@ define("NFLAN_42", "[h=4]Newsfeed Title[/h]
 	[h=4]Description[/h]
 	Enter a short description for the feed, or 'default' to use the description defined in the feed (if there is one).
 	[h=4]Update Interval[/h]
-	Enter the number of seconds before the feed is updated. 
+	Enter the number of seconds before the feed is updated.
 	For example, 1800 = 30 Minutes, 3600 = 1 Hour, 86400 = 1 Day.
 	[h=4]Activation[/h]
 	Newsfeeds can be displayed in the menu only or on the newsfeed page. Enter the details where feeds should be displayed. To see newsfeeds in e107 menus you will need to activate the [b]Newsfeeds Menu[b/] in [link=".e_ADMIN."menus.php]Menu Manager[/link].

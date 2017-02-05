@@ -19,7 +19,7 @@ if(!defined('e107_INIT'))
     require_once('../../class2.php');
 }
 
-if (!e107::isInstalled('newsfeed')) 
+if (!e107::isInstalled('newsfeed'))
 {
 	e107::redirect();
 	exit;
@@ -31,7 +31,7 @@ if(!class_exists('newsfeedClass'))
 	require(e_PLUGIN.'newsfeed/newsfeed_functions.php');
 }
 global $newsFeed;
-if (!is_object($newsFeed)) 
+if (!is_object($newsFeed))
 {
 	$newsFeed = new newsfeedClass;
 }
@@ -85,7 +85,7 @@ if($action == "show")
 	exit;
 }
 
-	
+
 /* no action - display feed list ... */
 $newsFeed->readFeedList();
 $vars = array();
@@ -112,4 +112,3 @@ if (count($newsFeed->feedList))
 $text = $NEWSFEED_LIST_START . vartrue($data) . $NEWSFEED_LIST_END;
 $ns->tablerender(NFLAN_29, $text);
 require_once(FOOTERF);
-

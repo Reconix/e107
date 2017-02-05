@@ -15,7 +15,7 @@
  *
 */
 if (!defined('e107_INIT')) { exit; }
-if (!e107::isInstalled('newsfeed')) 
+if (!e107::isInstalled('newsfeed'))
 {
 	return '';
 }
@@ -27,7 +27,7 @@ if(!class_exists('newsfeedClass'))
 	require_once(e_PLUGIN.'newsfeed/newsfeed_functions.php');
 }
 global $newsFeed;
-if (!is_object($newsFeed)) 
+if (!is_object($newsFeed))
 {
 	$newsFeed = new newsfeedClass;
 }
