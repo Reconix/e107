@@ -7,7 +7,7 @@
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
  */
- 
+
 define("LAN_PLUGIN_BANNER_NAME",		"Banners");
 define("LAN_PLUGIN_BANNER_DESCRIPTION", "Add advertising banners to your e107 website");
 

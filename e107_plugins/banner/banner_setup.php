@@ -65,5 +65,3 @@ class banner_setup
 	}
 */
 }
-
-

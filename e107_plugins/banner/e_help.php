@@ -10,7 +10,7 @@
  *
 */
 if (!defined('e107_INIT')) { exit; }
-if (!e107::isInstalled('banner')) 
+if (!e107::isInstalled('banner'))
 {
 	return;
 }

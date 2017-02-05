@@ -10,7 +10,7 @@
 
 
 if (!defined('e107_INIT'))
-{ 
+{
 	require_once("../../class2.php");
 }
 
@@ -29,8 +29,8 @@ $sql = e107::getDb();
 $mes = e107::getMessage();
 $frm = e107::getForm();
 
-// When a banner is clicked 
-if(e_QUERY) 
+// When a banner is clicked
+if(e_QUERY)
 {
 	$query_string = intval(e_QUERY);
 	$row = $sql->retrieve("banner", "*", "banner_id = '{$query_string}'"); // select the banner
@@ -42,32 +42,32 @@ if(e_QUERY)
 	exit;
 }
 
-if (!$BANNER_LOGIN_TABLE) 
+if (!$BANNER_LOGIN_TABLE)
 {
-	if(file_exists(THEME.'templates/banner/banner_template.php')) // v2.x location. 
+	if(file_exists(THEME.'templates/banner/banner_template.php')) // v2.x location.
 	{
 		require_once (THEME.'templates/banner/banner_template.php');
 	}
-	elseif(file_exists(THEME."banner_template.php")) 
+	elseif(file_exists(THEME."banner_template.php"))
 	{
 		require_once(THEME."banner_template.php");
-	} 
-	else 
+	}
+	else
 	{
 		require_once("banner_template.php");
 	}
 }
 
-	
+
 require_once(HEADERF);
-	
-if (isset($_POST['clientsubmit'])) 
+
+if (isset($_POST['clientsubmit']))
 {
-	
+
 	$clean_login 	= $tp->toDB($_POST['clientlogin']);
 	$clean_password = $tp->toDB($_POST['clientpassword']);
-	
-	// check login 
+
+	// check login
 	// TODO: massive clean-up (integrate e107 users, proper login handling, password encryption for new and existing records)
 	if (!$sql->select("banner", "*", "`banner_clientlogin` = '{$clean_login}' AND `banner_clientpassword` = '{$clean_password}'")) {
 		$mes->addError(BANNERLAN_20);
@@ -75,25 +75,25 @@ if (isset($_POST['clientsubmit']))
 		require_once(FOOTERF);
 		exit;
 	}
-	 
+
 	$row = $sql->fetch();
 	$banner_total = $sql->select("banner", "*", "`banner_clientname` = '{$row['banner_clientname']}'");
-	
-	// check 
-	if(!$banner_total) 
-	{	
-		$mes->addInfo(LAN_NO_RECORDS_FOUND.": ".LAN_PLUGIN_BANNER_NAME); 
+
+	// check
+	if(!$banner_total)
+	{
+		$mes->addInfo(LAN_NO_RECORDS_FOUND.": ".LAN_PLUGIN_BANNER_NAME);
 		$ns->tablerender(PAGE_NAME, $mes->render());
 		require_once(FOOTERF);
 		exit;
-	} 
-	else 
+	}
+	else
 	{
-		while ($row = $sql->fetch()) 
-		{			 
+		while ($row = $sql->fetch())
+		{
 			$start_date = ($row['banner_startdate'] ? strftime("%d %B %Y", $row['banner_startdate']) : BANNERLAN_31);
 			$end_date 	= ($row['banner_enddate'] ? strftime("%d %B %Y", $row['banner_enddate']) : BANNERLAN_31);
-			 
+
 			$BANNER_TABLE_CLICKPERCENTAGE 		= ($row['banner_clicks'] && $row['banner_impressions'] ? round(($row['banner_clicks'] / $row['banner_impressions']) * 100)."%" : "-");
 			$BANNER_TABLE_IMPRESSIONS_LEFT 		= ($row['banner_impurchased'] ? $row['banner_impurchased'] - $row['banner_impressions'] : BANNERLAN_30);
 			$BANNER_TABLE_IMPRESSIONS_PURCHASED = ($row['banner_impurchased'] ? $row['banner_impurchased'] : BANNERLAN_30);
@@ -104,12 +104,12 @@ if (isset($_POST['clientsubmit']))
 			$BANNER_TABLE_ACTIVE 				= LAN_VISIBILITY." ".($row['banner_active'] != "255" ? LAN_YES : "<b>".LAN_NO."</b>");
 			$BANNER_TABLE_STARTDATE				= LAN_START." ".$start_date;
 			$BANNER_TABLE_ENDDATE				= LAN_END." ".$end_date;
-			
-			if ($row['banner_ip']) 
+
+			if ($row['banner_ip'])
 			{
 				$tmp = explode("^", $row['banner_ip']);
 				$BANNER_TABLE_IP_LAN = (count($tmp)-1);
-				
+
 				for($a = 0; $a <= (count($tmp)-2); $a++) {
 					$BANNER_TABLE_IP .= $tmp[$a]."<br />";
 				}
@@ -118,27 +118,27 @@ if (isset($_POST['clientsubmit']))
 			$textstring .= preg_replace("/\{(.*?)\}/e", '$\1', $BANNER_TABLE);
 		}
 	}
-	
+
 
 	$textstart = preg_replace("/\{(.*?)\}/e", '$\1', $BANNER_TABLE_START);
 	$textend = preg_replace("/\{(.*?)\}/e", '$\1', $BANNER_TABLE_END);
 	$text = $textstart.$textstring.$textend;
-	 
+
 	$ns->tablerender(PAGE_NAME, $text);
-	 
+
 	require_once(FOOTERF);
 	exit;
 }
-	
+
 
 $BANNER_LOGIN_TABLE_LOGIN 	= $frm->text("clientlogin", $id);
 $BANNER_LOGIN_TABLE_PASSW 	= $frm->password("clientpassword", $pw);
 $BANNER_LOGIN_TABLE_SUBMIT 	= $frm->button("clientsubmit", LAN_CONTINUE, "submit");
-	
+
 
 
 $text = preg_replace("/\{(.*?)\}/e", '$\1', $BANNER_LOGIN_TABLE);
 $ns->tablerender(BANNERLAN_19, $text);
-	
+
 require_once(FOOTERF);
 ?>

@@ -7,7 +7,7 @@
  * Released under the terms and conditions of the
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
- * Banner template 
+ * Banner template
  */
 
 if (!defined('e107_INIT')) { exit; }
@@ -116,7 +116,7 @@ if(!isset($BANNER_MENU_END))
 
 $BANNER_TEMPLATE['menu']['start'] =		"<div class='banner-menu text-center'>{SETIMAGE: w=800}";
 $BANNER_TEMPLATE['menu']['item'] =		"<div class='banner-menu-item'>{BANNER}</div>";
-$BANNER_TEMPLATE['menu']['end'] = 		"</div>"; 
+$BANNER_TEMPLATE['menu']['end'] = 		"</div>";
 
 
 ?>

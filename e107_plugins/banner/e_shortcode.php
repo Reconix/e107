@@ -47,7 +47,7 @@ class banner_shortcodes extends e_shortcode
 		}
 	}
 
-	// Also used by banner_menu.php 
+	// Also used by banner_menu.php
 	public function renderBanner($row, $parm = '')
 	{
 		$sql = e107::getDb('banner');
@@ -56,11 +56,11 @@ class banner_shortcodes extends e_shortcode
 		{
 			return "<a href='".e_HTTP.'banner.php?'.$row['banner_id']."' rel='external'>".BANNERLAN_39."</a>";
 		}
-	
+
 		$fileext1 = substr(strrchr($row['banner_image'], '.'), 1);
-		
+
 		$sql->update('banner', 'banner_impressions=banner_impressions+1 WHERE banner_id='.(int)$row['banner_id']);
-		
+
 		switch ($fileext1)
 			{
 				case 'swf':
@@ -73,14 +73,14 @@ class banner_shortcodes extends e_shortcode
 					</object>
 					";
 				break;
-					
+
 				case 'html':
 				case 'js':
 				case 'php':			// Code - may 'echo' text, or may return it as a value
 					$file_data = file_get_contents(e_IMAGE.'banners/'.$row['banner_image']);
 					return $file_data;
 				break;
-				
+
 				default:
 
 						$class = empty($parm['class']) ? "e-banner img-responsive img-fluid" : $parm['class'];
@@ -91,7 +91,7 @@ class banner_shortcodes extends e_shortcode
 			$start = "<a class='e-tip' href='".e_HTTP.'banner.php?'.$row['banner_id']."' rel='external' title=\"".$tp->toAttribute(varset($row['banner_tooltip'],''))."\">";
 			$end = '</a>';
 			$text = $start.$ban_ret.$end;
-	
+
 			if(!empty($row['banner_description']))
 			{
 				$text .= "<div class='e-banner-description'>".$start.$tp->toHtml($row['banner_description'], true).$end. "</div>";
@@ -100,4 +100,3 @@ class banner_shortcodes extends e_shortcode
 			return $text;
 	}
 }
-

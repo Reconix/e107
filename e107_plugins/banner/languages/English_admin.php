@@ -7,7 +7,7 @@
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
  */
- 
+
 
 define("BNRLAN_00", "No banners created yet."); // 15
 define("BNRLAN_01", "Banner ID not found.");
@@ -15,7 +15,7 @@ define("BNRLAN_01", "Banner ID not found.");
 // define("BNRLAN_1", "Client"); //27
 // define("BNRLAN_2", "Clickthroughs");
 // define("BNRLAN_3", "Click %");
-// define("BNRLAN_4", "Impressions"); 
+// define("BNRLAN_4", "Impressions");
 // define("BNRLAN_5", "Impressions Left");
 
 // define("BNRLAN_6", "Unlimited"); // 35
@@ -26,9 +26,9 @@ define("BNRLAN_01", "Banner ID not found.");
 
 define("BNRLAN_11", "Campaign"); // 24
 define("BNRLAN_12", "Client Login"); // 30
-//define("BNRLAN_13", "Client Password"); //31 
+//define("BNRLAN_13", "Client Password"); //31
 //define("BNRLAN_14", "Banner Image"); // 32 LAN_IMAGE
-define("BNRLAN_15", "Click URL"); // 33 
+define("BNRLAN_15", "Click URL"); // 33
 define("BNRLAN_16", "Number of impressions purchased"); // 34
 //define("BNRLAN_17", "Start Date"); // 36 //LAN_START
 //define("BNRLAN_18", "End Date"); //37 //LAN_END

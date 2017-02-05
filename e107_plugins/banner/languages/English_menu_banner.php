@@ -6,7 +6,7 @@
  *
 */
 
-// DEPRECATED - ENTIRE LANGUAGE FILE MOVED INTO English_admin_banner.php 
+// DEPRECATED - ENTIRE LANGUAGE FILE MOVED INTO English_admin_banner.php
 
 /*
 define("BANNER_MENU_L1", "Advertisement");
