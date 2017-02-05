@@ -1,7 +1,7 @@
 <?php
 /*
 + ----------------------------------------------------------------------------+
-|     e107 website system - 
+|     e107 website system -
 |     social plugin
 
 +----------------------------------------------------------------------------+
@@ -24,4 +24,3 @@ define("LAN_SOCIAL_200",  "Unable to display feed. Twitter URL has not been defi
 define("LAN_SOCIAL_201",  "Tweets by");
 define("LAN_SOCIAL_202",  "Post to Twitter");
 define("LAN_SOCIAL_203",  "Type your tweet here.");
-

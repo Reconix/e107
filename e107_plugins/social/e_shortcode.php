@@ -24,8 +24,8 @@ class social_shortcodes extends e_shortcode
 
 		$tp = e107::getParser();
 
-			
-		$providers = array( 
+
+		$providers = array(
 			'email'				=> array('icon'	=> 'e-social-mail',			'title'=> LAN_SOCIAL_002,	                            'url' => "mailto:EMAIL_RECIPIENT?subject=[t]&body=".rawurlencode($emailMessage)."[u]"),
 			'facebook-like'		=> array('icon' => 'e-social-thumbs-up',	'title'=> $tp->lanVars(LAN_SOCIAL_001, "Facebook"),	    'url' => "http://www.facebook.com/plugins/like.php?href=[u]"),
 			'facebook-share'	=> array('icon' => 'e-social-facebook',		'title'=> $tp->lanVars(LAN_SOCIAL_000, "Facebook"),	    'url' => "http://www.facebook.com/sharer.php?u=[u]&t=[t]"),
@@ -57,7 +57,7 @@ class social_shortcodes extends e_shortcode
 	/**
 	 * {XURL_ICONS: size=2x}
 	 * {XURL_ICONS: type=facebook,twitter,vimeo}
-	 */	
+	 */
 	function sc_xurl_icons($parm='')
 	{
 		$tp = e107::getParser();
@@ -76,9 +76,9 @@ class social_shortcodes extends e_shortcode
 			'youtube'		=> array('href'=> deftrue('XURL_YOUTUBE'),		'title'=>'YouTube'),
 			'vimeo'			=> array('href'=> deftrue('XURL_VIMEO'),		'title'=>'Vimeo')
 		);
- 			
-		
-	
+
+
+
 		$class      = (vartrue($parm['size'])) ?  'fa-'.$parm['size'] : '';
 
 		// @deprecated - use template.
@@ -161,12 +161,12 @@ class social_shortcodes extends e_shortcode
 	function sc_social_login($parm=null)
 	{
 		$pref = e107::pref('core', 'social_login_active');
-		
+
 		if(empty($pref))
 		{
-			return; 
+			return;
 		}
-		
+
 		$sc = e107::getScBatch('signup');
 
 		$text = '';
@@ -179,8 +179,8 @@ class social_shortcodes extends e_shortcode
 		$text .= $sc->sc_signup_xup_login($parm);
 		$text .= "
 		<div class='clearfix'></div><hr class='clearfix' />";
-		
-		return $text; 	
+
+		return $text;
 	}
 
 
@@ -212,10 +212,10 @@ class social_shortcodes extends e_shortcode
 
 	/**
 	 * {SOCIALSHARE: url=x&title=y}
-	 * @example {SOCIALSHARE: type=basic} - Show only Email, Facebook, Twitter and Google. 
+	 * @example {SOCIALSHARE: type=basic} - Show only Email, Facebook, Twitter and Google.
 	 * @example {SOCIALSHARE: dropdown=1&type=basic} - Show only Email, Facebook, Twitter and Google in a drop-down button
 	 * @example {SOCIALSHARE: providers=twitter,pinterest&tip=false} - override provider preferences and disable tooltips.
-	 * @example for plugin developers:  send 'var' values for use by the social shortcode. (useful for loops where the value must change regularly) 
+	 * @example for plugin developers:  send 'var' values for use by the social shortcode. (useful for loops where the value must change regularly)
 	 * 	$socialArray = array('url'=>'your-url-here', 'title'=>'your-title-here');
 		e107::getScBatch('social')->setVars($socialArray);
 	 */
@@ -234,7 +234,7 @@ class social_shortcodes extends e_shortcode
 		$defaultTitle	= vartrue($this->var['title'], deftrue('e_PAGETITLE'). " | ". SITENAME);
 		$defaultDiz		= vartrue($this->var['description'], e107::getUrl()->response()->getMetaDescription());
 		$defaultTags    = vartrue($this->var['tags'],'');
-		
+
 		$tp 			= e107::getParser();
 
 		$providers = $this->getProviders();
@@ -260,17 +260,17 @@ class social_shortcodes extends e_shortcode
 		$tags           = varset($parm['tags'],     $defaultTags);
 		$media 			= "";
 		$label 			= varset($parm['label'], 	$tp->toGlyph('e-social-spread'));
-		
+
 		$size			= varset($parm['size'],		'md');
 
 
 		$data = array('u'=> rawurlencode($url), 't'=> rawurlencode($title), 'd'	=> rawurlencode($description), 'm' => rawurlencode($media));
-		
+
 		if(!vartrue($parm['dropdown']))
 		{
 			$butSize 	= ($size == 'lg' || $size == 'sm' || $size == 'xs') ? 'btn-'.$size : '';
 		}
-		else 
+		else
 		{
 			$butSize = 'btn-social';
 		}
@@ -332,18 +332,18 @@ class social_shortcodes extends e_shortcode
 			{
 				$btnClass .= ' social-share-mobile';
 			}
-			
+
 			$opt[$k] = "<a class='".$btnClass." ".$tooltip." ".$butSize." social-share-".$k."'  target='_blank' title='".$val["title"]."' href='".$shareUrl."'>".$tp->toIcon($val["icon"], array('fw'=>1))."</a>";
 		}
-		
-		// Show only Email, Facebook, Twitter and Google. 
+
+		// Show only Email, Facebook, Twitter and Google.
 		if(varset($parm['type']) == 'basic')
 		{
 			$remove = array('linkedi','pinterest', 'stumbleupon', 'digg', 'reddit', 'linkedin', 'tumblr','pocket','wordpress','pinboard');
 			foreach($remove as $v)
 			{
-				unset($opt[$v]);	
-			}	
+				unset($opt[$v]);
+			}
 		}
 		elseif(!empty($parm['type']))
 		{
@@ -358,7 +358,7 @@ class social_shortcodes extends e_shortcode
 
 		//	print_a($opt);
 		}
-		
+
 		if(vartrue($parm['dropdown']))
 		{
 			$dir = ($parm['dropdown'] == 'right') ? 'pull-right' : '';
@@ -367,24 +367,24 @@ class social_shortcodes extends e_shortcode
 
 			$text = '<div class="social-share btn-group hidden-print '.$dir.'">
 				  <a class="'.$tooltip.' btn btn-dropdown btn-default btn-'.$size.' dropdown-toggle" data-toggle="dropdown" href="#" title="Share">'.$label.'</a>
-				 
+
 				  <ul class="dropdown-menu" role="menu" >
-				  
+
 				    <li><div class="'.$class.'">'.implode("\n",$opt).'</div></li>
 				  </ul>
 				</div>';
-		
+
 			return $text;
 		}
 		else
 		{
-			
+
 			$class = varset($parm['class'],'text-center btn-group social-share');
 
 			return '<div class="'.$class.'  hidden-print">'.implode("\n",$opt)."</div>";
-		
-		}	
-		
+
+		}
+
 	}
 
 	/**
@@ -393,13 +393,13 @@ class social_shortcodes extends e_shortcode
 	function sc_twitter_timeline($parm)
 	{
 		$ns = e107::getRender();
-		
+
 		$account = basename(XURL_TWITTER);
 		//data-related="twitterapi,twitter"
 		$text = '<a class="twitter-timeline" href="'.XURL_TWITTER.'" data-widget-id="'.varset($parm['id']).'" data-theme="'.varset($parm['theme'],'light').'" data-link-color="#cc0000"   data-aria-polite="assertive" width="100%" height="'.varset($parm['height'],300).'" lang="'.e_LAN.'">'.LAN_SOCIAL_201.'@'.$account.'</a>';
 
 		$text .= <<<TMPL
-		
+
 		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 TMPL;
 		return (vartrue($parm['render'])) ? $ns->tablerender('',$text,'twitter-timeline',true) : $text;

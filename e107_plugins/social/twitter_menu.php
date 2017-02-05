@@ -11,7 +11,7 @@
 //@see https://dev.twitter.com/web/embedded-timelines
 e107::lan('social',false, true);
 
-if(deftrue('XURL_TWITTER'))	
+if(deftrue('XURL_TWITTER'))
 {
 
 	e107::js('footer-inline',	'

@@ -1,9 +1,9 @@
 <?php
 
-// Generated e107 Plugin Admin Area 
+// Generated e107 Plugin Admin Area
 
 require_once('../../class2.php');
-if (!getperms('P')) 
+if (!getperms('P'))
 {
 	e107::redirect('admin');
 	exit;
@@ -15,63 +15,63 @@ e107::lan('social',false, true);
 class social_adminarea extends e_admin_dispatcher
 {
 
-	protected $modes = array(	
-	
+	protected $modes = array(
+
 		'main'	=> array(
 			'controller' 	=> 'social_ui',
 			'path' 			=> null,
 			'ui' 			=> 'social_form_ui',
 			'uipath' 		=> null
 		),
-		
 
-	);	
-	
-	
+
+	);
+
+
 	protected $adminMenu = array(
 
 	//	'main/list'			=> array('caption'=> LAN_MANAGE, 'perm' => 'P'),
 		// 'main/create'		=> array('caption'=> LAN_CREATE, 'perm' => 'P'),
 		'main/configure'		=> array('caption'=> LAN_CONFIGURE, 'perm' => 'P'),
-		'main/prefs' 		=> array('caption'=> LAN_PREFS, 'perm' => 'P'),	
+		'main/prefs' 		=> array('caption'=> LAN_PREFS, 'perm' => 'P'),
 
 
 	);
 
 	protected $adminMenuAliases = array(
-		'main/edit'	=> 'main/list'				
-	);	
-	
+		'main/edit'	=> 'main/list'
+	);
+
 	protected $menuTitle = 'Social';
 }
 
 
 
 
-				
+
 class social_ui extends e_admin_ui
 {
-			
+
 		protected $pluginTitle		= 'Social';
 		protected $pluginName		= 'social';
 	//	protected $eventName		= 'social-social'; // remove comment to enable event triggers in admin.
 	//	protected $table			= 'social';
 	//	protected $pid				= 'interview_id';
-		protected $perPage			= 10; 
+		protected $perPage			= 10;
 		protected $batchDelete		= true;
-	//	protected $batchCopy		= true;		
+	//	protected $batchCopy		= true;
 	//	protected $sortField		= 'somefield_order';
 	//	protected $orderStep		= 10;
-	//	protected $tabs				= array('Tabl 1','Tab 2'); // Use 'tab'=>0  OR 'tab'=>1 in the $fields below to enable. 
-		
+	//	protected $tabs				= array('Tabl 1','Tab 2'); // Use 'tab'=>0  OR 'tab'=>1 in the $fields below to enable.
+
 	//	protected $listQry      	= "SELECT * FROM `#tableName` WHERE field != '' "; // Example Custom Query. LEFT JOINS allowed. Should be without any Order or Limit.
-	
+
 		protected $listOrder		= '';
-	
+
 		protected $fields           = array();
-		
+
 		protected $fieldpref        = array();
-		
+
 
 		protected $preftabs        = array(LAN_LOGIN, LAN_SOCIAL_ADMIN_14, LAN_SOCIAL_ADMIN_15, LAN_SOCIAL_ADMIN_16, LAN_SOCIAL_ADMIN_17, LAN_SOCIAL_ADMIN_37);
 
@@ -233,14 +233,14 @@ class social_ui extends e_admin_ui
 
 		}
 
-		
+
 		// ------- Customize Create --------
-		
+
 		public function beforeCreate($new_data)
 		{
 			return $new_data;
 		}
-	
+
 		public function afterCreate($new_data, $old_data, $id)
 		{
 			// do something
@@ -248,12 +248,12 @@ class social_ui extends e_admin_ui
 
 		public function onCreateError($new_data, $old_data)
 		{
-			// do something		
-		}		
-		
-		
+			// do something
+		}
+
+
 		// ------- Customize Update --------
-		
+
 		public function beforeUpdate($new_data, $old_data, $id)
 		{
 			return $new_data;
@@ -261,14 +261,14 @@ class social_ui extends e_admin_ui
 
 		public function afterUpdate($new_data, $old_data, $id)
 		{
-			// do something	
+			// do something
 		}
-		
+
 		public function onUpdateError($new_data, $old_data, $id)
 		{
-			// do something		
-		}		
-		
+			// do something
+		}
+
 		function renderHelp()
 		{
 			$this->testUrl = SITEURL."?route=system/xup/test";
@@ -283,7 +283,7 @@ class social_ui extends e_admin_ui
 
 		}
 
-		// optional - a custom page.  
+		// optional - a custom page.
 		public function configurePage()
 		{
 			$ns = e107::getRender();
@@ -501,17 +501,17 @@ class social_ui extends e_admin_ui
 			return $ret;
 		}
 
-			
+
 }
-				
+
 
 
 class social_form_ui extends e_admin_form_ui
 {
 
-}		
-		
-		
+}
+
+
 new social_adminarea();
 
 require_once(e_ADMIN."auth.php");
