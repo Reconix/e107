@@ -13,7 +13,7 @@
  */
 
 require_once('../../class2.php');
-if (!e107::isInstalled('poll')) 
+if (!e107::isInstalled('poll'))
 {
 	e107::redirect();
 	exit;

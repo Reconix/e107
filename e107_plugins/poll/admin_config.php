@@ -10,7 +10,7 @@
 
 require_once("../../class2.php");
 if (!is_object($tp)) $tp = new e_parse;
-if (!getperms("P") || !e107::isInstalled('poll')) 
+if (!getperms("P") || !e107::isInstalled('poll'))
 {
 	e107::redirect('admin');
 	exit;
@@ -23,7 +23,7 @@ require_once(e_PLUGIN."poll/poll_class.php");
 require_once(e_HANDLER."userclass_class.php");
 require_once(e_HANDLER."form_handler.php"); // FIXME using 'form' instead of 'e_form'
 
-if(isset($_POST)) 
+if(isset($_POST))
 {
 	$_POST = strip_if_magic($_POST);
 }
@@ -38,9 +38,9 @@ if (isset($_POST['reset']))
 {
 	unset($poll_id, $_POST['poll_title'], $_POST['poll_option'], $_POST['activate'], $_POST['multipleChoice'], $_POST['showResults'], $_POST['startday'], $_POST['startmonth'], $_POST['startyear'], $_POST['endday'], $_POST['endmonth'], $_POST['endyear']);
 	define("RESET", TRUE);
-} 
+}
 
-if (varset($_POST['delete'])) 
+if (varset($_POST['delete']))
 {
 	$poll->delete_poll(key($_POST['delete'])); // TODO check security?
 	$mes->addSuccess(LAN_DELETED);
@@ -81,7 +81,7 @@ if (varset($_POST['edit']) || varset($_GET['mode'])=='create' && !varset($_POST[
 			edit_poll();
 			define("POLLACTION",'edit');
 		}
-			
+
 		$poll_total = $sql->select("polls");
 		$text = $poll -> renderPollForm();
 
@@ -105,11 +105,11 @@ require_once(e_ADMIN."footer.php");
 
 function edit_poll()
 {
-	
+
 	$sql = e107::getDb();
 	$id = key($_POST['edit']);
-	
-	if ($sql->select("polls", "*", "poll_id=".$id)) 
+
+	if ($sql->select("polls", "*", "poll_id=".$id))
 	{
 		$_GET['mode'] = 'create';
 		$row = $sql->fetch();
@@ -158,17 +158,17 @@ function poll_list()
 	$tp = e107::getParser();
 	$frm = e107::getForm();
 	$mes = e107::getMessage();
-	
+
 	global $user_pref;
-	if(isset($_POST['etrigger_ecolumns'])) //TODO User 
+	if(isset($_POST['etrigger_ecolumns'])) //TODO User
 	{
 		$user_pref['admin_poll_columns'] = $_POST['e-columns'];
 		save_prefs('user');
 	}
-	
+
 	$fieldpref = (varset($user_pref['admin_poll_columns'])) ? $user_pref['admin_poll_columns'] : array("poll_id","poll_title","poll_options","poll_vote_userclass"); ;
 
-	//TODO Add more column options. 
+	//TODO Add more column options.
 	$fields = array(
 			'poll_id'				=> array('title'=> LAN_ID, 'width'=>'5%', 'forced'=> TRUE),
             'poll_title'	   		=> array('title'=> POLLAN_3, 'width'=>'auto'),
@@ -176,38 +176,38 @@ function poll_list()
 		//	'poll_start_datestamp' 	=> array('title'=> LAN_AUTHOR, 'type' => 'text', 'width' => 'auto', 'thclass' => 'left first'), // Display name
 		//	'poll_end_datestamp' 	=> array('title'=> LAN_DATE, 'type' => 'text', 'width' => 'auto'),	// User name
             'poll_vote_userclass' 	=> array('title'=> LAN_USERCLASS, 'type' => 'text', 'width' => 'auto'),	 	// Photo
-			
+
 			'options' 				=> array('title'=> LAN_OPTIONS, 'forced'=>TRUE, 'width' => '10%', 'thclass' => 'center last')
 	);
-		
-	
-	
+
+
+
 	$text = "
 		<form action='".e_SELF."' method='post' id='del_poll'>";
-	
-	if ($poll_total = $sql->select("polls", "*")) 
+
+	if ($poll_total = $sql->select("polls", "*"))
 	{
 		$text .= "<table class='table adminlist'>";
 		$text .= $frm->colGroup($fields,$fieldpref).
 				$frm->thead($fields,$fieldpref);
-	    $text .= "<tbody>";		
-			
+	    $text .= "<tbody>";
+
 		while ($row = $sql->fetch())
 		{
 			extract($row); // FIXME
-			
+
 			$pollopts = explode(chr(1),$poll_options);
-			
+
 			$pollopts = array_filter($pollopts);
-			
+
 			$text .= "
 			<tr>
 				<td>$poll_id</td>";
-				$text .= (in_array("poll_title",$fieldpref)) ? "<td class='left'>".$tp->toHTML($poll_title, TRUE,"no_hook, emotes_off, defs")."</td>" : "";              
+				$text .= (in_array("poll_title",$fieldpref)) ? "<td class='left'>".$tp->toHTML($poll_title, TRUE,"no_hook, emotes_off, defs")."</td>" : "";
                 $text .= (in_array("poll_options",$fieldpref)) ? "<td class='left'><ul><li>".implode("</li><li>",$pollopts)."</li></ul></td>" : "";
 		 		$text .= (in_array("poll_comment",$fieldpref)) ? "<td>".($poll_comment ? LAN_YES : LAN_NO)."</td>" : "";
 				$text .= (in_array("poll_vote_userclass",$fieldpref)) ? "<td>".(r_userclass_name($poll_vote_userclass))."</td>" : "";
-				
+
 				$text .= "
 				<td class='center' style='white-space:nowrap'>
 					<button class='btn btn-default btn-large' type='submit' name='edit[{$poll_id}]' value='edit' alt='".LAN_EDIT."' title='".LAN_EDIT."' >".ADMIN_EDIT_ICON."</button>
@@ -217,17 +217,17 @@ function poll_list()
 		}
 		$text .= "</tbody></table>";
 	}
-	else 
+	else
 	{
 		$mes->addInfo(LAN_NO_RECORDS_FOUND);
 	}
 	$text .= "</form>";
-	
+
 	$ns->tablerender(LAN_PLUGIN_POLL_NAME.SEP.LAN_MANAGE, $mes->render(). $text);
 }
 
 
-function admin_config_adminmenu() 
+function admin_config_adminmenu()
 {
 	$action = varset($_GET['mode']) ? $_GET['mode'] : "list";
     $var['list']['text'] = LAN_MANAGE;

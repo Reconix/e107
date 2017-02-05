@@ -50,7 +50,7 @@ else
   $pollMode = 'results';
 }
 
-$query = "SELECT p.*, u.user_name FROM #polls AS p 
+$query = "SELECT p.*, u.user_name FROM #polls AS p
 LEFT JOIN #user AS u ON p.poll_admin_id = u.user_id
 WHERE  p.poll_type=1{$poll_to_show}
 ORDER BY p.poll_datestamp DESC LIMIT 0,1

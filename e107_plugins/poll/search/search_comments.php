@@ -7,7 +7,7 @@
  * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
  *
  */
- 
+
 if (!defined('e107_INIT')) { exit; }
 
 $comments_title = LAN_PLUGIN_POLL_NAME;

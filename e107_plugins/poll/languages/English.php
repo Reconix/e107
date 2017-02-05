@@ -22,7 +22,7 @@
 //define("POLLAN_1", "Existing polls");//LAN_MANAGE
 //define("POLLAN_2", "Create / edit polls");//LAN_CREATE
 define("POLLAN_3", "Poll Question");
-define("POLLAN_4", "Poll Answers"); 
+define("POLLAN_4", "Poll Answers");
 //define("POLLAN_5", "Edit");
 //define("POLLAN_6", "Delete");
 //define("POLLAN_7", "No polls yet.");//LAN_NO_RECORDS_FOUND

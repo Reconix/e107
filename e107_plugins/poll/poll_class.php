@@ -29,7 +29,7 @@ class poll
 	{
 		$this->barl = (file_exists(THEME.'images/barl.png') ? THEME_ABS.'images/barl.png' : e_PLUGIN_ABS.'poll/images/barl.png');
 		$this->barr = (file_exists(THEME.'images/barr.png') ? THEME_ABS.'images/barr.png' : e_PLUGIN_ABS.'poll/images/barr.png');
-		$this->bar = (file_exists(THEME.'images/bar.png') ? THEME_ABS.'images/bar.png' : e_PLUGIN_ABS.'poll/images/bar.png');	
+		$this->bar = (file_exists(THEME.'images/bar.png') ? THEME_ABS.'images/bar.png' : e_PLUGIN_ABS.'poll/images/bar.png');
 	}
 
 
@@ -37,9 +37,9 @@ class poll
 	function remove_poll_cookies
 	Remove unused poll cookies. See: http://krijnhoetmer.nl/stuff/javascript/maximum-cookies/ Thanks Fanat1k - bugtracker #4983
 	no parameters
-	*/	
+	*/
 	function remove_poll_cookies()
-	{ 
+	{
 		$arr_polls_cookies = array();
 		if(!empty($_COOKIE))
 		{
@@ -58,7 +58,7 @@ class poll
 			}
 		}
 
-		if (count($arr_polls_cookies) > 1) 
+		if (count($arr_polls_cookies) > 1)
 		{	// Remove all except first (assumption: there is always only one active poll)
 			rsort($arr_polls_cookies);
 			for($i = 1; $i < count($arr_polls_cookies); $i++)
@@ -66,8 +66,8 @@ class poll
 				cookie("poll_{$arr_polls_cookies[$i]}", "", (time() - 2592000));
 			}
 		}
-	}	
-	
+	}
+
 	/*
 	function delete_poll
 	parameter in: $existing - existing poll id to be deleted
@@ -77,7 +77,7 @@ class poll
 	{
 		global $admin_log;
 		$sql = e107::getDb();
-		
+
 		if ($sql->delete("polls", " poll_id='".intval($existing)."' "))
 		{
 			if (function_exists("admin_purge_related"))
@@ -91,7 +91,7 @@ class poll
 
 
 
-	/* 
+	/*
 	function clean_poll_array
 	parameter in: original array with poll answers as entered in the forums
 	parameter out: cleaned array which trims the poll answers (to avoid 'falsely' empty answers) but allows to have '0' as an option
@@ -100,11 +100,11 @@ class poll
 	http://www.bubjavier.com/common-problems-php-arrayfilter-no-callback
 	*/
 
-	function clean_poll_array($val) 
+	function clean_poll_array($val)
 	{
  		$val = trim($val); // trims the array to remove poll answers which are (seemingly) empty but which may contain spaces
-  		$allowed_vals = array("0"); // Allows for '0' to be a poll answer option. Possible to add more allowed values. 
- 		
+  		$allowed_vals = array("0"); // Allows for '0' to be a poll answer option. Possible to add more allowed values.
+
  		return in_array($val, $allowed_vals, true) ? true : ( $val ? true : false );
 	}
 
@@ -117,10 +117,10 @@ class poll
 	function submit_poll($mode=1)
 	{
 		global $admin_log;
-				
+
 		$tp = e107::getParser();
 		$sql = e107::getDb();
-		
+
 		$poll_title		= $tp->toDB($_POST['poll_title']);
 		$poll_comment	= $tp->toDB($_POST['poll_comment']);
 		$multipleChoice	= intval($_POST['multipleChoice']);
@@ -133,7 +133,7 @@ class poll
 
 		$pollOption = $tp->filter($_POST['poll_option']);
 		$pollOption = array_filter($pollOption, 'poll::clean_poll_array');
- 
+
 		foreach ($pollOption as $key => $value)
 		{
 			$poll_options .= $tp->toDB($value).chr(1);
@@ -141,13 +141,13 @@ class poll
 
 		if (POLLACTION == 'edit' || vartrue($_POST['poll_id']))
 		{
-			$sql->update("polls", "poll_title='{$poll_title}', 
-			  				   poll_options='{$poll_options}', 
-							   poll_comment='{$poll_comment}', 
+			$sql->update("polls", "poll_title='{$poll_title}',
+			  				   poll_options='{$poll_options}',
+							   poll_comment='{$poll_comment}',
 							   poll_type={$mode},
-							   poll_allow_multiple={$multipleChoice}, 
-							   poll_result_type={$showResults}, 
-							   poll_vote_userclass={$pollUserclass}, 
+							   poll_allow_multiple={$multipleChoice},
+							   poll_result_type={$showResults},
+							   poll_vote_userclass={$pollUserclass},
 							   poll_storage_method={$storageMethod}
 							   WHERE poll_id=".intval(POLLID));
 
@@ -170,8 +170,8 @@ class poll
 
 			e107::getLog()->add('POLL_02','ID: '.POLLID.' - '.$poll_title,'');
 			//$message = POLLAN_45;
-		} 
-		else 
+		}
+		else
 		{
 			$votes = '';
 			for($a=1; $a<=count($_POST['poll_option']); $a++)
@@ -203,9 +203,9 @@ class poll
 
 	function get_poll($query)
 	{
-		global $e107;		
+		global $e107;
 		$sql = e107::getDb();
-		
+
 		if ($sql->gen($query))
 		{
 			$pollArray = $sql->fetch();
@@ -333,9 +333,9 @@ class poll
 		$ns = e107::getRender();
 		$tp = e107::getParser();
 		$sql = e107::getDb();
-		
+
 		global $POLLSTYLE;
-		
+
 		switch ($POLLMODE)
 		{
 			case 'query' :	// Show poll, register any vote
@@ -367,7 +367,7 @@ class poll
 
 		}
 
-		
+
 
 		if ($type == 'preview')
 		{
@@ -490,13 +490,13 @@ class poll
 
 				foreach ($optionArray as $option)
 				{
-					$sc->answerOption = $option; 
+					$sc->answerOption = $option;
 					$text .= $tp->parseTemplate($template['form']['item'], true, $sc);
-						
+
 					$count ++;
 					$sc->answerCount++;
 				}
-				
+
 				$text .= $tp->parseTemplate($template['form']['end'], true, $sc);
 
 				$text .= "</form>";
@@ -531,10 +531,10 @@ class poll
 						$count ++;
 						$sc->answerCount++;
 					}
-						
+
 					$text .= $tp->parseTemplate($template['results']['end'], true, $sc);
 				}
-			
+
 				break;
 
 
@@ -563,12 +563,12 @@ class poll
 
 
 		if (!defined("POLLRENDERED")) define("POLLRENDERED", TRUE);
-		
+
 		$caption = (file_exists(THEME."images/poll_menu.png") ? "<img src='".THEME_ABS."images/poll_menu.png' alt='' /> ".LAN_PLUGIN_POLL_NAME : LAN_PLUGIN_POLL_NAME);
-		
+
 		if ($type == 'preview')
 		{
-			$caption = LAN_CREATE.SEP.LAN_PREVIEW; // "Preview"; // TODO not sure this is used. 
+			$caption = LAN_CREATE.SEP.LAN_PREVIEW; // "Preview"; // TODO not sure this is used.
 			$text = "<div class='clearfix'>\n<div class='well span3'>".$text."</div></div>";
 		}
 		elseif ($type == 'forum')
@@ -587,7 +587,7 @@ class poll
 	}
 
 
-	
+
 	function generateBar($perc)
 	{
 		if(deftrue('BOOTSTRAP',false))
@@ -598,16 +598,16 @@ class poll
 			 <div class="bar progress-bar" role="progressbar" aria-valuenow="'.$val.'" aria-valuemin="0" aria-valuemax="100" style="width: '.$val.'%;">
 			   <span class="sr-only">'.$val.'%</span>
 			 </div>
-			 </div>';	
-			
+			 </div>';
+
 		}
 		else
 		{
 			$barl = $this->barl;
 			$barr = $this->barr;
 			$bar = $this->bar;
-			return ($perc ? "<div style='width: 100%'><div style='background-image: url($barl); width: 5px; height: 14px; float: left;'></div><div style='background-image: url($bar); width: ".min(intval($perc), 90)."%; height: 14px; float: left;'></div><div style='background-image: url($barr); width: 5px; height: 14px; float: left;'></div></div>" : "");	
-		}	
+			return ($perc ? "<div style='width: 100%'><div style='background-image: url($barl); width: 5px; height: 14px; float: left;'></div><div style='background-image: url($bar); width: ".min(intval($perc), 90)."%; height: 14px; float: left;'></div><div style='background-image: url($barr); width: 5px; height: 14px; float: left;'></div></div>" : "");
+		}
 	}
 
 
@@ -618,26 +618,26 @@ class poll
 	function renderPollForm
 	$mode = "admin" :: called from admin_config.php
 	$mode = "forum" :: called from forum_post.php
-	*/	
+	*/
 	/**
 	 * Render a Poll creation Form
-	 * @param $mode string - admin | forum | front 
+	 * @param $mode string - admin | forum | front
 	 */
 	function renderPollForm($mode='admin')
 	{
 		$tp = e107::getParser();
 		$frm = e107::getForm();
 	//	echo "MODE=".$mode;
-		
-		//XXX New v2.x default for front-end. Currently used by forum-post in bootstrap mode. 
+
+		//XXX New v2.x default for front-end. Currently used by forum-post in bootstrap mode.
 		// TODO LAN - Needs a more generic LAN rewrite when used on another area than forum
 
 
 		if ($mode == 'front')
-		{				
-			
+		{
+
 			$text = "
-			
+
 			<div class='alert alert-info'>
 				<small >".LAN_FORUM_3029."</small>
 			</div>";
@@ -650,21 +650,21 @@ class poll
 
 				<div class='form-group'>
 					<label for='poll_title'>".POLLAN_3."</label>
-					".$frm->text('poll_title', $tp->post_toForm(vartrue($_POST['poll_title'])), '200', array('placeholder' => POLLAN_3, 'id' => 'poll_title'))." 
+					".$frm->text('poll_title', $tp->post_toForm(vartrue($_POST['poll_title'])), '200', array('placeholder' => POLLAN_3, 'id' => 'poll_title'))."
 				</div>";
 
 			$option_count = vartrue($_POST['poll_option']) ? count($_POST['poll_option']) : 2;
-			$text .= "		
+			$text .= "
 				<div id='pollsection'>
 					<label for='pollopt'>".POLLAN_4."</label>";
-				
+
 				for($count = 1; $count <= $option_count; $count++)
 				{
 					// if ($count != 1 && $_POST['poll_option'][($count-1)] =="")
 					// {
 					// //	break;
 					// }
-					
+
 					$opt = ($count==1) ? "id='poll_answer'" : "";
 
 					$text .= "<div class='form-group' ".$opt.">
@@ -679,12 +679,12 @@ class poll
 						</div>
 
 				";
-			
-			//FIXME - get this looking good with Bootstrap CSS only. 
-			
+
+			//FIXME - get this looking good with Bootstrap CSS only.
+
 			$opts = array(1 => LAN_YES, 0=> LAN_NO);
-				
-			// Set to IP address.. Can add a pref to Poll admin for 'default front-end storage method' if demand is there for it. 
+
+			// Set to IP address.. Can add a pref to Poll admin for 'default front-end storage method' if demand is there for it.
 
 		$text .= "<br />
 			 <div class='form-horizontal control-group'>
@@ -692,43 +692,43 @@ class poll
 				<div class='radio controls'>
 					". $frm->radio('multipleChoice',$opts, vartrue($_POST['multipleChoice'], 0) ).$frm->hidden('storageMethod', 1)."
 				</div>
-			</div>			
+			</div>
 		";
 
 	//	$text .= "</form>";
-		
+
 		return $text;
-		
-			
+
+
 	/*
 			$text .= "
 				<div class='controls controls-row'>".POLL_506."
-				
+
 				<input type='radio' name='multi/pleChoice' value='1'".(vartrue($_POST['multipleChoice']) ? " checked='checked'" : "")." /> ".POLL_507."&nbsp;&nbsp;
 				<input type='radio' name='multi/pleChoice' value='0'".(!$_POST['multipleChoice'] ? " checked='checked'" : "")." /> ".POLL_508."
-				
+
 				</div>";
 			*/
-		
-			//XXX Should NOT be decided by USER 
+
+			//XXX Should NOT be decided by USER
 			/*
 			$text .= "
 
 			<div>
 			".POLLAN_16."
-			
+
 			<input type='radio' name='storageMethod' value='0'".(!vartrue($_POST['storageMethod']) ? " checked='checked'" : "")." /> ".POLLAN_17."<br />
 			<input type='radio' name='storageMethod' value='1'".($_POST['storageMethod'] == 1 ? " checked='checked'" : "")." /> ".LAN_IP_ADDRESS."<br />
 			<input type='radio' name='storageMethod' value='2'".($_POST['storageMethod'] ==2 ? " checked='checked'" : "")." /> ".POLLAN_19."
 			</div>
 			";
 			*/
-		
-			
+
+
 		}
-		
-		
-		//TODO Hardcoded FORUM code needs to be moved somewhere. 
+
+
+		//TODO Hardcoded FORUM code needs to be moved somewhere.
 		if ($mode == 'forum') // legacy code.
 		{
 			$text = "
@@ -834,10 +834,10 @@ class poll
 
 		<tr>
 		<td style='width:30%'>".POLLAN_15."</td>";
-		
+
 		$uclass = (ADMIN) ? "" : "public,member,admin,classes,matchclass";
-		
-		
+
+
 		$text .= "
 		<td>".r_userclass("pollUserclass", vartrue($_POST['pollUserclass']), 'off', $uclass)."</td>
 		</tr>
@@ -863,11 +863,11 @@ class poll
 		{
 			// $text .= "<input  type='submit' name='preview' value='".LAN_PREVIEW."' /> ";
 			$text .= $frm->admin_button('preview',LAN_PREVIEW,'other');
-			
+
 			if (POLLACTION == 'edit')
 			{
 				$text .= $frm->admin_button('submit', LAN_UPDATE, 'update')."
-				
+
 				<input type='hidden' name='poll_id' value='".intval($_POST['poll_id'])."' /> ";
 			}
 			else
@@ -875,14 +875,14 @@ class poll
 				$text .= $frm->admin_button('submit','no-value','submit', LAN_CREATE);
 			//	$text .= "<input type='submit' name='submit' value='".POLLAN_23."' /> ";
 			}
-		} 
-		else 
+		}
+		else
 		{
 			$text .= $frm->admin_button('preview','no-value','other',LAN_PREVIEW);
 		//	$text .= "<input  type='submit' name='preview' value='".LAN_PREVIEW."' /> ";
 		}
-		
-		if (defset('POLLID')) 
+
+		if (defset('POLLID'))
 		{
 			$text .= $frm->admin_button('reset','no-value','reset',LAN_CLEAR);
 		//	$text .= "<input  type='submit' name='reset' value='".LAN_CLEAR."' /> ";

@@ -75,4 +75,3 @@ define("POLLAN_44", "Delete this poll?");
 //define("LAN_AL_POLL_03","Poll added");//NOT USED
 //define("LAN_AL_POLL_04","");//NOT USED
 //define("LAN_AL_POLL_05","");//NOT USED
-
