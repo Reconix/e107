@@ -16,7 +16,7 @@
 */
 
 /**
- *	Comment interface for list_new plugin 
+ *	Comment interface for list_new plugin
  *
  *	@package e107_plugins
  *	@subpackage list_new
@@ -91,14 +91,14 @@ class list_comment
 				$record['date'] = (vartrue($this->parent->settings['date']) ? $this->parent->getListDate($row['comment_datestamp']) : "");
 				$record['icon'] = $bullet;
 				$record['info'] = '';
-				
+
 				$list_data[] = $record;
 			}
 		}
 		//return array with 'records', (global)'caption', 'display'
 		return array(
-			'records'=>$list_data, 
-			'caption'=>$list_caption, 
+			'records'=>$list_data,
+			'caption'=>$list_caption,
 			'display'=>$list_display
 		);
 	}

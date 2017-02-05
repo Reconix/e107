@@ -101,8 +101,8 @@ class listclass
 	 */
 	function getListPrefs()
 	{
-		return e107::pref('list_new'); //TODO Convert from old format to new. 
-		
+		return e107::pref('list_new'); //TODO Convert from old format to new.
+
 		/*
 		$sql = e107::getDb();
 		//check preferences from database
@@ -421,7 +421,7 @@ class listclass
 
 		//load e_list file
 		$this->data = $this->load_elist();
-		
+
 		//$this->shortcodes->rc->data = $this->data;
 
 
@@ -846,7 +846,7 @@ class listclass
 		//get sections
 		$this->sections = $this->prepareSection($this->mode);
 		$arr = $this->prepareSectionArray($this->mode);
-		
+
 
 		//display the sections
 		$text = '';

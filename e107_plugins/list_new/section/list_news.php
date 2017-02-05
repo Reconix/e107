@@ -108,11 +108,11 @@ class list_news
 				$list_data[] = $record;
 			}
 		}
-		
+
 		//return array with 'records', (global)'caption', 'display'
 		return array(
-			'records'=>$list_data, 
-			'caption'=>$list_caption, 
+			'records'=>$list_data,
+			'caption'=>$list_caption,
 			'display'=>$list_display
 		);
 	}

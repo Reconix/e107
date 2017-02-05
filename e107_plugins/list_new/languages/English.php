@@ -16,7 +16,7 @@
 */
 
 /**
- *	Language file list_new plugin 
+ *	Language file list_new plugin
  *
  *	@package e107_plugins
  *	@subpackage list_new

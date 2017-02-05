@@ -16,7 +16,7 @@
 */
 
 /**
- *	Menu for list_new plugin 
+ *	Menu for list_new plugin
  *
  *	@package e107_plugins
  *	@subpackage list_new

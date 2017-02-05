@@ -16,7 +16,7 @@
 */
 
 /**
- *	Templates for list_new plugin 
+ *	Templates for list_new plugin
  *
  *	@package e107_plugins
  *	@subpackage list_new

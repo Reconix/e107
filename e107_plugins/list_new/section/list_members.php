@@ -41,14 +41,14 @@ class list_members
 		$bullet = $this->parent->getBullet($this->parent->settings['icon']);
 
 		if(!$this->parent->e107->sql->gen("SELECT user_id,user_name,user_join FROM #user WHERE ".$qry))
-		{ 
+		{
 			$list_data = LIST_MEMBER_2;
 		}
 		else
 		{
 			while($row = $this->parent->e107->sql->fetch())
 			{
-				$record = array();    
+				$record = array();
 				$rowheading = $this->parent->parse_heading($row['user_name']);
 				//<a href='".e_BASE."user.php?id.".$row['user_id']."'>".$rowheading."</a>
 				$uparams = array('id' => $row['user_id'], 'name' => $rowheading);
@@ -65,8 +65,8 @@ class list_members
 		}
 		//return array with 'records', (global)'caption', 'display'
 		return array(
-			'records'=>$list_data, 
-			'caption'=>$list_caption, 
+			'records'=>$list_data,
+			'caption'=>$list_caption,
 			'display'=>$list_display
 		);
 	}
