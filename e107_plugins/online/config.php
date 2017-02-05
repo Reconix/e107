@@ -14,7 +14,7 @@ $eplug_admin = TRUE;
 require_once('../../class2.php');
 e107::includeLan(e_PLUGIN.'online/languages/'.e_LANGUAGE.'.php');
 
-if (!getperms('1')) 
+if (!getperms('1'))
 {
 	e107::redirect('admin');
 	exit ;
@@ -54,7 +54,7 @@ if (isset($_POST['update_menu']))
 
 $menu_pref = e107::getConfig('menu')->getPref('');
 
-if (!isset($menu_pref['online_ls_caption'])) 
+if (!isset($menu_pref['online_ls_caption']))
 {	// Assume that if one isn't set, none are set
 	$menu_pref['online_ls_caption'] = 'LAN_LASTSEEN_1';		//caption for the lastseen_menu
 	$menu_pref['online_ls_amount'] = 10;					//amount of records to show in the lastseen_menu

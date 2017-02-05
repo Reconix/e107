@@ -139,7 +139,7 @@ $img = (is_readable(THEME.'images/online_menu.png') ? "<img src='".THEME_ABS."im
 
 $caption = $img.' '.vartrue($menu_pref['online_caption'], LAN_ONLINE_4);
 
-if (getperms('1')) 
+if (getperms('1'))
 {
 	$path = e_PLUGIN_ABS."online/config.php?iframe=1";
 	$caption .= "<a class='e-modal pull-right' data-modal-caption='".LAN_SETTINGS."' href='".$path."' title='".LAN_SETTINGS."'><i class='glyphicon glyphicon-cog'></i></a>";
@@ -147,4 +147,3 @@ if (getperms('1'))
 
 
 e107::getRender()->tablerender($caption, $text, 'online_extended');
-

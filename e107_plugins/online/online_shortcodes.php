@@ -26,8 +26,8 @@ class online_shortcodes extends e_shortcode
 	public $memberTemplate = '';
 	protected $gen;
 	private $menuPref = array();
-	
-	
+
+
 	public function __construct()
 	{
 		// Need to set initial value for $scVars. Otherwise it results warning message.
@@ -83,7 +83,7 @@ class online_shortcodes extends e_shortcode
 
 	}
 
-	
+
 	// Online Menu
 	function sc_online_guests()
 	{
@@ -122,7 +122,7 @@ class online_shortcodes extends e_shortcode
 	function sc_online_members_total()
 	{
 		$total_members = e107::getCache()->retrieve("online_menu_member_total", 120);
-		if($total_members == false) 
+		if($total_members == false)
 		{
 			$total_members = e107::getDb()->count('user','(*)',"where user_ban='0'");
 			e107::getCache()->set("online_menu_member_total", $total_members);
@@ -136,7 +136,7 @@ class online_shortcodes extends e_shortcode
 
 		$sql = e107::getDb();
 		$ret =e107::getCache()->retrieve('online_menu_member_newest', 120);
-		if($ret == false) 
+		if($ret == false)
 		{
 
 			$sql->select('user', 'user_id, user_name,user_image', "user_ban='0' ORDER BY user_join DESC LIMIT 1");
@@ -193,7 +193,7 @@ class online_shortcodes extends e_shortcode
 
 
 
-	//##### ONLINE MEMBER LIST EXTENDED 
+	//##### ONLINE MEMBER LIST EXTENDED
 	function sc_online_members_list_extended()
 	{
 		//display list of 'member viewing page'
@@ -292,10 +292,10 @@ class online_shortcodes extends e_shortcode
 			);
 
 			return e107::getParser()->toAvatar($userData, $parm);
-			
-		//	return e107::getParser()->parseTemplate("{USER_AVATAR=".$this->currentMember['oimage']."}",true);	
+
+		//	return e107::getParser()->parseTemplate("{USER_AVATAR=".$this->currentMember['oimage']."}",true);
 		}
-		
+
 		return "<img src='".e_IMAGE_ABS."admin_images/users_16.png' alt='' style='vertical-align:middle' />";
 	}
 
@@ -326,4 +326,3 @@ class online_shortcodes extends e_shortcode
 		return (!strstr($this->currentMember['pinfo'], $ADMIN_DIRECTORY) ? "<a href='".$this->currentMember['pinfo']."'>".$this->currentMember['page']."</a>" : $this->currentMember['page']);
 	}
 }
-
