@@ -18,20 +18,20 @@
 
 
 require_once('../../class2.php');
-if (!getperms('P')) 
+if (!getperms('P'))
 {
 	e107::redirect();
 	exit;
 }
 
 
-if (e_QUERY) 
+if (e_QUERY)
 {
   $sl_qs = explode('.', e_QUERY);
 }
 $action = varset($sl_qs[0],'config');
 $params = varset($sl_qs[1],'');
-if (($action != 'export') || $params) 
+if (($action != 'export') || $params)
 {
 	e107::redirect();
 	exit;
@@ -127,11 +127,11 @@ if (isset($_POST['create_export']) && $action == 'export')
   else
   {	// Actually do export
     $message = export_stats($export_type, $export_date, $export_filter, $first_date, $last_date, $separator_char[$export_char], $quote_char[$export_quote], $export_stripurl);
-  } 
+  }
 }
 
 
-if (isset($message) && $message) 
+if (isset($message) && $message)
 {
   require_once(e_ADMIN."auth.php");
   $ns->tablerender("", "<div style='text-align:center'><b>".$message."</b></div>");
@@ -162,14 +162,14 @@ function  export_stats($export_type, $export_date, $export_filter, $first_date, 
   $values_per_entry = 1;
   $values_per_row = 1;
   $empty_data = 0;
-  
+
   $replace_url = $e107->http_path;
   if (strpos($e107->http_path,'www.'))
   {
     $replace_url = array($e107->http_path,str_replace('www.','',$e107->http_path));
   }
-  
-  if ($export_type == 'page') 
+
+  if ($export_type == 'page')
   {
     $values_per_entry = 2;
 	$empty_data = array('ttlv' => 0, 'unqv' => 0);
@@ -181,28 +181,28 @@ function  export_stats($export_type, $export_date, $export_filter, $first_date, 
   $filename = $stat_types[$export_date]."_";
   switch ($export_date)
   {
-    case 1 : 
+    case 1 :
 	  $filename .= $export_type.'_day_'.date('Ymd',$first_date);
 	  break;
-    case 2 : 
+    case 2 :
 	  $filename .= $export_type.'_mon_'.date('Ymd',$first_date).'_'.date('Ymd',$last_date);
 	  $values_per_row = 31;
 	  break;
     case 3 : $filename .= $export_type.'_year_'.date('Ym',$first_date).'_'.date('Ym',$last_date);
 	  $values_per_row = 12;
 	  break;
-    case 4 : 
+    case 4 :
 //	  $filename .= $export_type.'_alltime';
 	  $filename .= $export_type;
 	  break;
-    case 5 : 
+    case 5 :
 //	  $filename .= $export_type.'_alltime';
 	  $filename .= $export_type;
 	  break;
   }
   $filename .= '.csv';
   if (defined('CSV_DEBUG')) $export_text .= "export stats to {$filename}<br />";
-  
+
   while($row = $sql -> db_Fetch())
   {	// Process one DB entry
     $date_id = substr($row['log_id'],strrpos($row['log_id'],'-')+1);	// Numeric value of date being processed (not always valid)
@@ -218,7 +218,7 @@ function  export_stats($export_type, $export_date, $export_filter, $first_date, 
 	{
 	  $db_data = unserialize($row['log_data']);
 	}
-	
+
 	foreach ($db_data as $k => $db_v)
 	{
 	  if ($process_mode == 1)
@@ -244,7 +244,7 @@ function  export_stats($export_type, $export_date, $export_filter, $first_date, 
 		$total = $db_v;
 		$unique = 0;
 	  }
-	  
+
 	  if ($strip_url)
 	  {
 		$url = str_replace($replace_url,"",$url);	// We really just want a relative path. Strip out the root bit
@@ -255,8 +255,8 @@ function  export_stats($export_type, $export_date, $export_filter, $first_date, 
 	  //					the first entry has the url 'TOTAL'
 	  // All-time stats:
 	  //  Page data has array entries with three keys: 'url', 'ttlv', 'unqv'
-	
-// Work with an array where each entry is an array with up to 31 values. The key of each entry is page name, browser type etc. Within the value we have numeric keys corresponding 
+
+// Work with an array where each entry is an array with up to 31 values. The key of each entry is page name, browser type etc. Within the value we have numeric keys corresponding
 // to months 1..12, or days 1..31, or zero for all-time stats and single day stats. For most stats the value will be within these keys; for page data we have a further level
 // of arrays with keys ['ttlv'] and ['unqv']
 //		echo $total.", ".$unique.", ".$url."<br />";
@@ -286,7 +286,7 @@ function  export_stats($export_type, $export_date, $export_filter, $first_date, 
 	  }
 	}
   }
-  
+
   foreach ($export_array as $url => $data)
   {
     $export_text .= $quote_char.$url.$quote_char;

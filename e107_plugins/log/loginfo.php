@@ -13,7 +13,7 @@ if (!defined('LOGSTATS_INIT')) { exit; }
 
 $logIfile = e_LOG."logi_{$date}.php";
 $i_handle = fopen($logIfile, 'r+');
-if($i_handle && flock( $i_handle, LOCK_EX ) ) 
+if($i_handle && flock( $i_handle, LOCK_EX ) )
 {
 	$log_file_contents = '';
 	while (!feof($i_handle))
@@ -32,47 +32,47 @@ else
 $browser = getBrowser($agent);
 $os = getOs($agent);
 
-if($screenstats && $screenstats != "@") 
+if($screenstats && $screenstats != "@")
 {
-	if(array_key_exists($screenstats, $screenInfo)) 
+	if(array_key_exists($screenstats, $screenInfo))
 	{
 		$screenInfo[$screenstats] ++;
-	} 
-	else 
+	}
+	else
 	{
 		$screenInfo[$screenstats] = 1;
 	}
 }
 
-if(array_key_exists($browser, $browserInfo)) 
+if(array_key_exists($browser, $browserInfo))
 {
 	$browserInfo[$browser] ++;
-} 
-else 
+}
+else
 {
 	$browserInfo[$browser] = 1;
 }
 
-if(array_key_exists($os, $osInfo)) 
+if(array_key_exists($os, $osInfo))
 {
 	$osInfo[$os] ++;
-} 
-else 
+}
+else
 {
 	$osInfo[$os] =1;
 }
 
 /* referer data ... */
-if($ref && !strstr($ref, $_SERVER['HTTP_HOST'])) 
+if($ref && !strstr($ref, $_SERVER['HTTP_HOST']))
 {
-	if(preg_match("#http://(.*?)($|/)#is", $ref, $match)) 
+	if(preg_match("#http://(.*?)($|/)#is", $ref, $match))
 	{
 		$refdom = $match[0];
-		if(array_key_exists($refdom, $refInfo)) 
+		if(array_key_exists($refdom, $refInfo))
 		{
 			$refInfo[$refdom]['ttl'] ++;
-		} 
-		else 
+		}
+		else
 		{
 			$refInfo[$refdom] = array('url' => $ref, 'ttl' => 1);
 		}
@@ -80,30 +80,30 @@ if($ref && !strstr($ref, $_SERVER['HTTP_HOST']))
 }
 
 /* is the referal from Google? If so get search string ... */
-if(preg_match("#q=(.*?)($|&)#is", $oldref, $match)) 
+if(preg_match("#q=(.*?)($|&)#is", $oldref, $match))
 {
 	$schstr = trim($match[1]);
 	$schstr = htmlentities(urldecode($schstr));
-	if(array_key_exists($schstr, $searchInfo) && $schstr) 
+	if(array_key_exists($schstr, $searchInfo) && $schstr)
 	{
 		$searchInfo[$schstr] ++;
-	} 
-	else 
+	}
+	else
 	{
 		$searchInfo[$schstr] = 1;
 	}
 }
 
-if ($tmp = gethostbyaddr(getenv('REMOTE_ADDR'))) 
+if ($tmp = gethostbyaddr(getenv('REMOTE_ADDR')))
 {
 	$host = trim(strtolower(substr($tmp, strrpos($tmp, ".")+1)));
-	if(!is_numeric($host) && !strstr($host, "calhost")) 
+	if(!is_numeric($host) && !strstr($host, "calhost"))
 	{
-		if(array_key_exists($host, $domainInfo)) 
+		if(array_key_exists($host, $domainInfo))
 		{
 			$domainInfo[$host] ++;
-		} 
-		else 
+		}
+		else
 		{
 			$domainInfo[$host] =1;
 		}
@@ -111,7 +111,7 @@ if ($tmp = gethostbyaddr(getenv('REMOTE_ADDR')))
 }
 
 /* last 20 visitors */
-if(count($visitInfo) >= 20) 
+if(count($visitInfo) >= 20)
 {
 	$length = 20;
 	$offset = count($visitInfo)-$length;
@@ -151,7 +151,7 @@ if ($i_handle)
 }
 
 
-function getBrowser($agent) 
+function getBrowser($agent)
 {
 	//
 	// All "root" browsers must come at the end of the list, unfortunately.
@@ -231,22 +231,22 @@ function getBrowser($agent)
 		"firebird"     => array('name' => 'Firebird',          'rule' => 'Firebird/([0-9.+]{1,10})'),
 	);
 	$browser = "";
-	foreach($browsers as $key => $info) 
+	foreach($browsers as $key => $info)
 	{
-		if (preg_match("#".$info['rule']."#i", $agent, $results)) 
+		if (preg_match("#".$info['rule']."#i", $agent, $results))
 		{
-			switch ($key) 
+			switch ($key)
 			{
 				case 'nokia':
 				case 'nokia1':
 				case 'nokia2':
-					if(strpos(strtolower($agent), 'series60') !== false || strpos($agent, 'S60') !== false ) 
+					if(strpos(strtolower($agent), 'series60') !== false || strpos($agent, 'S60') !== false )
 					{
 						$info['name'] = 'Nokia S60 OSS Browser';
 					}
 					return ($info['name'].(isset($results[2]) && $results[2] ? ' v'.$results[2] : ''));
 				break;
-				
+
 				default:
 					return ($info['name'].(isset($results[1]) && $results[1] ? ' v'.$results[1] : ''));
 				break;
@@ -256,7 +256,7 @@ function getBrowser($agent)
 	return ('Unknown');
 }
 
-function getOs($agent) 
+function getOs($agent)
 {
 	// http://www.zytrax.com/tech/web/browser_ids.htm
 	$os = array(
@@ -299,15 +299,15 @@ function getOs($agent)
 		"palm"        => array('name' => 'PalmOS',       'rule' => 'Palm[ \-]?(Source|OS)[ /]?([0-9.]{1,10})'),
 		"palm2"       => array('name' => 'PalmOS',       'rule' => 'Palm[ \-]?(Source|OS)')
 	);
-	foreach($os as $key => $info) 
+	foreach($os as $key => $info)
 	{
-		if (preg_match("#".$info['rule']."#i", $agent, $results)) 
+		if (preg_match("#".$info['rule']."#i", $agent, $results))
 		{
-			if(strstr($key, "win")) 
+			if(strstr($key, "win"))
 			{
 				return ($info['name']);
-			} 
-			else 
+			}
+			else
 			{
 				return ($info['name']." ".$results[1]);
 			}

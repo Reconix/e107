@@ -14,7 +14,7 @@ if (!defined('e107_INIT'))
 	require_once("../../class2.php");
 }
 
-if (!e107::isInstalled('log')) 
+if (!e107::isInstalled('log'))
 {
 	e107::redirect();
 	exit;
@@ -32,16 +32,16 @@ e107::css('inline', "
 
 require_once(HEADERF);
 
-if(!check_class(e107::getPref('statUserclass'))) 
+if(!check_class(e107::getPref('statUserclass')))
 {
-	$mes->addError(ADSTAT_L4); 
+	$mes->addError(ADSTAT_L4);
 	$ns->tablerender(ADSTAT_L6, $mes->render());
 	require_once(FOOTERF);
 	exit;
 }
 
 
-if (!e107::getPref('statActivate')) 
+if (!e107::getPref('statActivate'))
 {
 	$text = (ADMIN ? "<div style='text-align:center'>".ADSTAT_L41."</div>" : "<div style='text-align:center'>".ADSTAT_L5."</div>");
 	$ns->tablerender(ADSTAT_L6, $text);
@@ -60,7 +60,7 @@ $order = intval($order);
 
 $stat = new siteStats($order);
 
-if($stat->error) 
+if($stat->error)
 {
 	$ns->tablerender(ADSTAT_L6, $stat->error);
 	require_once(FOOTERF);
@@ -115,7 +115,7 @@ if ((ADMIN == TRUE) && ($sec_action == 'rem'))
 
 $action = intval($action);
 
-switch($action) 
+switch($action)
 {
 	case 1:
 		$text .= $stat -> renderTodaysVisits(FALSE);
@@ -137,72 +137,72 @@ switch($action)
 		break;
 	case 3 :		// 'Normal' render
 	case 14 :		// 'Consolidated' render
-		if(e107::getPref('statBrowser')) 
+		if(e107::getPref('statBrowser'))
 		{
 			$text .= $stat -> renderBrowsers(display_pars(e107::getPref('statBrowser')), $action==3);
-		} 
-		else 
+		}
+		else
 		{
 			$text .= ADSTAT_L7;
 		}
 		break;
 	case 4:			// 'Normal' render
 	case 15 :		// 'Consolidated' render
-		if(e107::getPref('statOs')) 
+		if(e107::getPref('statOs'))
 		{
 			$text .= $stat -> renderOses(display_pars(e107::getPref('statOs')), $action==4);
-		} 
-		else 
+		}
+		else
 		{
 			$text .= ADSTAT_L7;
 		}
 		break;
 	case 5:
-		if(e107::getPref('statDomain')) 
+		if(e107::getPref('statDomain'))
 		{
 			$text .= $stat -> renderDomains(display_pars(e107::getPref('statDomain')));
-		} 
-		else 
+		}
+		else
 		{
 			$text .= ADSTAT_L7;
 		}
 		break;
 	case 6:
-		if(e107::getPref('statScreen')) 
+		if(e107::getPref('statScreen'))
 		{
 			$text .= $stat -> renderScreens(display_pars(e107::getPref('statScreen')));
-		} 
-		else 
+		}
+		else
 		{
 			$text .= ADSTAT_L7;
 		}
 		break;
 	case 7:
-		if (e107::getPref('statRefer')) 
+		if (e107::getPref('statRefer'))
 		{
 			$text .= $stat -> renderRefers(display_pars(e107::getPref('statRefer')));
-		} 
-		else 
+		}
+		else
 		{
 			$text .= ADSTAT_L7;
 		}
 		break;
 	case 8:
-		if (e107::getPref('statQuery')) 
+		if (e107::getPref('statQuery'))
 		{
 			$text .= $stat -> renderQueries(display_pars(e107::getPref('statQuery')));
-		} 
-		else 
+		}
+		else
 		{
 			$text .= ADSTAT_L7;
 		}
 		break;
 	case 9:
-		if (e107::getPref('statRecent')) 
+		if (e107::getPref('statRecent'))
 		{
 			$text .= $stat -> recentVisitors();
-		} 
-		else 
+		}
+		else
 		{
 			$text .= ADSTAT_L7;
 		}
@@ -219,7 +219,7 @@ switch($action)
 
 
 
-/* render links 
+/* render links
  1 - Todays visits
  2 - All-time
  3 - Browser stats
@@ -260,7 +260,7 @@ $links = "
 ($action != 9 && e107::getPref('statRecent') ? "<a href='{$path}?9'>".ADSTAT_L18."</a> | " : (e107::getPref('statRecent') ? "<b>".ADSTAT_L18."</b> | " : ""));
 if (ADMIN == TRUE)
 {
-	$links .= 
+	$links .=
 	($action != 12 ? "<a href='{$path}?12'>".ADSTAT_L43."</a>" : "<b>".ADSTAT_L43."</b>")." | ".
 	($action != 13 ? "<a href='{$path}?13'>".ADSTAT_L44."</a>" : "<b>".ADSTAT_L44."</b>");
 }
@@ -285,21 +285,21 @@ function make_bits($prefix, $act)
   $ret['hdg_extra'] = '';
   switch ($act)
   {
-	case 1 : 
-	  $ret['query'] = "log_id='{$prefix}'"; 
+	case 1 :
+	  $ret['query'] = "log_id='{$prefix}'";
 	  break;
-	case 2 : 
-	  $ret['query'] = "log_id='{$prefix}:".date("Y-m")."'"; 
+	case 2 :
+	  $ret['query'] = "log_id='{$prefix}:".date("Y-m")."'";
 	  $ret['hdg_extra'] = " (".$now['mon']."-".$now['year'].")";
 	  break;
-	case 3 : 
+	case 3 :
 	  $now['mon']--;
 	  if ($now['mon']==0)
 	  {
 		$now['mon'] = 12;
 		$now['year']--;
 	  }
-	  $ret['query'] = "log_id='{$prefix}:".sprintf("%04d-%02d",$now['year'],$now['mon'])."'"; 
+	  $ret['query'] = "log_id='{$prefix}:".sprintf("%04d-%02d",$now['year'],$now['mon'])."'";
 	  $ret['hdg_extra'] = " (".$now['mon']."-".$now['year'].")";
 	  break;
 	default: $ret = "Invalid selection: {$act}<br />";
@@ -310,7 +310,7 @@ function make_bits($prefix, $act)
 
 
 
-class siteStats 
+class siteStats
 {
 	protected $browser_headings = array(1 => ADSTAT_L50, 2 => ADSTAT_L51, 3 => ADSTAT_L52);
 
@@ -672,7 +672,7 @@ class siteStats
 	);
 
 
-	function __construct($order) 
+	function __construct($order)
 	{
 		/* constructor */
 		$sql = e107::getDB();
@@ -680,13 +680,13 @@ class siteStats
 		/* get today's logfile ... */
 		$logfile = e_LOG.'logp_'.date('z.Y', time()).'.php';
 	//	$logfile = e_PLUGIN.'log/logs/logp_'.date('z.Y', time()).'.php';
-		if(is_readable($logfile)) 
+		if(is_readable($logfile))
 		{
 			require($logfile);
 		}
 	//	$logfile = e_PLUGIN.'log/logs/logi_'.date('z.Y', time()).'.php';
 		$logfile = e_LOG.'logi_'.date('z.Y', time()).'.php';
-		if(is_readable($logfile)) 
+		if(is_readable($logfile))
 		{
 			require($logfile);
 		}
@@ -711,24 +711,24 @@ class siteStats
 		{
 			$row = $sql -> db_Fetch();
 			$this -> dbPageInfo = unserialize($row['log_data']);
-		} 
-		else 
+		}
+		else
 		{
 			$this -> dbPageInfo = array();
 		}
 
 		/* temp consolidate today's info (if it exists)... */
-		if(is_array($pageInfo)) 
+		if(is_array($pageInfo))
 		{
-			foreach($pageInfo as $key => $info) 
+			foreach($pageInfo as $key => $info)
 			{
 				$key = preg_replace("/\?.*/", "", $key);
-				if(array_key_exists($key, $this -> dbPageInfo)) 
+				if(array_key_exists($key, $this -> dbPageInfo))
 				{
 					$this -> dbPageInfo[$key]['ttlv'] += $info['ttl'];
 					$this -> dbPageInfo[$key]['unqv'] += $info['unq'];
-				} 
-				else 
+				}
+				else
 				{
 					$this -> dbPageInfo[$key]['url'] = $info['url'];
 					$this -> dbPageInfo[$key]['ttlv'] = $info['ttl'];
@@ -749,7 +749,7 @@ class siteStats
 	{
 	//	$path = e_PLUGIN_ABS.'log/stats.php';
 		$path = e_REQUEST_SELF;
-		
+
 		$links = array(
 			1	=> array('label' 	=> ADSTAT_L8, 	'pref' 	=> null),
 			2	=> array('label'	=> ADSTAT_L9,	'pref'	=> null),
@@ -762,35 +762,35 @@ class siteStats
 			7	=> array('label'	=> ADSTAT_L16,	'pref'	=> 'statRefer'),
 			8	=> array('label'	=> ADSTAT_L17,	'pref'	=> 'statQuery'),
 			9	=> array('label'	=> ADSTAT_L18,	'pref'	=> 'statRecent'),
-		);	
-		
+		);
+
 		if(ADMIN == true)
 		{
-			$links[12]	= array('label'	=> ADSTAT_L43, 'pref' => null);	
-			$links[13]	= array('label'	=> ADSTAT_L44, 'pref' => null);	
+			$links[12]	= array('label'	=> ADSTAT_L43, 'pref' => null);
+			$links[13]	= array('label'	=> ADSTAT_L44, 'pref' => null);
 		}
-		
+
 		$lk = array();
-		
+
 		foreach($links as $id => $val)
 		{
 			if($val['pref'] == null || e107::getPref($val['pref']))
 			{
 				$selected = ($id === $action) ? "class='active'" : "";
-				$lk[] = "<a {$selected} href='".$path."?".$id."'>".$val['label']."</a>";	
-			} 		
+				$lk[] = "<a {$selected} href='".$path."?".$id."'>".$val['label']."</a>";
+			}
 		}
-	
+
 		if(deftrue('BOOTSTRAP'))
 		{
 			return "<div class='text-right'>".e107::getForm()->button('statNav',$lk,'dropdown',$links[$action]['label'], array('align'=>'right','class'=>'btn-primary'))."</div>";
 		}
-	
+
 		return "<div style='text-align: center;'>".implode(" | ", $lk)."</div>";
 	}
 
 	/**
-	 *	sorts multi-dimentional array based on which field is passed 
+	 *	sorts multi-dimentional array based on which field is passed
 	 *
 	 *	@param array $array - the array to sort
 	 *	@param string $column - name of column to sort by
@@ -799,7 +799,7 @@ class siteStats
 	function arraySort($array, $column, $order = SORT_DESC)
 	{
 		$i=0;
-		foreach($array as $info) 
+		foreach($array as $info)
 		{
 			$sortarr[]=$info[$column];
 			$i++;
@@ -808,7 +808,7 @@ class siteStats
 		return($array);
 		/* end method */
 	}
-	
+
 
 	function getLabel($key,$truncate=false)
 	{
@@ -832,13 +832,13 @@ class siteStats
 
 
 	/**
-	 *	renders information for today only 
+	 *	renders information for today only
 	 *
 	 *	@param boolean $do_errors - FALSE to show 'normal' accesses, TRUE to show error accesses (i.e. invalid pages)
 	 *
 	 *	@return string text for display
 	 */
-	function renderTodaysVisits($do_errors = FALSE) 
+	function renderTodaysVisits($do_errors = FALSE)
 	{
 		$do_errors = $do_errors && ADMIN && getperms('P');		// Only admins can see page errors
 
@@ -850,7 +850,7 @@ class siteStats
 		foreach ($this -> fileInfo as $k => $v)
 		{
 			$found = (strpos($k,'error/') === 0);
-			if ($do_errors XOR !$found) 
+			if ($do_errors XOR !$found)
 			{
 				$totalArray[$k] = $v;
 				$total += vartrue($v['ttlv']);
@@ -858,7 +858,7 @@ class siteStats
 		}
 		$totalArray = $this -> arraySort($totalArray, "ttl");
 
-		foreach($totalArray as $key => $info) 
+		foreach($totalArray as $key => $info)
 		{
 			$totalv += $info['ttl'];
 			$totalu += $info['unq'];
@@ -870,8 +870,8 @@ class siteStats
 			<th class='fcaption' style='width: 70%;' colspan='2'>".ADSTAT_L20."</th>
 			<th class='fcaption' style='width: 10%; text-align: center;'>%</th>
 		</tr>\n";
-		
-		foreach($totalArray as $key => $info) 
+
+		foreach($totalArray as $key => $info)
 		{
 			if($info['ttl'])
 			{
@@ -888,14 +888,14 @@ class siteStats
 
 
 	/**
-	 *	Renders information for alltime, total and unique 
+	 *	Renders information for alltime, total and unique
 	 *
 	 *	@param string $action - value to incorporate in query part of clickable links
 	 *	@param boolean $do_errors - FALSE to show 'normal' accesses, TRUE to show error accesses (i.e. invalid pages)
 	 *
 	 *	@return string text for display
 	 */
-	function renderAlltimeVisits($action, $do_errors = FALSE) 
+	function renderAlltimeVisits($action, $do_errors = FALSE)
 	{
 		$sql = e107::getDB();
 		$tp = e107::getParser();
@@ -908,8 +908,8 @@ class siteStats
 
 		$can_delete = ADMIN && getperms("P");
 		$do_errors = $do_errors && $can_delete;
-		
-		foreach($this -> fileInfo as $url => $tmpcon) 
+
+		foreach($this -> fileInfo as $url => $tmpcon)
 		{
 			$pageTotal[$url]['url'] = $tmpcon['url'];
 			$pageTotal[$url]['ttlv'] += $tmpcon['ttl'];
@@ -921,7 +921,7 @@ class siteStats
 		foreach ($pageTotal as $k => $v)
 		{
 			$found = (strpos($k,'error/') === 0);
-			if ($do_errors XOR !$found) 
+			if ($do_errors XOR !$found)
 			{
 				$totalArray[$k] = $v;
 				$total += $v['ttlv'];
@@ -942,8 +942,8 @@ class siteStats
 				<th class='fcaption' colspan='2'>".ADSTAT_L23."</th>
 				<th class='fcaption' style='text-align: center;'>%</th>
 			</tr>\n";
-			
-		foreach($totalArray as $key => $info) 
+
+		foreach($totalArray as $key => $info)
 		{
 			if($info['ttlv'])
 			{
@@ -968,7 +968,7 @@ class siteStats
 		foreach ($this -> dbPageInfo as $k => $v)
 		{
 			$found = (strpos($k,'error/') === 0);
-			if ($do_errors XOR !$found) 
+			if ($do_errors XOR !$found)
 			{
 				$uniqueArray[$k] = $v;
 				$totalv += $v['unqv'];
@@ -984,7 +984,7 @@ class siteStats
 			<th class='fcaption' style='width: 10%; text-align: center;'>%</th>
 		</tr>\n";
 
-		foreach($uniqueArray as $key => $info) 
+		foreach($uniqueArray as $key => $info)
 		{
 			if ($info['ttlv'])
 			{
@@ -1004,13 +1004,13 @@ class siteStats
 
 
 	/**
-	 *	List browsers. 
+	 *	List browsers.
 	 *	@param integer $selection is an array of the info required - '2' = current month's stats, '1' = all-time stats (default)
 	 *	@param boolean $show_version - if FALSE, browsers are consolidated across versions - e.g. 1 line for Firefox using info from $browser_map
 	 *
 	 *	@return string text for display
 	 */
-	function renderBrowsers($selection = FALSE, $show_version=TRUE) 
+	function renderBrowsers($selection = FALSE, $show_version=TRUE)
 	{
 		$sql = e107::getDB();
 
@@ -1018,17 +1018,17 @@ class siteStats
 		if (!is_array($selection)) $selection = array(1);
 		$text = '';
 
-	
-		
+
+
 		foreach ($selection as $act)
 		{
 			unset($statBrowser);
 			$statBrowser = array();
-			
+
 			$pars = make_bits('statBrowser',$act);		// Get the query, plus maybe date for heading
 			if (!is_array($pars)) return $pars;			// Return error if necessary
 
-			if ($entries = $sql->select('logstats', 'log_data', $pars['query'])) 
+			if ($entries = $sql->select('logstats', 'log_data', $pars['query']))
 			{
 				$row = $sql->fetch();
 				$statBrowser = unserialize($row['log_data']);
@@ -1041,19 +1041,19 @@ class siteStats
 			/* temp consolidate today's data ... */
 			if (($act == 1) || ($act == 2))
 			{
-				foreach($this->fileBrowserInfo as $name => $count) 
+				foreach($this->fileBrowserInfo as $name => $count)
 				{
 					$statBrowser[$name] += $count;
 				}
 			}
-			
+
 			if ($show_version == FALSE)
 			{
 				$temp_array = array();
 				foreach ($statBrowser as $b_full=>$v)
 				{
 					$b_type = '';
-					foreach ($this->browser_map as $name => $file) 
+					foreach ($this->browser_map as $name => $file)
 					{
 					  if(stripos($b_full, $name) === 0)
 					  {  // Match here
@@ -1077,19 +1077,19 @@ class siteStats
 			}
 
 
-			if ($this -> order) 
+			if ($this -> order)
 			{
 				ksort($statBrowser);
 				reset ($statBrowser);
 				$browserArray = $statBrowser;
-			} 
-			else 
+			}
+			else
 			{
 				$browserArray = $this -> arraySort($statBrowser, 0);
 			}
 
 			$total = array_sum($browserArray);
-			
+
 			$text .= "
 				<table class='table table-striped fborder' style='width: 100%;'>\n
 					 <tr>
@@ -1105,18 +1105,18 @@ class siteStats
 
 			if (count($browserArray))
 			{
-				foreach($browserArray as $key => $info) 
+				foreach($browserArray as $key => $info)
 				{
 					$image = "";
-					foreach ($this->browser_map as $name => $file) 
+					foreach ($this->browser_map as $name => $file)
 					{
-						if(strstr($key, $name)) 
+						if(strstr($key, $name))
 						{
 							$image = "{$file}.png";
 							break;
 						}
 					}
-					if($image == "") 
+					if($image == "")
 					{
 						$image = "unknown.png";
 					}
@@ -1150,7 +1150,7 @@ class siteStats
 	 *
 	 *	@return string text for display
 	 */
-	function renderOses($selection = FALSE, $show_version=TRUE) 
+	function renderOses($selection = FALSE, $show_version=TRUE)
 	{
 		$sql = e107::getDB();
 		if (!$selection) $selection = array(1);
@@ -1164,7 +1164,7 @@ class siteStats
 			$pars = make_bits('statOs',$act);		// Get the query, plus maybe date for heading
 			if (!is_array($pars)) return $pars;			// Return error if necessary
 
-			if ($entries = $sql->select("logstats", "*", $pars['query'])) 
+			if ($entries = $sql->select("logstats", "*", $pars['query']))
 			{
 				$row = $sql -> db_Fetch();
 				$statOs = unserialize($row['log_data']);
@@ -1177,7 +1177,7 @@ class siteStats
 			/* temp consolidate today's data ... */
 			if (($act == 1) || ($act == 2))
 			{
-				foreach($this -> fileOsInfo as $name => $count) 
+				foreach($this -> fileOsInfo as $name => $count)
 				{
 					$statOs[$name] += $count;
 				}
@@ -1190,7 +1190,7 @@ class siteStats
 				foreach ($statOs as $b_full=>$v)
 				{
 					$b_type = '';
-					foreach ($this->oses_map as $name => $file) 
+					foreach ($this->oses_map as $name => $file)
 					{
 					  if(stripos($b_full, $name) === 0)
 					  {  // Match here
@@ -1215,19 +1215,19 @@ class siteStats
 
 
 
-			if($this -> order) 
+			if($this -> order)
 			{
 				ksort($statOs);
 				reset ($statOs);
 				$osArray = $statOs;
-			} 
-			else 
+			}
+			else
 			{
 				$osArray = $this->arraySort($statOs, 0);
 			}
 
 			$total = array_sum($osArray);
-			$text .= "	
+			$text .= "
 				<table class='table table-striped fborder' style='width: 100%;'>\n
 				<tr>
 					<th class='fcaption' colspan='4' style='text-align:center'>".$this->browser_headings[$act].$pars['hdg_extra']."</th>
@@ -1238,10 +1238,10 @@ class siteStats
 			  	<th class='fcaption' style='width: 70%;' colspan='2'>".ADSTAT_L21."</th>
 				<th class='fcaption' style='width: 10%; text-align: center;'>%</th>
 			</tr>\n";
-			  
+
 			if (count($osArray))
 			{
-				foreach($osArray as $key => $info) 
+				foreach($osArray as $key => $info)
 				{
 					$image = "";
 					if(strstr($key, "Windows")) {	$image = "windows.png"; }
@@ -1283,7 +1283,7 @@ class siteStats
 	 *
 	 *	@return string text for display
 	 */
-	function renderDomains($selection = FALSE) 
+	function renderDomains($selection = FALSE)
 	{
 		$sql = e107::getDB();
 
@@ -1297,7 +1297,7 @@ class siteStats
 			$pars = make_bits('statDomain',$act);		// Get the query, plus maybe date for heading
 			if (!is_array($pars)) return $pars;			// Return error if necessary
 
-			if ($entries = $sql->select('logstats', 'log_data', $pars['query'])) 
+			if ($entries = $sql->select('logstats', 'log_data', $pars['query']))
 			{
 				$row = $sql -> db_Fetch();
 				$statDom = unserialize($row['log_data']);
@@ -1310,19 +1310,19 @@ class siteStats
 			/* temp consolidate today's data ... */
 			if (($act == 1) || ($act == 2))
 			{
-				foreach($this -> fileDomainInfo as $name => $count) 
+				foreach($this -> fileDomainInfo as $name => $count)
 				{
 					$statDom[$name] += $count;
 				}
 			}
 
-			if($this -> order) 
+			if($this -> order)
 			{
 				ksort($statDom);
 				reset ($statDom);
 				$domArray = $statDom;
-			} 
-			else 
+			}
+			else
 			{
 				$domArray = $this -> arraySort($statDom, 0);
 			}
@@ -1336,9 +1336,9 @@ class siteStats
 
 			if (count($domArray))
 			{
-				foreach($domArray as $key => $info) 
+				foreach($domArray as $key => $info)
 				{
-					if($key = $this -> getcountry($key)) 
+					if($key = $this -> getcountry($key))
 					{
 						$percentage = round(($info/$total) * 100, 2);
 						$text .= "<tr>
@@ -1369,7 +1369,7 @@ class siteStats
 	 *
 	 *	@return string text for display
 	 */
-	function renderScreens($selection = FALSE) 
+	function renderScreens($selection = FALSE)
 	{
 		$sql = e107::getDB();
 
@@ -1383,7 +1383,7 @@ class siteStats
 			$pars = make_bits('statScreen',$act);		// Get the query, plus maybe date for heading
 			if (!is_array($pars)) return $pars;			// Return error if necessary
 
-			if ($entries = $sql->db_Select('logstats', 'log_data', $pars['query'])) 
+			if ($entries = $sql->db_Select('logstats', 'log_data', $pars['query']))
 			{
 				$row = $sql -> db_Fetch();
 				$statScreen = unserialize($row['log_data']);
@@ -1396,19 +1396,19 @@ class siteStats
 			/* temp consolidate today's data ... */
 			if (($act == 1) || ($act == 2))
 			{
-				foreach($this -> fileScreenInfo as $name => $count) 
+				foreach($this -> fileScreenInfo as $name => $count)
 				{
 					$statScreen[$name] += $count;
 				}
 			}
 
 
-			if($this -> order) 
+			if($this -> order)
 			{
 				$nsarray = array();
-				foreach($statScreen as $key => $info) 
+				foreach($statScreen as $key => $info)
 				{
-					if(preg_match("/(\d+)x/", $key, $match)) 
+					if(preg_match("/(\d+)x/", $key, $match))
 					{
 						$nsarray[$key] = array('width' => $match[1], 'info' => $info);
 					}
@@ -1416,18 +1416,18 @@ class siteStats
 				$nsarray = $this -> arraySort($nsarray, 'width', SORT_ASC);
 				reset($nsarray);
 				$screenArray = array();
-				foreach($nsarray as $key => $info) 
+				foreach($nsarray as $key => $info)
 				{
 					$screenArray[$key] = $info['info'];
 				}
-			} 
-			else 
+			}
+			else
 			{
 				$screenArray = $this -> arraySort($statScreen, 0);
 			}
 
 			$total = array_sum($screenArray);
-			$text .= "		
+			$text .= "
 			<table class='table table-striped fborder' style='width: 100%;'>\n
 			<tr>
 				<th class='fcaption' colspan='4' style='text-align:center'>".$this->browser_headings[$act].$pars['hdg_extra']."</th>
@@ -1440,9 +1440,9 @@ class siteStats
 
 			if (count($screenArray))
 			{
-				foreach($screenArray as $key => $info) 
+				foreach($screenArray as $key => $info)
 				{
-					if(strstr($key, "@") && !strstr($key, "undefined") && preg_match("/(\d+)x(\d+)@(\d+)/", $key)) 
+					if(strstr($key, "@") && !strstr($key, "undefined") && preg_match("/(\d+)x(\d+)@(\d+)/", $key))
 					{
 						$percentage = round(($info/$total) * 100, 2);
 						$text .= "<tr>
@@ -1472,7 +1472,7 @@ class siteStats
 	 *
 	 *	@return string text for display
 	 */
-	function renderRefers($selection = FALSE) 
+	function renderRefers($selection = FALSE)
 	{
 		$sql = e107::getDB();
 
@@ -1486,7 +1486,7 @@ class siteStats
 			$pars = make_bits('statReferer',$act);		// Get the query, plus maybe date for heading
 			if (!is_array($pars)) return $pars;			// Return error if necessary
 
-			if ($entries = $sql->select('logstats', 'log_data', $pars['query'])) 
+			if ($entries = $sql->select('logstats', 'log_data', $pars['query']))
 			{
 				$row = $sql -> db_Fetch();
 				$statRefer = unserialize($row['log_data']);
@@ -1499,7 +1499,7 @@ class siteStats
 			/* temp consolidate today's data ... */
 			if (($act == 1) || ($act == 2))
 			{
-				foreach($this -> fileReferInfo as $name => $count) 
+				foreach($this -> fileReferInfo as $name => $count)
 				{
 					$statRefer[$name]['url'] = $count['url'];
 					$statRefer[$name]['ttl'] += $count['ttl'];
@@ -1508,7 +1508,7 @@ class siteStats
 
 			$statArray = $this -> arraySort($statRefer, 'ttl');
 			$total = 0;
-			foreach ($statArray as $key => $info) 
+			foreach ($statArray as $key => $info)
 			{
 				$total += $info['ttl'];
 			}
@@ -1526,10 +1526,10 @@ class siteStats
 			$count = 0;
 			if (count($statArray))
 			{
-				foreach($statArray as $key => $info) 
+				foreach($statArray as $key => $info)
 				{
 					$percentage = round(($info['ttl']/$total) * 100, 2);
-					if (!$this -> order && strlen($key) > 50) 
+					if (!$this -> order && strlen($key) > 50)
 					{
 						$key = substr($key, 0, 50)." ...";
 					}
@@ -1539,7 +1539,7 @@ class siteStats
 					<td class='forumheader3' style='text-align: center;'>".$percentage."%</td>
 					</tr>\n";
 					$count++;
-					if($count == e107::getPref('statDisplayNumber')) 
+					if($count == e107::getPref('statDisplayNumber'))
 					{
 						break;
 					}
@@ -1565,7 +1565,7 @@ class siteStats
 	 *
 	 *	@return string - text for display
 	 */
-	function renderQueries($selection = FALSE) 
+	function renderQueries($selection = FALSE)
 	{
 		$sql = e107::getDB();
 
@@ -1580,7 +1580,7 @@ class siteStats
 			$pars = make_bits('statQuery',$act);		// Get the query, plus maybe date for heading
 			if (!is_array($pars)) return $pars;			// Return error if necessary
 
-			if ($entries = $sql->select("logstats", "*", $pars['query'])) 
+			if ($entries = $sql->select("logstats", "*", $pars['query']))
 			{
 				$row = $sql -> db_Fetch();
 				$statQuery = unserialize($row['log_data']);
@@ -1593,7 +1593,7 @@ class siteStats
 			/* temp consolidate today's data ... */
 			if (($act == 1) || ($act == 2))
 			{
-				foreach ($this -> fileQueryInfo as $name => $count) 
+				foreach ($this -> fileQueryInfo as $name => $count)
 				{
 					$statQuery[$name] += $count;
 				}
@@ -1602,7 +1602,7 @@ class siteStats
 
 			$queryArray = $this -> arraySort($statQuery, 0);
 			$total = array_sum($queryArray);
-			$text .= "		
+			$text .= "
 				<table class='table table-striped fborder' style='width: 100%;'>\n
 				<tr>
 					<th class='fcaption' colspan='4' style='text-align:center'>".$this->browser_headings[$act].$pars['hdg_extra']."</th>
@@ -1612,11 +1612,11 @@ class siteStats
 					<th class='fcaption' style='width: 30%;' colspan='2'>".ADSTAT_L21."</th>
 					<th class='fcaption' style='width: 10%; text-align: center;'>%</th>
 				</tr>\n";
-				
+
 			$count = 1;
 			if (count($queryArray))
 			{
-				foreach ($queryArray as $key => $info) 
+				foreach ($queryArray as $key => $info)
 				{
 					$percentage = round(($info/$total) * 100, 2);
 					$key = str_replace("%20", " ", $key);
@@ -1626,7 +1626,7 @@ class siteStats
 					<td class='forumheader3' style='width: 10%; text-align: center;'>".$percentage."%</td>
 					</tr>\n";
 					$count ++;
-					if($count == e107::getPref('statDisplayNumber')) 
+					if($count == e107::getPref('statDisplayNumber'))
 					{
 						break;
 					}
@@ -1649,9 +1649,9 @@ class siteStats
 	 *
 	 *	@return string - text for display
 	 */
-	function recentVisitors() 
+	function recentVisitors()
 	{
-		if(!is_array($this -> fileRecent) || !count($this -> fileRecent)) 
+		if(!is_array($this -> fileRecent) || !count($this -> fileRecent))
 		{
 			return "<div style='text-align: center;'>".ADSTAT_L25.".</div>";
 		}
@@ -1665,9 +1665,9 @@ class siteStats
 				<th class='fcaption' style='width: 70%;'>Information</th>
 			</tr>\n";
 
-		foreach($recentArray as $key => $info) 
+		foreach($recentArray as $key => $info)
 		{
-			if(is_array($info)) 
+			if(is_array($info))
 			{
 				$host      = $info['host'];
 				$datestamp = $info['date'];
@@ -1675,8 +1675,8 @@ class siteStats
 				$browser   = $info['browser'];
 				$screen    = $info['screen'];
 				$referer   = $info['referer'];
-			} 
-			else 
+			}
+			else
 			{
 				list($host, $datestamp, $os, $browser, $screen, $referer) = explode(chr(1), $info);
 			}
@@ -1699,7 +1699,7 @@ class siteStats
 	 *
 	 *	@return string - text for display
 	 */
-	function renderDaily() 
+	function renderDaily()
 	{
 		$sql = e107::getDB();
 
@@ -1713,14 +1713,14 @@ class siteStats
 		DESC LIMIT 0,14
 		";
 
-		if($amount = $sql->gen($qry)) 
+		if($amount = $sql->gen($qry))
 		{
 			$array = $sql -> db_getList();
 
 			$ttotal = 0;
 			$utotal = 0;
 
-			foreach($array as $key => $value) 
+			foreach($array as $key => $value)
 			{
 				extract($value);
 				if(is_array($log_data)) {
@@ -1730,8 +1730,8 @@ class siteStats
 					$entries[3] = $log_data['browser'];
 					$entries[4] = $log_data['screen'];
 					$entries[5] = $log_data['referer'];
-				} 
-				else 
+				}
+				else
 				{
 					$entries = explode(chr(1), $log_data);
 				}
@@ -1741,17 +1741,17 @@ class siteStats
 
 				unset($entries[0]);
 				unset($entries[1]);
-				
-				foreach($entries as $entry) 
+
+				foreach($entries as $entry)
 				{
-					if($entry) 
+					if($entry)
 					{
 						list($url, $total, $unique) = explode("|", $entry);
-						if(strstr($url, "/")) 
+						if(strstr($url, "/"))
 						{
 							$urlname = preg_replace("/\.php|\?.*/", "", substr($url, (strrpos($url, "/")+1)));
-						} 
-						else 
+						}
+						else
 						{
 							$urlname = preg_replace("/\.php|\?.*/", "", $url);
 						}
@@ -1788,7 +1788,7 @@ class siteStats
 				<th class='fcaption' style='width: 70%;' colspan='2'>".ADSTAT_L34."</th>
 			</tr>\n";
 
-		foreach($dayarray as $date => $total) 
+		foreach($dayarray as $date => $total)
 		{
 			if (!isset($total['daytotal'])) $total['daytotal'] = 0;
 			list($year, $month, $day) = explode("-", $date);
@@ -1812,7 +1812,7 @@ class siteStats
 		if (!isset($total['dayunique'])) $total['dayunique'] = 0;
 		if (!isset($total['total'])) $total['total']= 0;
 
-		foreach($dayarray as $date => $total) 
+		foreach($dayarray as $date => $total)
 		{
 			if (!isset($total['dayunique'])) $total['dayunique'] = 0;
 			list($year, $month, $day) = explode("-", $date);
@@ -1833,7 +1833,7 @@ class siteStats
 			</tr>\n";
 
 		$newArray = $this -> arraySort($pagearray, "total");
-		foreach($newArray as $key => $total) 
+		foreach($newArray as $key => $total)
 		{
 			$barWidth = round(($total['total']/$ttotal) * 100, 2);
 			$text .= "<tr>
@@ -1844,13 +1844,13 @@ class siteStats
 		}
 		$text .= "</table>";
 		$text .= "<br />
-		
+
 			<table class='table table-striped fborder' style='width: 100%;'>
 			<tr>
 				<th class='fcaption' style='width: 30%;'>".ADSTAT_L35." ".($amount+1)." ".ADSTAT_L36."</th>
 				<th class='fcaption' style='width: 70%;' colspan='2'>".ADSTAT_L34."</th>
 			</tr>\n";
-			
+
 		$newArray = $this -> arraySort($pagearray, "unique");
 
 		foreach($newArray as $key => $total) {
@@ -1872,12 +1872,12 @@ class siteStats
 	 *
 	 *	@return string text for display
 	 */
-	function renderMonthly() 
+	function renderMonthly()
 	{
 		$sql = e107::getDB();
 
 		// Month format entries have log_id = yyyy-mm
-		if(!$entries = $sql->select("logstats", "*", "log_id REGEXP('^[[:digit:]]+\-[[:digit:]]+$') ORDER BY CONCAT(LEFT(log_id,4), RIGHT(log_id,2)) DESC")) 
+		if(!$entries = $sql->select("logstats", "*", "log_id REGEXP('^[[:digit:]]+\-[[:digit:]]+$') ORDER BY CONCAT(LEFT(log_id,4), RIGHT(log_id,2)) DESC"))
 		{
 			return ADSTAT_L42;
 		}
@@ -1888,15 +1888,15 @@ class siteStats
 		$monthTotal = array();		// Array of totals, one per month, with 'totalv', 'uniquev' sub-indices
 		$mtotal = 0;
 		$utotal = 0;
-				
-		foreach($array as $info) 
+
+		foreach($array as $info)
 		{
 			$date = $info['log_id'];
 			$stats = unserialize($info['log_data']);
 
 			/*
 			Used to have to calculate monthly stats by adding the individual page access fields
-			foreach($stats as $key => $total) 
+			foreach($stats as $key => $total)
 			{
 				if (!isset($monthTotal[$date]['totalv'])) $monthTotal[$date]['totalv'] = 0;
 				if (!isset($monthTotal[$date]['uniquev'])) $monthTotal[$date]['uniquev'] = 0;
@@ -1922,7 +1922,7 @@ class siteStats
 			<th class='fcaption' style='width: 70%;' colspan='2'>".ADSTAT_L34."</th>
 		</tr>\n";
 
-		foreach($monthTotal as $date => $total) 
+		foreach($monthTotal as $date => $total)
 		{
 			list($year, $month) = explode("-", $date);
 			$date = strftime ("%B %Y", mktime (0,0,0,$month,1,$year));
@@ -1941,7 +1941,7 @@ class siteStats
 				<th class='fcaption' style='width: 70%;' colspan='2'>".ADSTAT_L34."</th>
 			</tr>\n";
 
-		foreach($monthTotal as $date => $total) 
+		foreach($monthTotal as $date => $total)
 		{
 			$barWidth = round(($total['uniquev']/$utotal) * 100, 2);
 			list($year, $month) = explode("-", $date);
@@ -1960,14 +1960,14 @@ class siteStats
 
 
 
-	function getWidthRatio ($array, $column) 
+	function getWidthRatio ($array, $column)
 	{
 		$tmpArray = $this -> arraySort($array, $column);
 		$data = each($tmpArray);
 		$maxValue = $data[1]['totalv'];
 		echo "<b>maxValue</b> ".$maxValue." <br />";
 		$ratio = 0;
-		while($maxValue > 100) 
+		while($maxValue > 100)
 		{
 			$maxValue = ($maxValue / 2);
 			$ratio ++;
@@ -1982,7 +1982,7 @@ class siteStats
 
 
 
-	function getcountry($dom) 
+	function getcountry($dom)
 	{
 		return $this->country[$dom];
 	}
@@ -2005,15 +2005,15 @@ class siteStats
 		}
 		else
 		{
-			$text = "<div class='b' style='width: ".intval($percen)."%'></div>"; 
+			$text = "<div class='b' style='width: ".intval($percen)."%'></div>";
 		}
-		
-		
-		
+
+
+
 		$text .= "
 		</td>
 		<td style='width:10%; text-align:right' class='forumheader3'>".number_format($val);
-		
+
 		return $text;
 	}
 
@@ -2026,7 +2026,7 @@ class siteStats
 	 *
 	 *	@return boolean TRUE for success, FALSE if no entry found
 	 */
-	function remove_entry($toremove) 
+	function remove_entry($toremove)
 	{	// Note - only removes info from the database - not from the current page file
 		$sql = e107::getDB();
 		if ($sql->select("logstats", "*", "log_id='pageTotal'"))

@@ -12,7 +12,7 @@
 
 require_once('../../class2.php');
 
-if (!getperms('P') || !e107::isInstalled('log')) 
+if (!getperms('P') || !e107::isInstalled('log'))
 {
 	e107::redirect('admin');
 	exit;
@@ -93,7 +93,7 @@ e107::includeLan(e_PLUGIN.'log/languages/'.e_LANGUAGE.'_admin.php');
 
 if(!is_writable(e_LOG))
 {
-	//$message = "<b>".ADSTAT_LAN_38."</b>"; 
+	//$message = "<b>".ADSTAT_LAN_38."</b>";
 	e107::getMessage()->addError(ADSTAT_LAN_28);
 }
 
@@ -271,7 +271,7 @@ e107::css('inline', 'td.last.options { padding-right:20px } ');
 
 			if(isset($_POST['wipeSubmit']))
 			{
-				$this->wipe(); 
+				$this->wipe();
 			}
 		}
 
@@ -282,7 +282,7 @@ e107::css('inline', 'td.last.options { padding-right:20px } ');
 		private function wipe()
 		{
 			$sql = e107::getDb();
-			
+
 			$logStr = '';
 			foreach($_POST['wipe'] as $key => $wipe)
 			{
@@ -322,7 +322,7 @@ e107::css('inline', 'td.last.options { padding-right:20px } ');
 
 				$logStr .= '[!br!]'.$key;
 			}
-				
+
 			e107::getLog()->add('STAT_01',ADSTAT_LAN_81.$logStr,'');
 
 			e107::getMessage()->addSuccess(LAN_UPDATED);
@@ -662,7 +662,7 @@ e107::css('inline', 'td.last.options { padding-right:20px } ');
 
 
 
-			foreach($pageInfo as $url => $tmpcon) 
+			foreach($pageInfo as $url => $tmpcon)
 			{
 				$pageTotal[$url]['url'] = $tmpcon['url'];
 				$pageTotal[$url]['ttlv'] += $tmpcon['ttl'];
@@ -767,10 +767,10 @@ e107::css('inline', 'td.last.options { padding-right:20px } ');
 			  <col style='width:50%' />
 			  <col style='width:50%' />
 			</colgroup>";
-			
+
 			$keep_month = varset($_POST['delete_month'],0);
 			$keep_year = varset($_POST['delete_year'],0);
-			
+
 			if (isset($_POST['delete_history']))
 			{
 						$text .= "<tr><td>".ADSTAT_LAN_72."</td><td>".nl_langinfo(constant('MON_'.$keep_month))." ".$keep_year."</td></tr>
@@ -789,39 +789,39 @@ e107::css('inline', 'td.last.options { padding-right:20px } ');
 							$logStr = '';
 							//	    $text .= "<tr><td colspan='2'>Data notionally deleted {$keep_month}-{$keep_year}</td></tr>";
 							$text .= "<tr><td>".ADSTAT_LAN_77."</td><td>";
-							
+
 							foreach ($delete_list as $k => $v)
 							{
 								$sql->delete('logstats',"log_id='{$k}'");
 								$text .= $v."<br />";
 								$logStr .= "[!br!]{$k} => ".$v;
 							}
-							
+
 							$text .= "</td></tr>";
 							e107::getLog()->add('STAT_04',ADSTAT_LAN_83.$logStr,'');
 				}
-						
+
 				$text .= "<tr><td>".ADSTAT_LAN_70."</td>";
 				$text .= "<td><select class='tbox' name='delete_month'>\n";
 				$match_month = date("n");
-				
+
 				for ($i = 1; $i < 13; $i++)
 				{
 					$selected = $match_month == $i ? " selected='selected'" : "";
 					$text .= "<option value='{$i}'".$selected.">".nl_langinfo(constant('MON_'.$i))."</option>\n";
 				}
-				
+
 				$text .= "</select>\n&nbsp;&nbsp;&nbsp;";
 				$this_year = date("Y");
-						
+
 				$text .= "<select class='tbox' name='delete_year' id='export_year'>\n";
-				
+
 				for ($i = $this_year; $i > $this_year - 6; $i--)
 				{
 					$selected = ($this_year - 2) == $i ? " selected='selected'" : "";
 					$text .= "<option value='{$i}'{$selected}>{$i}</option>\n";
 				}
-				
+
 				$text .= "</select>\n</td></tr>";
 			}
 
@@ -1160,7 +1160,7 @@ $mes = e107::getMessage();
 */
 
 
-if (e_QUERY) 
+if (e_QUERY)
 {
 	$sl_qs = explode('.', e_QUERY);
 }
@@ -1266,12 +1266,12 @@ switch ($action)
   case 'config' :
 
 	break;  // case config
-	
+
   case 'rempage' :			// Remove pages
 //	rempage();
     break;
-	
-	
+
+
   case 'export' :			// Export file
   case 'datasets' :
 	//===========================================================
@@ -1279,7 +1279,7 @@ switch ($action)
 	//===========================================================
 
     break;	// case 'export'
-	
+
   case 'history' :
 	//===========================================================
 	//				DELETE HISTORY
@@ -1309,19 +1309,19 @@ function headerjs()
 		  dispinfo[1][1] = '';
 		  dispinfo[1][2] = '';
 		  dispinfo[1][3] = 'none';
-		  
+
 		dispinfo[2] = new Array();		// Month
 		  dispinfo[2][0] = 'none';
 		  dispinfo[2][1] = '';
 		  dispinfo[2][2] = '';
 		  dispinfo[2][3] = 'none';
-		  
+
 		dispinfo[3] = new Array();		// Year
 		  dispinfo[3][0] = 'none';
 		  dispinfo[3][1] = 'none';
 		  dispinfo[3][2] = '';
 		  dispinfo[3][3] = 'none';
-		  
+
 		dispinfo[4] = new Array();		// Specials
 		  dispinfo[4][0] = 'none';
 		  dispinfo[4][1] = 'none';
@@ -1342,7 +1342,7 @@ function headerjs()
 		target.display = dispinfo[disptype][j];
 	  }
 	}
-	
+
 	function settypebox(pagetype)
 	{
 	  var newdateformat = 1;
@@ -1388,7 +1388,7 @@ function rempage()
 
 function admin_config_adminmenu()
 {
-  if (e_QUERY) 
+  if (e_QUERY)
   {
 	$tmp = explode(".", e_QUERY);
 	$action = $tmp[0];

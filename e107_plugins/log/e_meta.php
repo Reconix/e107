@@ -16,14 +16,14 @@ if (!defined('e107_INIT')) { exit; }
 
 if (vartrue($pref['statActivate']))
 {
-	
+
 	if(!$pref['statCountAdmin'] && ADMIN) // don't count admin visits
 	{
 		return;
 	}
-	
+
 	// Page to log here
-	
+
 	if(USER_AREA)
 	{
 		require_once(e_PLUGIN.'log/consolidate.php');
@@ -37,7 +37,7 @@ if (vartrue($pref['statActivate']))
 			if (is_numeric(e_QUERY)) $err_flag .= '/'.substr(e_QUERY,0,10);		// This should pick up the error code - and limit numeric length to upset the malicious
 			$err_flag .= "&err_referer=".$_SERVER['HTTP_REFERER'];
 		}
-				
+
 	}
 
 	if(USER_AREA)

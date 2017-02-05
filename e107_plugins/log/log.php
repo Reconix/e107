@@ -14,7 +14,7 @@
 	e_PLUGIN_ABS."log/log.php?base64encode(referer=' + ref + '&color=' + colord + '&eself=' + eself + '&res=' + res + '\">' );)";
 		referer= ref
 		color= colord
-		eself= eself 
+		eself= eself
 		res= res
 		err_direct - optional error flag
 		err_referer - referrer if came via error page
@@ -25,7 +25,7 @@
 //error_reporting(0);
 // error_reporting(E_ALL);
 define('e_MINIMAL',true);
-require_once("../../class2.php"); // More secure to include it. 
+require_once("../../class2.php"); // More secure to include it.
 header('Cache-Control: no-cache, must-revalidate');		// See if this discourages browser caching
 header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');		// Date in the past
 
@@ -102,7 +102,7 @@ e107::getEvent()->trigger('user_log_stats',$vals);
 
 // We MUST have a timezone set in PHP >= 5.3. This should work for PHP >= 5.1:
 // @todo may be able to remove this check once minimum PHP version finalised
-if (function_exists('date_default_timezone_get')) 
+if (function_exists('date_default_timezone_get'))
 {
 	date_default_timezone_set(@date_default_timezone_get()); // Just set a default - it should default to UTC if no timezone set
 }
@@ -152,7 +152,7 @@ if ($err_code = strip_tags((isset($vals['err_direct']) ? $vals['err_direct'] : '
 	$err_code .= ':';
 }
 
-if(strstr($ref, 'admin')) 
+if(strstr($ref, 'admin'))
 {
 	$ref = FALSE;
 }
@@ -162,9 +162,9 @@ $agent = $_SERVER['HTTP_USER_AGENT'];
 $ip = e107::getIPHandler()->ipDecode(USERIP);
 
 $oldref = $ref; // backup for search string being stripped off for referer
-if($ref && !strstr($ref, $_SERVER['HTTP_HOST'])) 
+if($ref && !strstr($ref, $_SERVER['HTTP_HOST']))
 {
-	if(preg_match("#http://(.*?)($|/)#is", $ref, $match)) 
+	if(preg_match("#http://(.*?)($|/)#is", $ref, $match))
 	{
 		$ref = $match[0];
 	}
@@ -227,11 +227,11 @@ if(LOGSTATS_DEBUG == true)
 //$logfp = fopen(e_LOG.'rcvstring.txt', 'a+'); fwrite($logfp, $pageName."\n"); fclose($logfp);
 
 $p_handle = fopen($logPfile, 'r+');
-if($p_handle && flock( $p_handle, LOCK_EX ) ) 
+if($p_handle && flock( $p_handle, LOCK_EX ) )
 {
 	$log_file_contents = '';
 	while (!feof($p_handle)) // Assemble a string of data
-	{  
+	{
 		$log_file_contents.= fgets($p_handle,1000);
 	}
 	$log_file_contents = str_replace(array('<'.'?php','?'.'>'),'',$log_file_contents);
@@ -242,17 +242,17 @@ if($p_handle && flock( $p_handle, LOCK_EX ) )
 }
 elseif(getperms('0'))
 {
-	echo "Couldn't log data to: ".$logPfile; // returned to js popup. 
+	echo "Couldn't log data to: ".$logPfile; // returned to js popup.
 	exit;
 }
 
 
 $flag = FALSE;
-if(array_key_exists($pageName, $pageInfo)) 
+if(array_key_exists($pageName, $pageInfo))
 {  // Existing page - just increment stats
 	$pageInfo[$pageName]['ttl'] ++;
 }
-else 
+else
 {  // First access of page
 	$url = preg_replace("/".$tagRemove2."/si", "", $self);
 	if(preg_match("/".$pageDisallow."/i", $url)) return;
@@ -262,9 +262,9 @@ else
 
 
 
-if(!strstr($ipAddresses, $ip)) 
+if(!strstr($ipAddresses, $ip))
 {	/* unique visit */
-	if(!$flag) 
+	if(!$flag)
 	{
 		$pageInfo[$pageName]['unq'] ++;
 	}
