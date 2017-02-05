@@ -13,9 +13,9 @@
 $eplug_admin = TRUE;
 require_once("../../class2.php");
 require_once(e_HANDLER."userclass_class.php");
-	
+
 e107::includeLan(e_PLUGIN."comment_menu/languages/".e_LANGUAGE.".php");
-if (!getperms("1")) 
+if (!getperms("1"))
 {
 	e107::redirect('admin');
 	exit() ;
@@ -23,9 +23,9 @@ if (!getperms("1"))
 require_once(e_ADMIN."auth.php");
 $frm = e107::getForm();
 $mes = e107::getMessage();
-$menu_config = e107::getConfig('menu'); 
+$menu_config = e107::getConfig('menu');
 
-if (isset($_POST['update_menu'])) 
+if (isset($_POST['update_menu']))
 {
 	$temp = $old = $menu_config->getPref();
 
@@ -35,9 +35,9 @@ if (isset($_POST['update_menu']))
 		$temp['comment_caption'] = array();
 	}
 
-	
+
 	$tp = e107::getParser();
-	while (list($key, $value) = each($_POST)) 
+	while (list($key, $value) = each($_POST))
 	{
 		if($key == "comment_caption")
 		{
@@ -46,7 +46,7 @@ if (isset($_POST['update_menu']))
 		}
 
 
-		if ($value != LAN_UPDATE) 
+		if ($value != LAN_UPDATE)
 		{
 			$temp[$tp->toDB($key)] = $tp->toDB($value);
 		}
@@ -56,7 +56,7 @@ if (isset($_POST['update_menu']))
 	{
 		$temp['comment_title'] = 0;
 	}
-	
+
 	$menu_config->setPref($temp);
 
 	if($menu_config->save(false))
@@ -90,22 +90,22 @@ $text = "
 		<td>".CM_L3.":</td>
 		<td>".$frm->renderElement('comment_caption',$commentCaption, array('type'=>'text','multilan'=>true))."</td>
 	</tr>
-	 
+
 	<tr>
 		<td>".CM_L4.":</td>
 		<td><input class='tbox' type='text' name='comment_display' size='20' value='".$menu_config->get('comment_display')."' maxlength='2' /></td>
 	</tr>
-	 
+
 	<tr>
 		<td>".CM_L5.":</td>
 		<td><input class='tbox' type='text' name='comment_characters' size='20' value='".$menu_config->get('comment_characters')."' maxlength='4' /></td>
 	</tr>
-	 
+
 	<tr>
 		<td>".CM_L6.":</td>
 		<td><input class='tbox' type='text' name='comment_postfix' size='30' value='".$menu_config->get('comment_postfix')."' maxlength='200' /></td>
 	</tr>
-	 
+
 	<tr>
 		<td>".CM_L7.":</td>
 		<td><input type='checkbox' name='comment_title' value='1'".($menu_config->get('comment_title') ? ' checked="checked"' : '')." /></td>
@@ -114,9 +114,9 @@ $text = "
 
 	<div class='buttons-bar center'>
 		".$frm->admin_button('update_menu', LAN_UPDATE, 'update')."
-	</div>	
+	</div>
 	</form>";
-	
+
 $ns->tablerender(CM_L8, $mes->render() . $text);
 
 require_once(e_ADMIN."footer.php");

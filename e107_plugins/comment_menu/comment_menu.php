@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * e107 website system
  *
@@ -44,16 +44,16 @@ if (empty($data) || !is_array($data))
 	$text = CM_L1;
 }
 
-if(!is_array($COMMENT_MENU_TEMPLATE)) // Convert to v2.x standard. 
+if(!is_array($COMMENT_MENU_TEMPLATE)) // Convert to v2.x standard.
 {
 	$TEMPLATE = array();
 	$TEMPLATE['start'] = "";
 	$TEMPLATE['item'] = $COMMENT_MENU_TEMPLATE;
-	$TEMPLATE['end'] = "";		
+	$TEMPLATE['end'] = "";
 }
-else 
+else
 {
-	$TEMPLATE = $COMMENT_MENU_TEMPLATE;	
+	$TEMPLATE = $COMMENT_MENU_TEMPLATE;
 }
 
 $comment_menu_shortcodes = new comment_menu_shortcodes;
