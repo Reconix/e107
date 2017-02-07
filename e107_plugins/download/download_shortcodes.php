@@ -392,9 +392,19 @@ class download_shortcodes extends e_shortcode
 
    }
 
+<<<<<<< HEAD
 
 
    function sc_download_list_icon($parm='') //XXX FIXME $img.
+=======
+	function sc_download_filename($parm=null)
+	{
+		return basename($this->var['download_url']);
+		
+	}
+   
+   function sc_download_list_icon($parm='') //XXX FIXME $img. 
+>>>>>>> refs/remotes/origin/master
    {
       if ($parm == "link")
       {
