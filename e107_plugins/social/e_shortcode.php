@@ -366,8 +366,13 @@ class social_shortcodes extends e_shortcode
 
 
 			$text = '<div class="social-share btn-group hidden-print '.$dir.'">
+<<<<<<< HEAD
 				  <a class="'.$tooltip.' btn btn-dropdown btn-default btn-'.$size.' dropdown-toggle" data-toggle="dropdown" href="#" title="Share">'.$label.'</a>
 
+=======
+				  <a class="'.$tooltip.' btn btn-dropdown btn-default btn-'.$size.' dropdown-toggle" data-toggle="dropdown" href="#" title="'.LAN_SOCIAL_204.'">'.$label.'</a>
+				 
+>>>>>>> refs/remotes/e107inc/master
 				  <ul class="dropdown-menu" role="menu" >
 
 				    <li><div class="'.$class.'">'.implode("\n",$opt).'</div></li>

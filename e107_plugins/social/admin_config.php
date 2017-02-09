@@ -39,10 +39,17 @@ class social_adminarea extends e_admin_dispatcher
 	);
 
 	protected $adminMenuAliases = array(
+<<<<<<< HEAD
 		'main/edit'	=> 'main/list'
 	);
 
 	protected $menuTitle = 'Social';
+=======
+		'main/edit'	=> 'main/list'				
+	);	
+	
+	protected $menuTitle = LAN_PLUGIN_SOCIAL_NAME;
+>>>>>>> refs/remotes/e107inc/master
 }
 
 
@@ -51,8 +58,13 @@ class social_adminarea extends e_admin_dispatcher
 
 class social_ui extends e_admin_ui
 {
+<<<<<<< HEAD
 
 		protected $pluginTitle		= 'Social';
+=======
+			
+		protected $pluginTitle		= LAN_PLUGIN_SOCIAL_NAME;
+>>>>>>> refs/remotes/e107inc/master
 		protected $pluginName		= 'social';
 	//	protected $eventName		= 'social-social'; // remove comment to enable event triggers in admin.
 	//	protected $table			= 'social';
@@ -96,12 +108,12 @@ class social_ui extends e_admin_ui
 
 			'sharing_mode'              => array('title'=> LAN_SOCIAL_ADMIN_24, 'type'=>'dropdown', 'tab'=>1, 'writeParms'=>array('optArray'=>array('normal'=>LAN_SOCIAL_ADMIN_25,'dropdown'=>LAN_SOCIAL_ADMIN_26,'off'=>LAN_SOCIAL_ADMIN_27)), 'data' => 'str','help'=>''),
 			'sharing_hashtags'		    => array('title'=> 'Hashtags', 'type'=>'tags', 'tab'=>1, 'data' => 'str','help'=>LAN_SOCIAL_ADMIN_28),
-			'sharing_providers'         => array('title'=> 'Providers', 'type'=>'checkboxes', 'tab'=>1, 'writeParms'=>array(), 'data' => 'str','help'=>''),
+			'sharing_providers'         => array('title'=> LAN_SOCIAL_ADMIN_39, 'type'=>'checkboxes', 'tab'=>1, 'writeParms'=>array(), 'data' => 'str','help'=>''),
 
-			'xup_login_update_username'  => array('title'=> 'Update User Display Name ', 'type'=>'bool', 'tab'=>0, 'writeParms'=>array(), 'data' => 'str','help'=>''),
-			'xup_login_update_avatar'   => array('title'=> 'Update User Avatar', 'type'=>'bool', 'tab'=>0, 'writeParms'=>array(), 'data' => 'str','help'=>''),
+			'xup_login_update_username'  => array('title'=> LAN_SOCIAL_ADMIN_40, 'type'=>'bool', 'tab'=>0, 'writeParms'=>array(), 'data' => 'str','help'=>''),
+			'xup_login_update_avatar'   => array('title'=> LAN_SOCIAL_ADMIN_41, 'type'=>'bool', 'tab'=>0, 'writeParms'=>array(), 'data' => 'str','help'=>''),
 
-			'og_image'	                => array('title'=> "Custom Image", 'type'=>'image', 'tab'=>5, 'data' => 'str','help'=>'og:image'),
+			'og_image'	                => array('title'=> LAN_SOCIAL_ADMIN_42, 'type'=>'image', 'tab'=>5, 'data' => 'str','help'=>'og:image'),
 
 
 			);

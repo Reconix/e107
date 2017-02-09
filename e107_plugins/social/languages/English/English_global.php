@@ -12,3 +12,7 @@ define("LAN_PLUGIN_SOCIAL_DESCR",  "Adds options to replace the e107 comment eng
 define("LAN_PLUGIN_SOCIAL_SIGNIN",  "Sign in with:");
 define("LAN_PLUGIN_SOCIAL_XUP_SIGNUP", "Sign-in with your [x] account");
 define("LAN_PLUGIN_SOCIAL_XUP_REG", "Register with your [x] account");
+<<<<<<< HEAD
+=======
+define("LAN_PLUGIN_SOCIAL_NAME", "Social");
+>>>>>>> refs/remotes/e107inc/master

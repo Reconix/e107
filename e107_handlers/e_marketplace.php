@@ -255,13 +255,13 @@ class e_marketplace
 
 			$d = http_build_query($srcData,false,'&');
 
-			if(deftrue('e_DEBUG_PLUGMANAGER'))
+		//	if(deftrue('e_DEBUG_PLUGMANAGER'))
 			{
 				$url = e_ADMIN.'plugin.php?mode=online&action=download&src='.base64_encode($d);
 			}
-			else
+		//	else
 			{
-				$url = e_ADMIN.'plugin.php?mode=download&src='.base64_encode($d);
+			//	$url = e_ADMIN.'plugin.php?mode=download&src='.base64_encode($d);
 			}
 
 
@@ -612,9 +612,18 @@ class e_marketplace_adapter_wsdl extends e_marketplace_adapter_abstract
 		$auth = new stdClass;
 		$auth->authKey = $this->getAuthKey();
 		$header = new SoapHeader('http://e107.org/services/auth', 'checkAuthHeader', $auth);
+
+		if(!is_object($this->client))
+		{
+			$result['exception'] = array();
+			$result['exception']['message'] = "Unable to connect at this time.";
+			return $result;
+		}
 		
 		try
 		{
+
+
 			$this->client->__setSoapHeaders(array($header));
 			if(is_array($args) && $apply)
 			{
