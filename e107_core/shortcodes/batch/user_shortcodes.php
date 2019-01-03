@@ -161,22 +161,19 @@ class user_shortcodes extends e_shortcode
 	function sc_user_level($parm) 
 	{
 		$pref = e107::getPref();
-		//FIXME - new level handler, currently commented to avoid parse errors
-		//require_once(e_HANDLER."level_handler.php");
-		//$ldata = get_level($this->var['user_id'], $this->var['user_forums'], $this->var['user_comments'], $this->var['user_chats'], $this->var['user_visits'], $this->var['user_join'], $this->var['user_admin'], $this->var['user_perms'], $pref);
-		$ldata = array();
-		if (strstr($ldata[0], "IMAGE_rank_main_admin_image")) 
+
+		$ldata = e107::getRank()->getRanks($this->var['user_id']); //, (USER && $forum->isModerator(USERID)));
+		if(vartrue($ldata['special']))
 		{
-			return LAN_USER_31;
-		}
-		elseif(strstr($ldata[0], "IMAGE")) 
-		{
-			return LAN_USER_32;
+			$r = $ldata['special'];
 		}
 		else
 		{
-			return $ldata[1];
+			$r = $ldata['pic'] ? $ldata['pic'] : varset($ldata['name'], $ldata['name']);
 		}
+		if(!$r) $r = 'n/a';
+		return $r;
+
 	}
 	
 	
@@ -265,44 +262,29 @@ class user_shortcodes extends e_shortcode
 
 
 	
-	function sc_user_email($parm='')
+function sc_user_email($parm='')
+{
+
+	$tp = e107::getParser();
+	
+	$aCurUserData = e107::user(USERID);
+
+	if( ($this->var['user_hideemail'] && !ADMIN ) && ( $this->var['user_email']!=$aCurUserData['user_email'] ) )
 	{
-
-		$tp = e107::getParser();
-
-		if($this->var['user_hideemail'] && !ADMIN)
-		{
-			return "<i>".LAN_USER_35."</i>";
-		}
-		else
-		{
+		return "<i>".LAN_USER_35."</i>";
+	}
+	else
+	{
+		if($this->var['user_email']!=$aCurUserData['user_email']){
 			return $tp->emailObfuscate($this->var['user_email']);
 			//list($user,$dom) = explode('@', $this->var['user_email']);
 			//return "<span class='e-email' data-user='".$user."' data-dom='".$dom."'>&#64;</span>";
+		}else{
+			return $this->var['user_email'];
 		}
-
-		      ########################################################
-		       # Security Note - 04 May 2013                          #
-		       ########################################################
-		       #                                                      #
-		       # The CSS code direction rtl is an effective way to    #
-		       # prevent spam bots from scraping emails that are      #
-		       # not hidden.                                          #
-		       #                                                      #
-		       # You can find empirical support for this method at    #
-		       # <http://superuser.com/a/235965>.                     #
-		       #                                                      #
-		       # {e_CORE}templates/user_template.php was modified to  #
-		       # support this code.  In $USER_FULL_TEMPLATE, the      #
-		       # LAN_USER_60 value {USER_EMAIL_LINK} was changed to   #
-		       # {USER_EMAIL}.  I couldn't figure out how the two     #
-		       # shortcodes were different, so I took precautions in  #
-		       # hopes that the CSS direction won't break actual HTML #
-		       # tags.                                                #
-		       #                                                      #
-		       #       -- Deltik                                      #
-		       ########################################################
 	}
+
+}
 
 
 	/**
@@ -542,21 +524,40 @@ class user_shortcodes extends e_shortcode
 	
 	function sc_user_update_link($parm) 
 	{
-		$url = e107::getUrl();
+		$label = null;
+
 		if (USERID == $this->var['user_id']) 
 		{
-			//return "<a href='".$url->create('user/myprofile/edit')."'>".LAN_USER_38."</a>";
-			return "<a class='btn btn-default' href='".e_HTTP."usersettings.php'>".LAN_USER_38."</a>"; // TODO: repair dirty fix for usersettings
+			$label = LAN_USER_38;
 		}
 		else if(ADMIN && getperms("4") && !$this->var['user_admin']) 
 		{
-			$editUrl =  e_ADMIN_ABS."users.php?mode=main&action=edit&id=".$this->var['user_id'];
-
-			return "<a class='btn btn-default' href='".$editUrl."'>".LAN_USER_39."</a>";
-
-			//	return "<a class='btn btn-default' href='".$url->create('user/profile/edit', array('id' => $this->var['user_id'], 'name' => $this->var['user_name']))."'>".LAN_USER_39."</a>";
+			$label = LAN_USER_39;
 		}
+
+		if(empty($label))
+		{
+			return null;
+		}
+
+		return "<a class='btn btn-default' href='".$this->sc_user_settings_url()."'>".$label."</a>";
+
 	}
+
+	function sc_user_settings_url($parm=null)
+	{
+
+		if (USERID == $this->var['user_id'])
+		{
+			return e107::getUrl()->create('user/myprofile/edit');
+		}
+		else if(ADMIN && getperms("4") && !$this->var['user_admin'])
+		{
+			return e_ADMIN_ABS."users.php?mode=main&action=edit&id=".$this->var['user_id'];
+		}
+
+	}
+
 	
 	
 	
@@ -653,7 +654,7 @@ class user_shortcodes extends e_shortcode
 		{
 			return "
 			<form method='post' action='".e_SELF."?".e_QUERY."'>
-			<input class='btn btn-default button' type='submit' name='delp' value='".LAN_USER_43."' />
+			<input class='btn btn-default btn-secondary button' type='submit' name='delp' value='".LAN_USER_43."' />
 			</form>
 			";
 		}
@@ -738,7 +739,7 @@ class user_shortcodes extends e_shortcode
 			
 			$cat_name = true; //XXX TEMP Fix. 
 			
-			if($cat_name != FALSE && count($ueFieldList[$catnum]))
+			if($cat_name != FALSE && isset($ueFieldList[$catnum]) && count($ueFieldList[$catnum]))
 			{
 					
 				$ret .= str_replace("{EXTENDED_NAME}", $key, $EXTENDED_CATEGORY_START);
@@ -780,13 +781,15 @@ class user_shortcodes extends e_shortcode
 	
 	function sc_profile_comments($parm) 
 	{
-		if(e107::getPref('profile_comments'))
+		if(!e107::getPref('profile_comments'))
 		{
-			$ret = e107::getComment()->compose_comment('profile', 'comment', $this->var['user_id'], null, $this->var['user_name'], FALSE,true);
-		
-		 	return e107::getRender()->tablerender($ret['caption'],$ret['comment_form']. $ret['comment'], 'profile_comments', TRUE);
+			return '';
 		}
-		return "";
+
+		return e107::getComment()->compose_comment('profile', 'comment', $this->var['user_id'], null, $this->var['user_name'], false,'html');
+
+	//	return e107::getRender()->tablerender($ret['caption'],$ret['comment_form']. $ret['comment'], 'profile_comments', TRUE);
+
 	}
 	
 	
@@ -856,7 +859,7 @@ class user_shortcodes extends e_shortcode
 	
 	function sc_user_form_submit($parm) 
 	{
-		return "<input class='btn btn-default button' type='submit' name='submit' value='".LAN_GO."' />";
+		return "<input class='btn btn-default btn-secondary button' type='submit' name='submit' value='".LAN_GO."' />";
 	}
 
 

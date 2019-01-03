@@ -14,71 +14,123 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 	e107.behaviors.initMediaManager = {
 		attach: function (context, settings)
 		{
-			$(context).find('body').once('init-media-manager').each(function ()
+			$(context).find('.e-media-attribute').once('media-manager-e-media-attribute').each(function ()
 			{
-				e107.mediaManager.setEventListeners();
+				$(this).keyup(function ()
+				{
+					e107.mediaManager.eMediaAttribute(this);
+				});
+			});
+
+			$(context).find('#float').once('media-manager-float').each(function ()
+			{
+				$(this).change(function ()
+				{
+					e107.mediaManager.eMediaAttribute(this);
+				});
+			});
+
+			$(context).find('.e-media-select-file-none').once('media-manager-e-media-select-file-none').each(function ()
+			{
+				$(this).click(function ()
+				{
+					e107.mediaManager.eMediaSelectFileNone(this);
+				});
+			});
+/*
+			$(context).find('.e-media-select').once('media-manager-e-media-select').each(function ()
+			{
+				$(this).on('click', function ()
+				{
+					e107.mediaManager.eMediaSelect(this);
+				});
+			});
+*/
+            $(context).on('click', '.e-media-select', function (e)
+            {
+            	e.preventDefault();
+
+            	var previewHTML = $(this).attr('data-preview-html');
+
+            //	console.log(previewHTML);
+
+            	if(previewHTML) // MediaPicker v2.1.9
+				{
+					 e107.mediaManager.eMediaSelectProcess(this);
+				//	 e107.mediaManager.eMediaSelect(this);
+				}
+				else // imagepicker, iconpicker
+				{
+					 e107.mediaManager.eMediaSelect(this);
+				}
+
+
+
+            });
+
+			// Must be defined after e-media-select.
+			/*
+			$(context).find('.e-dialog-save').once('media-manager-e-dialog-save').each(function ()
+			{
+				$(this).click(function ()
+				{
+					e107.mediaManager.eDialogSave(this);
+				});
+			});
+			*/
+            $(context).on('click', '.e-dialog-save', function ()
+            {
+                e107.mediaManager.eDialogSave(this);
+            });
+
+
+			// Must be defined after e-media-select.
+			$(context).find('.e-media-nav').once('media-manager-e-media-nav').each(function ()
+			{
+				$(this).click(function ()
+				{
+					e107.mediaManager.mediaNav(this, '.e-media-nav');
+				});
+			});
+
+			$(context).find('#media-search').once('media-manager-media-search').each(function ()
+			{
+				$(this).keyup(function ()
+				{
+					var that = this;
+
+					e107.callbacks.waitForFinalEvent(function ()
+					{
+						e107.mediaManager.mediaNav(that, null);
+					}, 300, "mediaSearch");
+				});
+			});
+
+			// Ajax keyup search. Used by media-browser.
+			$(context).find('.e-ajax-keyup').once('media-manager-e-ajax-keyup').each(function ()
+			{
+
+
+				$(this).keyup(function ()
+				{
+
+					var that = this;
+
+					e107.callbacks.waitForFinalEvent(function ()
+					{
+
+						$(that).closest('div').find('.media-carousel-index').text('1'); // reset counter when searching.
+
+						e107.mediaManager.eAjaxKeyUp(that);
+					}, 300, "eAjaxKeyUp");
+				});
+			});
+
+			$(context).find('body').once('media-manager-plupload').each(function ()
+			{
 				e107.mediaManager.initPlUpload();
 			});
 		}
-	};
-
-	/**
-	 * Add event listeners to the Media Manager elements.
-	 */
-	e107.mediaManager.setEventListeners = function ()
-	{
-		$(".e-media-attribute").keyup(function ()
-		{
-			e107.mediaManager.eMediaAttribute(this);
-		});
-
-		$("#float").change(function ()
-		{
-			e107.mediaManager.eMediaAttribute(this);
-		});
-
-		$(".e-media-select-file-none").click(function ()
-		{
-			e107.mediaManager.eMediaSelectFileNone(this);
-		});
-
-		$(".e-media-select").click(function ()
-		{
-			e107.mediaManager.eMediaSelect(this);
-		});
-
-		// Must be defined after e-media-select.
-		$(".e-dialog-save").click(function ()
-		{
-			e107.mediaManager.eDialogSave(this);
-		});
-
-		// Must be defined after e-media-select.
-		$(".e-media-nav").click(function ()
-		{
-			e107.mediaManager.mediaNav(this, '.e-media-nav');
-		});
-
-		$("#media-search").keyup(function ()
-		{
-			var that = this;
-
-			e107.callbacks.waitForFinalEvent(function ()
-			{
-				e107.mediaManager.mediaNav(that, null);
-			}, 300, "mediaSearch");
-		});
-
-		// Ajax keyup search. Used by media-browser.
-		$(".e-ajax-keyup").keyup(function ()
-		{
-			var that = this;
-
-			e107.callbacks.waitForFinalEvent(function ()
-			{
-				e107.mediaManager.eAjaxKeyUp(that);
-			}, 300, "eAjaxKeyUp");
-		});
 	};
 
 	/**
@@ -91,6 +143,7 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 	{
 		var $this = $(that);
 		var style = '';
+		var css = '';
 		var bb = '';
 
 		var src = $('#src').attr('value'); // working old
@@ -106,6 +159,8 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 		var margin_left = $('#margin-left').val();
 		var _float = $('#float').val();
 		var alt = $('#alt').val();
+
+
 
 		var target = $this.attr('data-target');
 
@@ -134,7 +189,12 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 
 		if(_float == 'left' || _float == 'right')
 		{
-			style = style + 'float:' + _float + ';';
+	//		style = style + 'float:' + _float + ';';
+		}
+
+		if(_float == 'left' || _float == 'right')
+		{
+			css = 'bbcode-img-' + _float;
 		}
 
 		if(width === undefined)
@@ -149,24 +209,49 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 
 		// Set the Html / Wysiwyg Value.
 		var $img = $('<img/>');
-		$img.attr('style', style);
+
+		if(css != '')
+		{
+			$img.attr('class', css);
+		}
+
+		if(style != '')
+		{
+			$img.attr('style', style);
+		}
+
 		$img.attr('src', src);
-		$img.attr('alt', alt);
-		$img.attr('width', width);
-		$img.attr('height', height);
+
+		if(alt != '')
+		{
+			$img.attr('alt', alt);
+		}
+
+		if(width > 0)
+		{
+			$img.attr('width', width);
+		}
+
+		if(height > 0)
+		{
+			$img.attr('height', height);
+		}
 
 		if($htmlHolder.length > 0)
 		{
 			$htmlHolder.val($img.prop('outerHTML'));
 		}
 
+		// prevent empty tags
+		if (path == '') return;
+
 		// Only Do width/height styling on bbcodes --
-		if(width != '' && width !== undefined)
+		if(width != '' && width != 0 && width !== undefined)
 		{
 			style = style + 'width:' + width + 'px;';
 		}
 
-		if(height != '' && height !== undefined)
+		if(height != '' && height != 0 && height !== undefined)
 		{
 			style = style + 'height:' + height + 'px;';
 		}
@@ -175,20 +260,34 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 		{
 			bb = '[img';
 
+			var bparm = {};
+
+			if(css != '')
+			{
+				// bb = bb + '&class=' + css;
+				bparm['class'] = css;
+			}
+
 			if(style != '')
 			{
-				bb = bb + ' style=' + style;
+				// bb = bb + ' style=' + style;
+				bparm['style'] = style;
 			}
 
 			if(alt != '')
 			{
-				bb = bb + '&alt=' + alt;
+			// 	bb = bb + '&alt=' + alt;
+				bparm['alt'] = alt;
 			}
+
+			var bbquery = decodeURIComponent(jQuery.param(bparm, true));
+			console.log(bbquery);
+			bb = bb + ' ' + bbquery;
 
 			bb = bb + ']';
 			bb = bb + path;
 			bb = bb + '[/img]';
-
+/*
 			if(target && target.charAt(0) != "#" && target.charAt(0) != ".")
 			{
 				target = "#" + target;
@@ -216,6 +315,13 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 					}
 				}
 			}
+*/
+            // above code did directly write the tag to the target, without having clicked on "Save"
+            if($bbcodeHolder.length > 0)
+            {
+                $bbcodeHolder.val(bb); // Set the BBcode Value.
+            }
+
 		}
 	};
 
@@ -259,9 +365,157 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 		{
 			$parentTarget.text(label);
 		}
+
+		console.log(label);
 	};
 
+
 	/**
+	 * New in v2.1.9 to eventually replace the eMediaSelect
+	 * Handle Media-Picker selection.
+	 * @param {object} that
+	 *  Element that was clicked.
+	 *
+	 * @returns {boolean}
+	 */
+	e107.mediaManager.eMediaSelectProcess = function (that)
+	{
+
+		var $this = $(that);
+
+		var id 				= $this.attr('data-id'); 	// ID of the Media Manager Item.
+		var target 			= $this.attr('data-target'); // Path of the Media Manager Item.
+		var path 			= $this.attr('data-path');
+		var preview 		= $this.attr('data-preview');
+		var previewHTML 	= $this.attr('data-preview-html');
+		var src 			= $this.attr('data-src');
+		var bbcode 			= $this.attr('data-bbcode'); // TinyMce/Textarea insert mode-
+		var name 			= $this.attr('data-name'); // Title of the Media Manager Item.
+		var width 			= $this.attr('data-width');
+		var height 			= ''; // Disable for now - will be updated by bb parser. $this.attr('data-height');
+		var type 			= $this.attr('data-type');
+		var alt 			= $this.attr('data-alt');
+
+		var bbpath 			= '';
+
+		// variable placeholders.
+		var $bbcodeHolder 	= $('#bbcode_holder');
+		var $htmlHolder 	= $('#html_holder');
+		var $srcHolder 		= $('#src');
+		var $pathHolder 	= $('#path');
+		var $preview 		= $('img#preview');
+
+
+
+		// Remove "selected" class from elements.
+		$('.e-media-select').removeClass('media-select-active');
+
+		// Add "selected" class to clicked element.
+		$this.addClass('media-select-active');
+		$this.closest('img').addClass('active');
+
+		// convert base64 encoded HTML preview information to HTML.
+		if(previewHTML)
+		{
+			var previewSrc = atob(previewHTML).trim();
+		}
+		
+		if($htmlHolder.length > 0)
+		{
+			$htmlHolder.val(previewSrc);
+		}
+
+		if($pathHolder.length > 0)
+		{
+			$pathHolder.attr('value', path);
+		}
+
+		switch(type) {
+
+			case 'file':
+				bbpath = '[file=' + id + ']' + name + '[/file]';
+				$bbcodeHolder.val(bbpath);
+				break;
+
+			case 'video':
+			case 'glyph':
+			case 'icon':
+			case 'audio':
+				$srcHolder.val('');
+				bbpath = '[' + bbcode + ']' + path + '[/' + bbcode + ']';
+				$bbcodeHolder.val(bbpath);
+				break;
+
+
+			case 'image':
+				$srcHolder.attr('value', src);
+
+				// Populate Attributes Tab with Info.
+				
+				$('#width').val(width);
+				$('#height').val(height);
+				$('#alt').val(alt);
+
+				e107.mediaManager.eMediaAttribute($this, bbcode);
+				$preview.attr('src',src);
+			//	$preview.val(preview);
+				$srcHolder.attr('value', src);
+
+				break;
+
+		}
+
+		console.log("Mode: MediaPicker");
+		console.log("Src:" + src);
+		console.log("Bbpath: " + $bbcodeHolder.val());
+		console.log("Preview: "+preview);
+		console.log("Save Path: "+path);
+
+		// Update mediapicker preview with html content.
+		$('div#' + target + "_prev", window.top.document).html(previewSrc); // set new value
+		$('span#' + target + "_prev", window.top.document).html(previewSrc); // set new value
+
+		// Update hidden form targets with data that can be saved to the DB.
+		if(target !== '')
+		{
+			if($('input#' + target) !== undefined)
+			{
+				$('input#' + target, window.top.document).attr('value', path); // set new value
+			}
+
+			// Array mode:
+			var pathTarget = target + '-path';
+			var nameTarget = target + '-name';
+			var idTarget = target + '-id';
+
+			if($('input#' + pathTarget) !== undefined)
+			{
+				$('input#' + pathTarget, window.top.document).attr('value', path); // set new value
+			}
+
+			if($('input#' + nameTarget) !== undefined)
+			{
+				$('input#' + nameTarget, window.top.document).attr('value', name); // set new value
+			}
+
+			if($('input#' + idTarget) !== undefined)
+			{
+				$('input#' + idTarget, window.top.document).attr('value', id); // set new value
+			}
+		}
+
+		return false;
+
+	};
+
+
+
+
+
+
+
+	/**
+	 * @deprecated - to eventually be replaced by the method above.
 	 * @param {object} that
 	 *  Element that was clicked.
 	 *
@@ -269,6 +523,9 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 	 */
 	e107.mediaManager.eMediaSelect = function (that)
 	{
+
+
+
 		var $this = $(that);
 		// ID of the Media Manager Item.
 		var id = $this.attr('data-id');
@@ -276,6 +533,7 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 		// Path of the Media Manager Item.
 		var path = $this.attr('data-path');
 		var preview = $this.attr('data-preview');
+		var previewHTML = $this.attr('data-preview-html');
 		var src = $this.attr('data-src');
 		// TinyMce/Textarea insert mode-
 		var bbcode = $this.attr('data-bbcode');
@@ -296,26 +554,44 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 		var $preview = $('#preview');
 		var $path = $('#path');
 
-		$this.addClass("media-select-active");
-		$this.closest("img").addClass("active");
 
-		if(bbcode == "file") // not needed for Tinymce
+
+
+		// Remove "selected" class from elements.
+		$('.e-media-select').removeClass('media-select-active');
+
+		// Add "selected" class to clicked element.
+		$this.addClass('media-select-active');
+		$this.closest('img').addClass('active');
+
+
+console.log('Bbcode: '+bbcode);
+
+		
+
+		if(bbcode === "file" && $bbcodeHolder.length > 0) // not needed for Tinymce
 		{
 			bbpath = '[file=' + id + ']' + name + '[/file]';
-
-			if($bbcodeHolder.length > 0)
-			{
-				$bbcodeHolder.val(bbpath);
-			}
+			$bbcodeHolder.val(bbpath);
 			return;
 		}
 
-		if(bbcode == "video" || bbcode == 'glyph')
+		if((bbcode === "video" || bbcode === "img") && $bbcodeHolder.length > 0)
 		{
+			e107.mediaManager.eMediaAttribute($this, bbcode);
 			bbpath = '[' + bbcode + ']' + path + '[/' + bbcode + ']';
+			$bbcodeHolder.val(bbpath);
 
-			if($bbcodeHolder.length > 0)
+		}
+
+		if(bbcode === "glyph" && $bbcodeHolder.length > 0)
+		{
+			var $target = $('div#' + target + "_prev", window.top.document);
+			
+			// Only if  the triggering element is not an icon-picker.
+			if($target.length === 0 || !$target.hasClass('image-selector'))
 			{
+				bbpath = '[' + bbcode + ']' + path + '[/' + bbcode + ']';
 				$bbcodeHolder.val(bbpath);
 			}
 		}
@@ -342,7 +618,8 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 
 		$('img#' + target + "_prev", window.top.document).attr('src', preview); // set new value
 
-		if(type == 'glyph')
+
+		if(type === 'glyph')
 		{
 			preview = "<span class='" + src + "'>&nbsp;</span>";
 
@@ -356,11 +633,11 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 				$path.attr('value', path);
 			}
 		}
-		else if(type == 'file')
+		else if(type === 'file')
 		{
 			preview = name;
 		}
-		else // image and video
+		else // image
 		{
 			e107.mediaManager.eMediaAttribute($this, bbcode);
 
@@ -370,13 +647,24 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 			{
 				preview = $htmlHolder.val();
 			}
+
+			// issue #3051 Preview url is wrong when target page is a plugin
+			var s = new RegExp('/' + e107_plugins_directory + '[\\w]+/', 'gmi');
+			if (window.top.document.URL.match(s))
+			{
+				preview = preview.replace(e107_plugins_directory, '');
+			}
+			console.log("Mode: Image");
 		}
+
+
+
 
 		$('div#' + target + "_prev", window.top.document).html(preview); // set new value
 		$('span#' + target + "_prev", window.top.document).html(preview); // set new value
 
 		// @see $frm->filepicker()
-		if(target != '')
+		if(target !== '')
 		{
 			if($('input#' + target) !== undefined)
 			{
@@ -422,13 +710,33 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 		var bbcode = $this.attr('data-bbcode'); // TinyMce/Textarea insert mode
 		var close = $this.attr('data-close');
 
+
+
 		if(!target || !bbcode)
 		{
+			console.log('eDialogSave: no target or bbcode');
+			console.log('eDialogSave (bbcode): ' + bbcode);
+			console.log('eDialogSave (target): ' + target);
 			return true;
 		}
 
-		// http://code.google.com/p/jquery-at-caret/wiki/GettingStarted
-		$('#' + target, window.top.document).atCaret('insert', newval);
+
+
+		var $target = $('#' + target, window.top.document);
+
+		if ($target.length > 0)
+		{
+			var targetType = $target.attr('type');
+
+			// The input element's type ('hidden') does not support selection.
+			if (targetType == 'hidden')
+			{
+				return true;
+			}
+
+			// http://code.google.com/p/jquery-at-caret/wiki/GettingStarted
+			$('#' + target, window.top.document).atCaret('insert', newval);
+		}
 
 		if(close == 'true')
 		{
@@ -510,19 +818,22 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 		$('#e-modal-loading', window.parent.document).show();
 		$('iframe', window.parent.document).attr('scrolling', 'no'); // hide the scrollbar.
 
+		// TODO use loading screen instead?
 		$(id).hide('slide', {direction: outDir}, 1500, function ()
 		{
-		});
-
-		$.get(src, function (data)
-		{
-			$(id).html(data);
-			newVal = $('#admin-ui-media-select-count-hidden').text();
-			$('#admin-ui-media-select-count').text(newVal).fadeIn();
-
-			$(id).show('slide', {direction: inDir}, 500, function ()
+			$.get(src, function (data)
 			{
-				$('#e-modal-loading', window.parent.document).hide();
+				$(id).html(data);
+				newVal = $('#admin-ui-media-select-count-hidden').text();
+				$('#admin-ui-media-select-count').text(newVal).fadeIn();
+
+				$(id).show('slide', {direction: inDir}, 500, function ()
+				{
+					$('#e-modal-loading', window.parent.document).hide();
+				});
+
+				// We need to attach behaviors to the newly loaded contents.
+				e107.attachBehaviors();
 			});
 		});
 
@@ -543,6 +854,8 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 		var src = $this.attr("data-src");
 		var search = $this.val();
 
+
+
 		if(search !== null)
 		{
 			search = search.replace('https://', 'url:');
@@ -557,6 +870,7 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 		$target.load(src, function ()
 		{
 			$target.fadeIn('fast'); // .slideLeft();
+			e107.attachBehaviors();
 		});
 	};
 
@@ -584,10 +898,10 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 
 			// Specify what files to browse for
 			filters: [
-				{title: "Image files", extensions: extImg || "jpg,gif,png,jpeg"},
+				{title: "Image files", extensions: extImg || "jpg,gif,png,jpeg,svg"},
 				{title: "Zip files", extensions: extArchive || "zip,gz,rar"},
 				{title: "Document files", extensions: extDoc || "pdf,doc,docx,xls,xlsm,xml"},
-				{title: "Media files", extensions: 'mp3,mp4,wav,ogg,webm,mid,midi,'},
+				{title: "Media files", extensions: 'mp3,mp4,wav,ogg,webm,mid,midi'},
 				{title: "Other files", extensions: 'torrent,txt'}
 			],
 			preinit: {
@@ -597,13 +911,34 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 				}
 			},
 			init: {
+				BeforeUpload: function(e,file)
+				{
+
+
+				},
+				BeforeChunkUpload: function(uploader, file, post, currentBlob, currentOffset)
+				{
+					//console.log(file);
+              		// currentBlob.name=file.name;
+       			},
 				FilesAdded: function (up, files)
 				{
 
 				},
-				FileUploaded: function (up, file, info)
+				FileUploaded: function (up, file, info) // Called when a file has finished uploading
 				{
-					// Called when a file has finished uploading
+				//	console.log(up);
+				//	console.log(file);
+				//	console.log(file);
+					var result = JSON.parse(info.response);
+					if(result.error)
+					{
+						alert(file.name + ': '+ result.error.message);
+					//	$('.plupload_buttons').show();
+						return false;
+					}
+				//	console.log(result);
+
 				},
 				UploadProgress: function (up, file)
 				{

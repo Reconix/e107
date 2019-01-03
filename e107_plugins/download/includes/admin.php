@@ -126,49 +126,91 @@ class plugin_download_admin extends e_admin_dispatcher
 
 class download_cat_ui extends e_admin_ui
 { 	 	 
-		protected $pluginTitle	= LAN_PLUGIN_DOWNLOAD_NAME;
-		protected $pluginName	= 'download';
-		protected $table 		= "download_category";
-		protected $pid			= "download_category_id";
-		protected $perPage 		= 0; //no limit
-		protected $listOrder = 'download_category_order';
-		// protected $defaultOrderField = 'download_category_parent,download_category_order';
-	//	protected $listQry = "SELECT * FROM #faq_info"; // without any Order or Limit. 
-	//	protected $editQry = "SELECT * FROM #faq_info WHERE faq_info_id = {ID}";
+		protected $pluginTitle	    = LAN_PLUGIN_DOWNLOAD_NAME;
+		protected $pluginName	    = 'download';
+		protected $table 		    = "download_category";
+		protected $pid			    = "download_category_id";
+		protected $perPage 		    = 0; //no limit
+
+		protected $batchCopy		= true;
+
+		// initiate as a parent/child tree.
+		protected $sortField		= 'download_category_order';
+		protected $sortParent       = 'download_category_parent';
+		protected $treePrefix       = 'download_category_name';
+	//	protected $orderStep		= // automatic
+	//	protected $listOrder		= // automatic
+
+		//legacy URL scheme
+		protected $url         		= array('route'=>'download/list/category', 'vars' => array('id' => 'download_category_id', 'name' => 'download_category_sef'), 'name' => 'download_category_name', 'description' => ''); // 'link' only needed if profile not provided.
+
 	 	 	
 		protected $fields = array(
 			'checkboxes'						=> array('title'=> '',				'type' => null, 			'width' =>'5%', 'forced'=> TRUE, 'thclass'=>'center', 'class'=>'center'),
 			'download_category_icon' 			=> array('title'=> LAN_ICON,		'type' => 'method',			'width' => '5%', 'thclass' => 'center','class'=>'center','writeParms'=>'glyphs=1' ),
-			'download_category_id'				=> array('title'=> LAN_ID,			'type' => 'number',			'width' =>'5%', 'forced'=> TRUE),     		
-         	'download_category_name' 			=> array('title'=> LAN_TITLE,		'type' => 'text',			'inline' => true, 'width' => 'auto', 'thclass' => 'left', 'writeParms'=>'size=xxlarge'),
-       		'download_category_sef' 			=> array('title'=> LAN_SEFURL,		'type' => 'text',			'inline' => true,	'width' => 'auto', 'thclass' => 'left', 'writeParms'=>'size=xxlarge'),
+			'download_category_id'				=> array('title'=> LAN_ID,			'type' => 'number',			'width' =>'5%', 'forced'=> TRUE, 'readParms'=>'link=sef&target=blank'),
+         	'download_category_name' 			=> array('title'=> LAN_TITLE,		'type' => 'text',		'data'=>'str',	'inline' => true, 'width' => 'auto', 'thclass' => 'left', 'writeParms'=>'size=xxlarge'),
+       		'download_category_sef' 			=> array('title'=> LAN_SEFURL,		'type' => 'text',		'data'=>'str',	'batch'=>true, 'inline' => true,	'width' => 'auto', 'thclass' => 'left', 'writeParms'=>'sef=download_category_name&size=xxlarge'),
          
-	     	'download_category_description' 	=> array('title'=> LAN_DESCRIPTION,	'type' => 'bbarea',			'width' => '30%', 'readParms' => 'expand=...&truncate=50&bb=1'), // Display name
+	     	'download_category_description' 	=> array('title'=> LAN_DESCRIPTION,	'type' => 'bbarea',		'data'=>'str',	'width' => '30%', 'readParms' => 'expand=...&truncate=50&bb=1'), // Display name
 		 	'download_category_parent' 			=> array('title'=> LAN_PARENT,		'type' => 'method',			'width' => '5%', 'batch' => TRUE, 'filter'=>TRUE),		
 			'download_category_class' 			=> array('title'=> LAN_VISIBILITY,	'type' => 'userclass',		'inline' => true, 'width' => 'auto', 'data' => 'int', 'batch' => TRUE, 'filter'=>TRUE),
-			'download_category_order' 			=> array('title'=> LAN_ORDER,		'type' => 'number',	'data'=>'int',		'width' => '5%', 'thclass' => 'right', 'class'=> 'right' ),
-			'options' 							=> array('title'=> LAN_OPTIONS,		'type' => null,				'width' => '10%', 'forced'=>TRUE, 'thclass' => 'center last', 'class' => 'center')
+			'download_category_order' 			=> array('title'=> LAN_ORDER,		'type' => 'number',	'nolist'=>true, 'data'=>'int',		'width' => '5%', 'thclass' => 'right', 'class'=> 'right' ),
+			'options' 							=> array('title'=> LAN_OPTIONS,		'type' => null,				'width' => '10%', 'forced'=>TRUE, 'thclass' => 'center last', 'class' => 'center', 'sort'=>1)
 		);	
-		
 
-	function getDownloadCategoryTree($id = false, $default = 'n/a')
+		protected $fieldpref = array('download_category_icon', 'download_category_id', 'download_category_name', 'download_category_sef', 'download_category_class', 'download_category_order');
+
+	protected $downloadCats = array();
+
+	function init()
 	{
-		// TODO get faq category tree
+		if(deftrue('e_DEBUG'))
+		{
+			$this->fields['download_category_order']['nolist'] = false;
+		}
+
+		$this->setDownloadCategoryTree();
+
+	}
+
+
+	private function setDownloadCategoryTree()
+	{
+
+
 		$sql = e107::getDb();
-		$sql -> gen('SELECT * FROM #download_category ORDER BY download_category_order');
-		$cats = array();
-		$cats[0] = $default;
+		$qry = $this->getParentChildQry(true);
+		$sql->gen($qry);
+
+		$this->downloadCats[0] = LAN_NONE;
+
 		while($row = $sql->fetch())
 		{
-			$cats[$row['download_category_id']] = $row['download_category_name'];
+			$num = $row['_depth'] - 1;
+			$id = $row['download_category_id'];
+			$this->downloadCats[$id] = str_repeat("&nbsp;&nbsp;",$num).$row['download_category_name'];
 		}
-		
+
+		if($this->getAction() === 'edit') // make sure parent is not the same as ID.
+		{
+			$r = $this->getId();
+			unset($this->downloadCats[$r]);
+		}
+
+	}
+
+
+
+	function getDownloadCategoryTree($id = false)
+	{
+
 		if($id)
 		{
-			return $cats[$id];
+			return $this->downloadCats[$id];
 		}
 		
-		return $cats;
+		return $this->downloadCats;
 	}	
 		
 }
@@ -187,7 +229,7 @@ class download_cat_form_ui extends e_admin_form_ui
 			break;
 			
 			case 'write':
-				return $this->selectbox('download_category_parent', $controller->getDownloadCategoryTree(), $curVal);
+				return $this->select('download_category_parent', $controller->getDownloadCategoryTree(), $curVal);
 			break;
 			
 			case 'filter':
@@ -239,12 +281,17 @@ class download_main_admin_ui extends e_admin_ui
 		protected $pluginName = 'download';
 		protected $eventName = 'download';
 		protected $table = "download"; // DB Table, table alias is supported. Example: 'r.release'
-		protected $listQry = "SELECT m.*,u.user_id,u.user_name FROM #download AS m LEFT JOIN #user AS u ON m.download_author = u.user_id "; // without any Order or Limit.
+		protected $listQry = "SELECT m.*, c.download_category_sef, u.user_id,u.user_name FROM #download AS m
+			lEFT JOIN #download_category AS c on m.download_category = c.download_category_id LEFT JOIN #user AS u ON m.download_author = u.user_id "; // without any Order or Limit.
 		
 		//required - default column user prefs
 		protected $fieldpref = array('checkboxes', 'download_image', 'download_id', 'download_datestamp', 'download_category', 'download_name', 'download_active', 'download_class', 'fb_order', 'options');
 	
-		//
+		// Security modes
+		protected $security_options = array(
+			'none' => LAN_DL_SECURITY_MODE_NONE,
+			'nginx-secure_link_md5' => LAN_DL_SECURITY_MODE_NGINX_SECURELINKMD5
+		);
 
 		// optional - required only in case of e.g. tables JOIN. This also could be done with custom model (set it in init())
 		//protected $editQry = "SELECT * FROM #release WHERE release_id = {ID}";
@@ -258,14 +305,18 @@ class download_main_admin_ui extends e_admin_ui
 		// default - true - TODO - move to displaySettings
 		protected $batchDelete = true;
 
+		/** @deprecated see writeParms() on download_id below. */
+	//	protected $url         		= array('route'=>'download/view/item', 'vars' => array('id' => 'download_id', 'name' => 'download_sef'), 'name' => 'download_name', 'description' => ''); // 'link' only needed if profile not provided.
+
+
 	
     	protected  $fields = array(
 			'checkboxes'				=> array('title'=> '', 					'type' => null,			'data' => null,			'width'=>'5%', 		'thclass' =>'center', 'forced'=> TRUE,  'class'=>'center', 'toggle' => 'e-multiselect'),
-			'download_id'				=> array('title'=> ID, 					'type' => 'number',		'data' => 'int',		'width'=>'5%',		'thclass' => '',	'forced'=> TRUE, 'primary'=>TRUE/*, 'noedit'=>TRUE*/), //Primary ID is not editable
+			'download_id'				=> array('title'=> LAN_ID, 				'type' => 'text',		'data' => 'int',		'width'=>'5%',		'thclass' => '',	'forced'=> TRUE, 'readParms'=>'url=item&target=blank', 'primary'=>TRUE/*, 'noedit'=>TRUE*/), //Primary ID is not editable
             'download_name' 			=> array('title'=> LAN_TITLE, 			'type' => 'text', 		'data' => 'str',		'inline'=>true, 'width' => 'auto',	'thclass' => ''),		
             'download_url'	   			=> array('title'=> DOWLAN_13, 			'type' => 'url', 	'data' => 'str',		'width'=>'auto',	'thclass' => '', 'batch' => TRUE, 'filter'=>TRUE),
 		    'download_sef'	   			=> array('title'=> LAN_SEFURL, 			'type' => 'text', 	'inline'=>true, 'data' => 'str',		'width'=>'auto',	'thclass' => '', 'batch' => TRUE, 'filter'=>TRUE, 'writeParms'=>'sef=download_name'),
-		  	'download_keywords'	   	=> array('title'=> LAN_KEYWORDS, 		'type' => 'tags', 	'inline'=>true, 'data' => 'str',		'width'=>'auto',	'thclass' => ''),
+		  	'download_keywords'	    	=> array('title'=> LAN_KEYWORDS, 		'type' => 'tags', 	'inline'=>true, 'data' => 'str',		'width'=>'auto',	'thclass' => ''),
 		
 			'download_author' 			=> array('title'=> LAN_AUTHOR,			'type' => 'user', 		'data' => 'str',		'width' => 'auto',	'thclass' => 'left'),
          	'download_author_email' 	=> array('title'=> DOWLAN_16, 			'type' => 'email', 		'data' => 'str',		'width' => 'auto',	'thclass' => 'left'),  
@@ -278,12 +329,12 @@ class download_main_admin_ui extends e_admin_ui
 			'download_active'			=> array('title'=> DOWLAN_21,			'type' => 'method', 		'data' => 'int',		'width' => '5%',	'thclass' => 'center', 'class' => 'center',	'batch' => TRUE, 'filter'=>TRUE, 'noedit' => true),
 			'download_datestamp' 		=> array('title'=> LAN_DATE, 			'type' => 'datestamp', 	'data' => 'int',		'width' => 'auto',	'thclass' => '', 'readParms' => 'long', 'writeParms' => ''),
 			
-			'download_thumb' 			=> array('title'=> DOWLAN_20,			'type' => 'image', 		'data' => 'str',		'width' => '100px',	'thclass' => 'center', 'class'=>'center', 'readParms'=>'thumb=60&thumb_urlraw=0&thumb_aw=60&legacyPath={e_FILE}downloadthumbs',  'readonly'=>TRUE ),
-			'download_image' 			=> array('title'=> DOWLAN_19,			'type' => 'image', 		'data' => 'str',		'width' => '100px',	'thclass' => 'center', 'class'=>'center', 'readParms'=>'thumb=60&thumb_urlraw=0&thumb_aw=60&legacyPath={e_FILE}downloadimages', 'readonly'=>TRUE,	'batch' => FALSE, 'filter'=>FALSE),
+			'download_thumb' 			=> array('title'=> DOWLAN_20,			'type' => 'image', 		'data' => 'str',		'width' => '100px',	'thclass' => 'center', 'class'=>'center', 'readParms'=>'thumb=60&thumb_urlraw=0&thumb_aw=60&legacyPath={e_FILE}downloadthumbs', 'writeParms' => 'media=download_image', 'readonly'=>TRUE ),
+			'download_image' 			=> array('title'=> DOWLAN_19,			'type' => 'image', 		'data' => 'str',		'width' => '100px',	'thclass' => 'center', 'class'=>'center', 'readParms'=>'thumb=60&thumb_urlraw=0&thumb_aw=60&legacyPath={e_FILE}downloadimages', 'writeParms' => 'media=download_image', 'readonly'=>TRUE,	'batch' => FALSE, 'filter'=>FALSE),
 			'download_comment'			=> array('title'=> DOWLAN_102,			'type' => 'boolean', 		'data' => 'int',		'width' => '5%',	'thclass' => 'center',	'batch' => TRUE, 'filter'=>TRUE, 'noedit' => true),
 			
 			'download_class' 			=> array('title'=> DOWLAN_113,			'type' => 'userclass',		'width' => 'auto', 'inline'=>true, 'data' => 'int','batch' => TRUE, 'filter'=>TRUE),		
-			'download_visible' 			=> array('title'=> LAN_VISIBILITY,		'type' => 'userclass',		'width' => 'auto', 'data' => 'int', 'batch' => TRUE, 'filter'=>TRUE),
+			'download_visible' 			=> array('title'=> LAN_VISIBILITY,		'type' => 'userclass',	'inline'=>true,	'width' => 'auto', 'data' => 'int', 'batch' => TRUE, 'filter'=>TRUE),
 			
 			'download_mirror' 			=> array('title'=> DOWLAN_128,			'type' => 'text', 		'data' => 'str',		'width' => '10%',	'thclass' => 'center' ),
 			'download_mirror_type' 		=> array('title'=> DOWLAN_195,			'type' => 'method', 		'data' => 'str',		'width' => '10%',	'thclass' => 'center' ),
@@ -372,15 +423,18 @@ $columnInfo = array(
 			}
 		}
 		
-		
+
+
+
 		
 		// optional
 		public function init()
 		{
-			
-			$this->action 		= vartrue($_GET['mode']);
-			$this->subAction 	= vartrue($_GET['action']);
-			$this->id			= vartrue($_GET['id']);
+
+
+			$this->action 		= $this->getMode(); // vartrue($_GET['mode']);
+			$this->subAction 	= $this->getAction(); // vartrue($_GET['action']);
+			$this->id			= $this->getId(); // vartrue($_GET['id']);
 			
 			$this->observe();
 			
@@ -619,11 +673,11 @@ $columnInfo = array(
 					<tr>
 					<td>".$row['limit_id']."</td>
 					<td>".r_userclass_name($row['limit_classnum'])."</td>
-					<td>
+					<td class='form-inline'>
 						<input type='text' class='form-control' size='5' name='count_num[{$row['limit_id']}]' value='".($row['limit_count_num'] ? $row['limit_count_num'] : "")."'/> ".DOWLAN_109."
 						<input type='text' class='form-control' size='5' name='count_days[{$row['limit_id']}]' value='".($row['limit_count_days'] ? $row['limit_count_days'] : "")."'/> ".DOWLAN_110."
 					</td>
-					<td>
+					<td class='form-inline'>
 						<input type='text' class='form-control' size='5' name='bw_num[{$row['limit_id']}]' value='".($row['limit_bw_num'] ? $row['limit_bw_num'] : "")."'/> ".DOWLAN_111." ".DOWLAN_109."
 						<input type='text' class='form-control' size='5' name='bw_days[{$row['limit_id']}]' value='".($row['limit_bw_days'] ? $row['limit_bw_days'] : "")."'/> ".DOWLAN_110."
 					</td>
@@ -634,7 +688,7 @@ $columnInfo = array(
 			$txt .= "
 			</table>
 			<div class='buttons-bar center'>
-			<input type='submit' class='btn btn-default button' name='updatelimits' value='".DOWLAN_115."'/>
+			<input type='submit' class='btn btn-default btn-secondary button' name='updatelimits' value='".DOWLAN_115."'/>
 			</div>
 			
 			<table class='table adminlist'>
@@ -643,11 +697,11 @@ $columnInfo = array(
 			</tr>
 			<tr>
 			<td colspan='2'>".r_userclass("newlimit_class", 0, "off", "guest, member, admin, classes, language")."</td>
-			<td>
+			<td class='form-inline'>
 				<input type='text' class='form-control' size='5' name='new_count_num' value=''/> ".DOWLAN_109."
 				<input type='text' class='form-control' size='5' name='new_count_days' value=''/> ".DOWLAN_110."
 			</td>
-			<td>
+			<td class='form-inline'>
 				<input type='text' class='form-control' size='5' name='new_bw_num' value=''/> ".DOWLAN_111." ".DOWLAN_109."
 				<input type='text' class='form-control' size='5' name='new_bw_days' value=''/> ".DOWLAN_110."
 			</td>
@@ -658,7 +712,7 @@ $columnInfo = array(
 		
 			$txt .= "</table>
 			<div class='buttons-bar center'>
-			<input type='submit' class='btn btn-default button' name='addlimit' value='".DOWLAN_114."'/>
+			<input type='submit' class='btn btn-default btn-secondary button' name='addlimit' value='".DOWLAN_114."'/>
 			</div></form>";
 			echo $txt;
 		
@@ -1085,22 +1139,32 @@ $columnInfo = array(
 			global $admin_log,$pref;
 					
 			$tp = e107::getParser();
+
+			$expected_params = array(
+				'download_php', 'download_view', 'download_sort', 'download_order',
+				'mirror_order', 'recent_download_days', 'agree_flag', 'download_email',
+				'agree_text', 'download_denied', 'download_reportbroken',
+				'download_security_mode', 'download_security_expression', 'download_security_link_expiry'
+			);
 			
 			$temp = array();
-			$temp['download_php'] = $_POST['download_php'];
-			$temp['download_view'] = $_POST['download_view'];
-			$temp['download_sort'] = $_POST['download_sort'];
-			$temp['download_order'] = $_POST['download_order'];
-			$temp['mirror_order'] = $_POST['mirror_order'];
-			$temp['recent_download_days'] = $_POST['recent_download_days'];
-			$temp['agree_flag'] = $_POST['agree_flag'];
-			$temp['download_email'] = $_POST['download_email'];
-			$temp['agree_text'] = $tp->toDB($_POST['agree_text']);
-			$temp['download_denied'] = $tp->toDB($_POST['download_denied']);
-			$temp['download_reportbroken'] = $_POST['download_reportbroken'];
-						
-			if ($_POST['download_subsub']) $temp['download_subsub'] = '1'; else $temp['download_subsub'] = '0';
-			if ($_POST['download_incinfo']) $temp['download_incinfo'] = '1'; else $temp['download_incinfo'] = '0';
+			foreach($expected_params as $expected_param)
+			{
+				$temp[$expected_param] = $_POST[$expected_param];
+			}
+
+			$temp['download_subsub'] = $_POST['download_subsub'] ? '1' : '0';
+			$temp['download_incinfo'] = $_POST['download_incinfo'] ? '1' : '0';
+
+			if ($_POST['download_security_mode'] !== 'nginx-secure_link_md5')
+			{
+				unset($temp['download_security_mode']);
+				unset($temp['download_security_expression']);
+				unset($temp['download_security_link_expiry']);
+				e107::getConfig('core')->removePref('download_security_mode');
+				e107::getConfig('core')->removePref('download_security_expression');
+				e107::getConfig('core')->removePref('download_security_link_expiry');
+			}
 			
 			e107::getConfig('core')->setPref($temp)->save(false);
 
@@ -1337,7 +1401,7 @@ $columnInfo = array(
 	            $text .= "  </div>";
 	         }
 	         $text .="      </div>
-	                        <input class='btn btn-default button' type='button' name='addoption' value='".DOWLAN_130."' onclick=\"duplicateHTML('mirror','mirrorsection')\"/>
+	                        <input class='btn btn-default btn-secondary button' type='button' name='addoption' value='".DOWLAN_130."' onclick=\"duplicateHTML('mirror','mirrorsection')\"/>
 	                     </td>
 	                  </tr>
 	                  <tr>
@@ -1464,7 +1528,7 @@ $columnInfo = array(
 	           $download_datestamp = time();
 	      }
 	
-			$text .= $frm->datepicker('download_datestamp',$download_datestamp);
+			$text .= $frm->datepicker('download_datestamp', $download_datestamp, 'type=datetime');
 			
 	  //    $update_checked = ($_POST['update_datestamp']) ? "checked='checked'" : "";
 	  //    $text .= "        &nbsp;&nbsp;<span><input type='checkbox' value='1' name='update_datestamp' $update_checked/>".DOWLAN_148."</span>";
@@ -1971,7 +2035,7 @@ $columnInfo = array(
 	      <input class='form-control input-xxlarge' type='text' id='mirror_image' name='mirror_image' size='60' value='{$mirror_image}' maxlength='200'/>
 	
 	
-	      <br /><input class='btn btn-default button' type ='button' style='cursor:pointer' size='30' value='".DOWLAN_42."' onclick='expandit(this)'/>
+	      <br /><input class='btn btn-default btn-secondary button' type ='button' style='cursor:pointer' size='30' value='".DOWLAN_42."' onclick='expandit(this)'/>
 	      <div id='imagefile' style='display:none;{head}'>";
 	
 	      $text .= DOWLAN_140."<br/>";
@@ -2000,7 +2064,7 @@ $columnInfo = array(
 	
 	      <tr>
 	      <td colspan='2' class='forumheader' style='text-align:center;'>
-	      ".($edit ? "<input class='btn btn-default button' type='submit' name='submit_mirror' value='".DOWLAN_142."'/><input type='hidden' name='id' value='{$mirror_id}'/>" : "<input class='btn button' type='submit' name='submit_mirror' value='".DOWLAN_143."'/>")."
+	      ".($edit ? "<input class='btn btn-default btn-secondary button' type='submit' name='submit_mirror' value='".DOWLAN_142."'/><input type='hidden' name='id' value='{$mirror_id}'/>" : "<input class='btn button' type='submit' name='submit_mirror' value='".DOWLAN_143."'/>")."
 	      </td>
 	      </tr>
 	
@@ -2045,14 +2109,33 @@ $columnInfo = array(
 		      }
 	   }
 
+	private function supported_secure_link_variables_html()
+	{
+		require_once(__DIR__."/../handlers/NginxSecureLinkMd5Decorator.php");
+		$supported_secure_link_variables_html = "<ul>";
+		foreach(NginxSecureLinkMd5Decorator::supported_variables() as $variable)
+		{
+			$supported_secure_link_variables_html .= "<li><code>$variable</code></li>";
+		}
+		$supported_secure_link_variables_html .= "</ul>";
+		return $supported_secure_link_variables_html;
+	}
+
+	private function mirror_order_options_html($pref)
+	{
+		return ($pref['mirror_order'] == "0" ? "<option value='0' selected='selected'>".DOWLAN_161."</option>" : "<option value='0'>".DOWLAN_161."</option>").
+			($pref['mirror_order'] == "1" ? "<option value='1' selected='selected'>".LAN_ID."</option>" : "<option value='1'>".LAN_ID."</option>").
+			($pref['mirror_order'] == "2" ? "<option value='2' selected='selected'>".DOWLAN_12."</option>" : "<option value='2'>".DOWLAN_12."</option>");
+	}
+
 		function show_download_options()
 		{
 		   	global $pref, $ns;
-		
-				require_once(e_HANDLER."form_handler.php");
-				$frm = new e_form(true); //enable inner tabindex counter
-		
-		   	$agree_flag = $pref['agree_flag'];
+
+			require_once(e_HANDLER."form_handler.php");
+			$frm = new e_form(true); //enable inner tabindex counter
+
+			$agree_flag = $pref['agree_flag'];
 		   	$agree_text = $pref['agree_text'];
 		      $c = $pref['download_php'] ? " checked = 'checked' " : "";
 		      $sacc = (varset($pref['download_incinfo'],0) == '1') ? " checked = 'checked' " : "";
@@ -2067,14 +2150,15 @@ $columnInfo = array(
 		         "ASC"    => DOWLAN_62,
 		         "DESC"   => DOWLAN_63
 		      );
-		
+
 		   	$text = "
 				   
 					   <ul class='nav nav-tabs'>
 						   <li class='active'><a data-toggle='tab' href='#core-download-download1'>".LAN_DL_DOWNLOAD_OPT_GENERAL."</a></li>
 						   <li><a data-toggle='tab' href='#core-download-download2'>".LAN_DL_DOWNLOAD_OPT_BROKEN."</a></li>
 						   <li><a data-toggle='tab' href='#core-download-download3'>".LAN_DL_DOWNLOAD_OPT_AGREE."</a></li>
-						   <li><a data-toggle='tab' href='#core-download-download4'>".LAN_DL_UPLOAD."</a></li>
+						   <li><a data-toggle='tab' href='#core-download-download4'>".LAN_DL_DOWNLOAD_OPT_SECURITY."</a></li>
+						   <li><a data-toggle='tab' href='#core-download-download5'>".LAN_DL_UPLOAD."</a></li>
 					   </ul>
 						
 		        		<form method='post' action='".e_SELF."?".e_QUERY."'>\n
@@ -2122,10 +2206,7 @@ $columnInfo = array(
 		            		      <tr>
 		               		      <td>".DOWLAN_160."</td>
 		               		      <td>
-		                  		      <select name='mirror_order' class='form-control'>".
-		                  		         ($pref['mirror_order'] == "0" ? "<option value='0' selected='selected'>".DOWLAN_161."</option>" : "<option value='0'>".DOWLAN_161."</option>").
-		                                 ($pref['mirror_order'] == "1" ? "<option value='1' selected='selected'>".LAN_ID."</option>" : "<option value='1'>".LAN_ID."</option>").
-		                                 ($pref['mirror_order'] == "2" ? "<option value='2' selected='selected'>".DOWLAN_163."</option>" : "<option value='2'>".DOWLAN_12."</option>")."
+		                  		      <select name='mirror_order' class='form-control'>".$this->mirror_order_options_html($pref)."
 		            		            </select>
 		               		      </td>
 		            		      </tr>
@@ -2179,6 +2260,45 @@ $columnInfo = array(
 				   		</div>
 		   				<div class='tab-pane' id='core-download-download4'>
 		            	   <div>
+		            	   		<p style='padding: 8px'>
+		            	   			".LAN_DL_SECURITY_DESCRIPTION."
+								</p>
+		            		   <table class='table adminform'>
+		            		      <colgroup>
+		            		         <col style='width:30%'/>
+		            		         <col style='width:70%'/>
+		            		      </colgroup>
+		            		      <tr>
+		            		         <td>".LAN_DL_SECURITY_MODE."</td>
+		            		         <td>".$frm->select('download_security_mode', $this->security_options, $pref['download_security_mode'])."</td>
+		            		      </tr>
+		            		      <tbody id='nginx-secure_link_md5' ".($pref['download_security_mode'] === 'nginx-secure_link_md5' ? "" : "style='display:none'").">
+		            		      	<tr>
+		            		     	 	<td>".LAN_DL_SECURITY_NGINX_SECURELINKMD5_EXPRESSION."</td>
+		            		     	 	<td>
+		            		     	 		".$frm->text('download_security_expression', $pref['download_security_expression'], 1024)."
+		            		     	 		<div class='field-help'>".LAN_DL_SECURITY_NGINX_SECURELINKMD5_EXPRESSION_HELP."</div>
+		            		     	 		<small><a href='#' onclick='event.preventDefault();$(\"#supported-nginx-variables\").toggle();this.blur()'>
+		            		     	 			".LAN_DL_SECURITY_NGINX_SUPPORTED_VARIABLES_TOGGLE."
+		            		     	 		</a></small>
+		            		     	 		<div id='supported-nginx-variables' style='display:none'>
+		            	   						".$this->supported_secure_link_variables_html()."
+		            		     	 		</div>
+		            		     	 	</td>
+		            		      	</tr>
+		            		      	<tr>
+		            		      		<td>".LAN_DL_SECURITY_LINK_EXPIRY."</td>
+		            		      		<td>
+		            		     	 		".$frm->text('download_security_link_expiry', $pref['download_security_link_expiry'], 16, array('pattern' => '\d+'))."
+		            		      			<div class='field-help'>".LAN_DL_SECURITY_LINK_EXPIRY_HELP."</div>
+		            		      		</td>
+		            		      	</tr>
+								  </tbody>
+		            		   </table>
+		            		</div>
+				   		</div>
+				   		<div class='tab-pane' id='core-download-download5'>
+		            	   <div>
 		            		   <table class='table adminform'>
 		            		      <colgroup>
 		            		         <col style='width:30%'/>
@@ -2192,13 +2312,26 @@ $columnInfo = array(
 		            		</div>
 				   		</div>
 						   <div class='buttons-bar center'>
-		                  <input class='btn btn-default button' type='submit' name='updatedownlaodoptions' value='".DOWLAN_64."'/>
+		                  <input class='btn btn-default btn-secondary button' type='submit' name='updatedownlaodoptions' value='".DOWLAN_64."'/>
 		               </div>
 		              
 		           </div>
 		           </form>
 		      ";
-		     // $ns->tablerender(LAN_DL_OPTIONS, $text);
+
+		   	  e107::js('footer-inline', "
+		   	  $('#download-security-mode').on('change', function() {
+		   	    var mode = $(this).val();
+		   	    
+		   	    if (mode == 'nginx-secure_link_md5') {
+		   	        $('#nginx-secure_link_md5').show('slow');
+		   	        return;
+		   	    }
+		   	    
+		   	    $('#nginx-secure_link_md5').hide('slow');
+		   	  });
+		   	  ");
+
 		      echo $text;
 		   }
 

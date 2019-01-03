@@ -19,7 +19,7 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 				{
 					var $this = $(this);
 
-					if($this.attr('data-cache') == 'false')
+					if($this.attr('data-cache') === 'false')
 					{
 						$('#uiModal').on('shown.bs.modal', function ()
 						{
@@ -30,6 +30,7 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 					var url = $this.attr('href');
 					var caption = $this.attr('data-modal-caption');
 					var height = ($(window).height() * 0.7) - 120;
+
 
 					if(caption === undefined)
 					{
@@ -43,9 +44,80 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 					$("#e-modal-iframe").on("load", function ()
 					{
 						$('#e-modal-loading').hide();
+
+						if($this.attr('data-modal-submit'))
+						{
+							var buttonCaption = $('#e-modal-iframe').contents().find('#etrigger-submit').text(); // copy submit button caption from iframe form.
+
+							var buttonClass = $('#e-modal-iframe').contents().find('#etrigger-submit').attr('data-modal-submit-class'); // co
+							if(buttonCaption)
+							{
+								$('#e-modal-submit').text(buttonCaption).fadeIn(); // display the button in the modal footer.
+							}
+
+							if(buttonClass)
+							{
+								$('#e-modal-submit').addClass(buttonClass);
+							}
+
+
+							$('#e-modal-iframe').contents().find('.buttons-bar').hide(); // hide buttons in the iframe's form.
+						}
+
 					});
 
+
+
 					return false;
+				});
+			});
+		}
+	};
+
+	/**
+	 * Run tips on .field-help.
+	 *
+	 * @type {{attach: e107.behaviors.fieldHelpTooltip.attach}}
+	 */
+	e107.behaviors.fieldHelpTooltip = {
+		attach: function (context, settings)
+		{
+			var selector = 'div.tbox,div.checkboxes,input,textarea,select,label,.e-tip,div.form-control';
+
+			$(context).find(selector).once('field-help-tooltip').each(function ()
+			{
+				var $this = $(this);
+				var $fieldHelp = $this.nextAll(".field-help");
+				var placement = 'bottom';
+
+				if($this.is("textarea"))
+				{
+					placement = 'top';
+				}
+
+				var custPlace = $fieldHelp.attr('data-placement'); // ie top|left|bottom|right
+
+				if(custPlace !== undefined)
+				{
+					placement = custPlace;
+				}
+
+				$fieldHelp.hide();
+
+				$this.tooltip({
+					title: function ()
+					{
+						return $fieldHelp.html();
+					},
+					fade: true,
+					html: true,
+					opacity: 1.0,
+					placement: placement,
+					container: 'body',
+					delay: {
+						show: 300,
+						hide: 600
+					}
 				});
 			});
 		}
@@ -89,6 +161,45 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 
 $(document).ready(function()
 {
+
+			$('#e-modal-submit').click(function () {
+			  $('#e-modal-iframe').contents().find('#etrigger-submit').trigger('click');
+
+			  	var type = $(this).data('loading-icon');
+			  	var orig = $(this).text();
+
+				var caption = "<i class='fa fa-spin " + type + " fa-fw'></i>";
+				caption += "<span>" + orig + "</span>";
+
+				$(this).html(caption);
+
+				  $('#e-modal-iframe').on('load', function(){
+
+				  	 var buttonFound = $('#e-modal-iframe').contents().find('#etrigger-submit');
+
+				  	if(buttonFound.length === 0) // disable resubmitting if not button found after submit.
+				  	{
+				  		$('#e-modal-submit').fadeOut(1000);
+				  	}
+
+				  	$('#e-modal-submit').text(orig); // remove spinner.
+
+				  });
+
+			});
+
+			$('[data-dismiss="modal"]').click(function(){ // hide button for next modal popup usage.
+
+				$('#e-modal-submit').hide(1000);
+
+			});
+
+
+
+
+
+
+
 		$('form').h5Validate(
 			{ errorClass: 'has-error' }
 		); // allow older browsers to use html5 validation. 
@@ -176,8 +287,14 @@ $(document).ready(function()
 		});
 
 
+
+
 	$('div.e-container').editable({
 		selector: '.e-editable',
+		params: function(params) {
+			params.token = $(this).attr('data-token');
+           return params;
+		},
 		display: function (value, sourceData)
 		{
 			// HTML entities decoding... fix for:
@@ -453,42 +570,7 @@ $(document).ready(function()
 			
 		});
 		
-			// run tips on .field-help 
-		$("div.tbox,div.checkboxes,input,textarea,select,label,.e-tip,div.form-control").each(function(c) {
-						
-			var t = $(this).nextAll(".field-help");
 
-			var placement = 'bottom';
-			
-			if($(this).is("textarea"))
-			{
-				var placement = 'top';	
-			}
-
-            var custplace = $(t).attr('data-placement'); // ie top|left|bottom|right
-
-            if(custplace !== undefined)
-            {
-                placement = custplace;
-            }
-			
-			
-			t.hide();
-		//	alert('hello');
-			$(this).tooltip({
-				title: function() {
-					var tip = t.html();			
-					return tip; 
-				},
-				fade: true,
-				html: true,
-				opacity: 1.0,
-				placement: placement,
-				container: 'body',
-				delay: { show: 300, hide: 600 } 
-			});
-		
-		});
 	
 	//	 $(".e-spinner").spinner(); //FIXME breaks tooltips etc. 
 
@@ -673,12 +755,13 @@ $(document).ready(function()
 			
 		
 	
-		// Basic Delete Confirmation	
+		// Basic Delete Confirmation
+		/*
 		$('input.delete,button.delete,a[data-confirm]').click(function(){
   			answer = confirm($(this).attr("data-confirm"));
   			return answer; // answer is a boolean
 		});
-		
+	*/
 		$(".e-confirm").click(function(){
   			answer = confirm($(this).attr("title"));
   			return answer; // answer is a boolean
@@ -716,6 +799,92 @@ $(document).ready(function()
             });
 
         });
+
+
+		$('body').on('slid.bs.carousel', '.carousel', function(){
+		  var currentIndex = $(this).find('.active').index();
+		  var text = (currentIndex + 1);
+		  var id = $(this).attr('id') + '-index'; // admin-ui-carousel-index etc.
+		  $('#'+id).text(text);
+
+			// this takes commented content for each carousel slide and enables it, one slide at a time as we scroll.
+
+			$(this).find('.item').each(function(index, node)
+			{
+				var content = $(this).contents();
+
+				var item = content[0];
+
+				if(item.nodeType === 8) // commented code @see e_media::browserCarousel() using '<!--'
+				{
+					$(item).replaceWith(item.nodeValue);
+					return false;
+				}
+
+			});
+
+		});
+		
+
+		$(window).load(function() {
+
+			$('.carousel').each(function(){
+
+				$(this).carouselHeights();
+
+			});
+
+		});
+
+		// Normalize Bootstrap Carousel Heights
+
+		$.fn.carouselHeights = function() {
+
+			var items = $(this).find('.item'), // grab all slides
+
+				heights = [], // create empty array to store height values
+
+				tallest, // create variable to make note of the tallest slide
+
+				call;
+
+			var normalizeHeights = function() {
+
+				items.each(function() { // add heights to array
+
+					heights.push($(this).outerHeight());
+
+				});
+
+				tallest = Math.max.apply(null, heights); // cache largest value
+
+				items.css('height', tallest);
+
+			};
+
+			normalizeHeights();
+
+			$(window).on('resize orientationchange', function() {
+
+				// reset vars
+
+				tallest = 0;
+
+				heights.length = 0;
+
+				items.css('height', ''); // reset height
+
+				if(call){
+
+					clearTimeout(call);
+
+				};
+
+				call = setTimeout(normalizeHeights, 100); // run it again
+
+			});
+
+		};
 
 
 
@@ -761,8 +930,12 @@ $(document).ready(function()
 		
 			$(selector).toggle();
 
+		//	$('.menu-selector input[type="checkbox"]').removeAttr("checked");
+
 			return false; 
 		});
+
+		
 
 
 		$(".e-mm-selector li input").click(function(e){

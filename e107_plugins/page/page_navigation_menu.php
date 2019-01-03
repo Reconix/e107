@@ -20,7 +20,7 @@ $parm = eHelper::scParams($parm);
 $tmpl = e107::getCoreTemplate('chapter','nav',true,true); // always merge and allow override
 
 $template = $tmpl['showPage'];
-
+/*
 $request = e107::getRegistry('core/page/request');
 if($request && is_array($request))
 {
@@ -58,7 +58,11 @@ if(isset($data['title']) && !vartrue($template['noAutoTitle']))
 }
 
 if(empty($data)) return;
-$text = e107::getNav()->render($data, $template) ;
+$text = e107::getNav()->render($data, $template) ;*/
+$pg = new page_shortcodes;
+$text = $pg->sc_page_navigation($parm);
+
+
 
 /**
  * Expandable menu support. 
@@ -68,11 +72,10 @@ $text = e107::getNav()->render($data, $template) ;
 if($expandable) 
 {
 	e107::js('page','js/jquery.page.navigation.js','jquery');
-	$template['caption'] .= "<span class='btn-group pull-right'><a class='btn btn-default btn-xs btn-mini' id='page-nav-expand'>+</a><a class='btn btn-default btn-xs btn-mini' id='page-nav-collapse'>-</a></span>";
+	$template['caption'] .= "<span class='btn-group pull-right'><a class='btn btn-default btn-secondary btn-xs btn-mini' id='page-nav-expand'>+</a><a class='btn btn-default btn-secondary btn-xs btn-mini' id='page-nav-collapse'>-</a></span>";
 }
 
 
 ### Render
 e107::getRender()->tablerender($template['caption'], $text, 'page-navigation-menu');
 
-?>

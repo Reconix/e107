@@ -78,6 +78,35 @@ e107::getLanguage()->bcDefs($bcDefs);
 
 			}
 
+
+			/**
+			 *
+			 * @param array $parm
+			 * @return null|string
+			 */
+			function sc_lm_active($parm=array())
+			{
+			//	$request = e_REQUEST_URI;
+
+				$ret = null;
+
+				$mode = varset($parm['mode']);
+
+				if($mode === 'usersettings' && e_PAGE === 'usersettings.php')
+				{
+					 return 'active';
+				}
+				elseif($mode === 'profile' && e_PAGE === 'user.php')
+				{
+					return 'active';
+				}
+
+
+				return null;
+			}
+
+
+
 			function sc_lm_username_input($parm='')
 			{
 				$pref = e107::getPref();
@@ -85,7 +114,7 @@ e107::getLanguage()->bcDefs($bcDefs);
 				// If logging in with email address - ignore pref and increase to 100 chars.
 				$maxLength  = ($this->allowEmailLogin == 1 || $this->allowEmailLogin) ? 100 : varset($pref['loginname_maxlength'],30);
 
-				return "<input class='form-control tbox login user' type='text' name='username' placeholder='".$this->usernameLabel."' required='required' id='username' size='15' value='' maxlength='".$maxLength."' />\n";
+				return "<input class='form-control tbox login user' type='text' name='username' placeholder='".$this->usernameLabel."' required='required' id='".vartrue( $parm['idprefix'] )."username' size='15' value='' maxlength='".$maxLength."' />\n";
 			}
 
 
@@ -98,7 +127,7 @@ e107::getLanguage()->bcDefs($bcDefs);
 			function sc_lm_password_input($parm='')
 			{
 				$pref = e107::getPref();
-				$t_password = "<input class='form-control tbox login pass' type='password' placeholder='".LAN_PASSWORD."' required='required' name='userpass' id='userpass' size='15' value='' maxlength='30' />\n";
+				$t_password = "<input class='form-control tbox login pass' type='password' placeholder='".LAN_PASSWORD."' required='required' name='userpass' id='".vartrue( $parm['idprefix'] )."userpass' size='15' value='' maxlength='30' />\n";
 				if (!USER && e107::getSession()->is('challenge') && varset($pref['password_CHAP'],0)) $t_password .= "<input type='hidden' name='hashchallenge' id='hashchallenge' value='".e107::getSession()->get('challenge')."' />\n\n";
 				return $t_password;
 			}
@@ -156,7 +185,7 @@ e107::getLanguage()->bcDefs($bcDefs);
 
 			function sc_lm_loginbutton($parm='')
 			{
-				return "<input class='button btn btn-default login' type='submit' name='userlogin' id='userlogin' value='".LAN_LOGIN."' />";
+				return "<input class='button btn btn-default btn-secondary login' type='submit' name='userlogin' id='userlogin' value='".LAN_LOGIN."' />";
 			}
 
 			function sc_lm_rememberme($parm='')

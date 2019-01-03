@@ -127,8 +127,8 @@ class forumStats
 		ORDER BY post_count DESC LIMIT 0,10";
 
 		$sql->gen($query);
-	// 	$top_repliers_data = $sql->db_getList('ALL', false, false, 'user_id');
-		$top_repliers_data = $sql->retrieve($query,true);
+	 	$top_repliers_data = $sql->db_getList('ALL', false, false, 'user_id');
+//		$top_repliers_data = $sql->retrieve($query,true);
 
 		// build top posters meanwhile
 		$top_posters = array();
@@ -479,7 +479,7 @@ class forumStats
 
 		$text .= "<div class='center'>".e107::getForm()->pagination(e107::url('forum','index'), LAN_BACK)."</div>";
 
-		$ns -> tablerender(LAN_FORUM_6013, $text);
+		$ns -> tablerender(LAN_FORUM_6013, $text, 'forum-stats');
 
 	}
 
@@ -566,7 +566,7 @@ class forumStats
 				$text .= "<div class='nextprev'>".$tp->parseTemplate("{NEXTPREV={$parms}}").'</div>';
 			}
 
-			$ns->tablerender(TOP_LAN_0, $text);
+			$ns->tablerender(TOP_LAN_0, $text, 'forum-stats-top');
 
 
 		}
@@ -626,8 +626,8 @@ class forumStats
 					$POSTER = $row['thread_user_anon'];
 				}
 
-				$LINKTOTHREAD = e107::url('forum/thread/view', array('id' =>$row['thread_id'])); //$e107->url->getUrl('forum', 'thread', "func=view&id={$row['thread_id']}");
-				$LINKTOFORUM = e107::url('forum/forum/view', array('id' => $row['thread_forum_id'])); //$e107->url->getUrl('forum', 'forum', "func=view&id={$row['thread_forum_id']}");
+			//	$LINKTOTHREAD = e107::url('forum/thread/view', array('id' =>$row['thread_id'])); //$e107->url->getUrl('forum', 'thread', "func=view&id={$row['thread_id']}");
+			//	$LINKTOFORUM = e107::url('forum/forum/view', array('id' => $row['thread_forum_id'])); //$e107->url->getUrl('forum', 'forum', "func=view&id={$row['thread_forum_id']}");
 
 				$lastpost_datestamp = $gen->convert_date($row['thread_lastpost'], 'forum');
 
@@ -656,7 +656,7 @@ class forumStats
 			$parms = "{$ftotal},{$this->view},{$this->from},".e_SELF.'?[FROM].active.forum.'.$this->view;
 			$text .= "<div class='nextprev'>".$tp->parseTemplate("{NEXTPREV={$parms}}").'</div>';
 
-			$ns->tablerender(LAN_7, $text, 'nfp');
+			$ns->tablerender(LAN_7, $text, 'forum-stats-active');
 
 
 		}

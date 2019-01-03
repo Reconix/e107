@@ -648,6 +648,11 @@ class comment
 		}
 
 		$tp = e107::getParser();
+
+	//	if(THEME_LEGACY !== true) // old themes might still use bbcodes.
+		{
+			$comment = $tp->toText($comment);
+		}
 		
 		$comment = trim($comment);
 		
@@ -711,7 +716,8 @@ class comment
 		{
 			$author_name = $data; //BC Fix. 	
 		}
-		
+
+
 		
 		global $e107,$rater;
 
@@ -719,6 +725,11 @@ class comment
 		$sql2 		= e107::getDb('sql2');
 		$tp 		= e107::getParser();
 		$pref 		= e107::getPref();
+
+	//	if(THEME_LEGACY !== true) // old themes might still use bbcodes.
+		{
+			$comment = $tp->toText($comment);
+		}
 
 		if ($this->getCommentPermissions() != 'rw') return;
 
@@ -1044,16 +1055,18 @@ class comment
 	}
 
 
-
 	/**
 	 * Displays existing comments, and a comment entry form
 	 *
-	 * @param string $table - the source table for the associated item
-	 * @param string $action - usually 'comment' or 'reply'
+	 * @param string  $table - the source table for the associated item
+	 * @param string  $action - usually 'comment' or 'reply'
 	 * @param integer $id - ID of item associated with comments (e.g. news ID)
-	 * @param int $width - appears to not be used
-	 * @param string $subject
+	 * @param int     $width - appears to not be used
+	 * @param string  $subject
 	 * @param boolean $rate
+	 * @param boolean|string $return true, false or 'html'
+	 * @param boolean $tablerender
+	 * @return array|null|string|void
 	 */
 	function compose_comment($table, $action, $id, $width, $subject, $rate = FALSE, $return = FALSE, $tablerender = TRUE)
 	{
@@ -1134,11 +1147,12 @@ class comment
 			{
 					
 				//	$modcomment .= "<a href='".e_ADMIN_ABS."modcomment.php?$table.$id'>".COMLAN_314."</a>";
-					$modcomment .= "<a class='btn btn-default btn-mini btn-sm' href='".e_ADMIN_ABS."comment.php?searchquery={$id}&filter_options=comment_type__".$this->getCommentType($table)."'>".COMLAN_314."</a>";		
+					$modcomment .= "<a class='btn btn-default btn-secondary btn-mini btn-sm' href='".e_ADMIN_ABS."comment.php?searchquery={$id}&filter_options=comment_type__".$this->getCommentType($table)."'>".COMLAN_314."</a>";
 					
 					
 			}
-			
+
+			$from = 0;
 			$modcomment .= 	$this->nextprev($table,$id,$from);
 			$modcomment .= "</div>";
 		}	
@@ -1162,10 +1176,9 @@ class comment
 		{
 			$text = "<ul class='media-list' id='comments-container'><li><!-- --></li></ul>";	
 		}
-		
-		$search = array("{MODERATE}","{COMMENTS}","{COMMENTFORM}","{COMMENTNAV}");
-		$replace = array($modcomment,$text,$comment,$pagination);
-		$TEMPL = str_replace($search,$replace,$this->template['layout']);		
+
+
+		$TEMPL = $this->parseLayout($text,$comment,$modcomment);
 
 
 	//	$return = null;
@@ -1196,8 +1209,8 @@ class comment
 		}
 
 		
-		
 
+		$ret = array();
 		$ret['comment'] = $text;
 		$ret['moderate'] = $modcomment;
 		$ret['comment_form'] = $comment;
@@ -1206,7 +1219,22 @@ class comment
 		return (!$return) ? "" : $ret;
 	}
 
+	/**
+	 * Parse the Comment Layout template
+	 * @param $comment
+	 * @param $form
+	 * @param $modcomment
+	 * @return mixed
+	 */
+	public function parseLayout($comment, $form, $modcomment)
+	{
+		$search = array("{MODERATE}","{COMMENTS}","{COMMENTFORM}","{COMMENTNAV}");
+		$pagination = '';
+		$replace = array($modcomment,$comment,$form,$pagination);
 
+		return str_replace($search,$replace,$this->template['layout']);
+
+	}
 
 
 	
@@ -1301,8 +1329,8 @@ class comment
 			$prev = e_HTTP . 'comment.php?mode=list&amp;type=' . $table . '&amp;id=' . $id . '&amp;from=0';
 			$next = e_HTTP . 'comment.php?mode=list&amp;type=' . $table . '&amp;id=' . $id . '&amp;from=0';
 
-			return "<a class='e-ajax btn btn-default btn-mini btn-sm' href='#' data-nav-total='{$this->totalComments}' data-nav-dir='down' data-nav-inc='{$this->commentsPerPage}' data-target='comments-container' data-src='{$prev}'>" . LAN_PREVIOUS . "</a>
-			<a class='e-ajax btn btn-default btn-mini btn-sm' href='#' data-nav-total='{$this->totalComments}' data-nav-dir='up' data-nav-inc='{$this->commentsPerPage}' data-target='comments-container' data-src='{$next}'>" . LAN_NEXT . "</a>";
+			return "<a class='e-ajax btn btn-default btn-secondary btn-mini btn-sm' href='#' data-nav-total='{$this->totalComments}' data-nav-dir='down' data-nav-inc='{$this->commentsPerPage}' data-target='comments-container' data-src='{$prev}'>" . LAN_PREVIOUS . "</a>
+			<a class='e-ajax btn btn-default btn-secondary btn-mini btn-sm' href='#' data-nav-total='{$this->totalComments}' data-nav-dir='up' data-nav-inc='{$this->commentsPerPage}' data-target='comments-container' data-src='{$next}'>" . LAN_NEXT . "</a>";
 		}
 		
 	}
@@ -1399,7 +1427,7 @@ class comment
 				{
 					unset($e_comment, $key);
 					include_once (e_PLUGIN.$file."/e_comment.php");
-					if ($e_comment && is_array($e_comment))
+					if (!empty($e_comment) && is_array($e_comment))
 					{
 						$key = $e_comment['eplug_comment_ids'];
 						if (isset($key) && $key != '')
@@ -1410,9 +1438,10 @@ class comment
 					else
 					{
 						//convert old method variables into the same array method
-						$key = $e_plug_table;
-						if (isset($key) && $key != '')
+
+						if (isset($e_plug_table) && $e_plug_table != '')
 						{
+							$key = $e_plug_table;
 							$e_comment['eplug_comment_ids'] = $e_plug_table;
 							$e_comment['plugin_name'] = $plugin_name;
 							$e_comment['plugin_path'] = $plugin_path;
@@ -1489,6 +1518,7 @@ class comment
 					//author - no ned to split now
 					$comment_author_id = $row['comment_author_id'];
 					$ret['comment_author_id'] = $comment_author_id ;
+					$ret['comment_author_image'] = $row['user_image'];
 					$comment_author_name = $row['comment_author_name'];
 					$ret['comment_author'] = (USERID ? "<a href='".e107::getUrl()->create('user/profile/view', array('id' => $comment_author_id, 'name' => $comment_author_name))."'>".$comment_author_name."</a>" : $comment_author_name);
 					//comment text

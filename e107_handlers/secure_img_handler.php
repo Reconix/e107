@@ -265,7 +265,9 @@ class secure_image
 		}
 		else
 		{
+
 			echo "Render Failed";
+			http_response_code(500);
 			exit;
 		}
 
@@ -349,7 +351,9 @@ class secure_image
 			
 		}
 
-		if(isset($secureimg['font']) && !is_readable($fontpath.$secureimg['font']))
+		$fontFile = isset($secureimg['font']) ? realpath($fontpath.$secureimg['font']) : false;
+
+		if(!empty($fontFile) && !is_readable($fontFile))
 		{
 			echo "Font missing"; // for debug only. translation not necessary.
 			exit;
@@ -399,10 +403,11 @@ class secure_image
 		}
 		
 		header("Content-type: image/{$type}");
+		
 
-		if(isset($secureimg['font']) && is_readable($fontpath.$secureimg['font']))
+		if(!empty($fontFile))
 		{
-			imagettftext($image, $secureimg['size'],$secureimg['angle'], $secureimg['x'], $secureimg['y'], $text_color,$fontpath.$secureimg['font'], $code);
+			imagettftext($image, $secureimg['size'],$secureimg['angle'], $secureimg['x'], $secureimg['y'], $text_color, $fontFile, $code);
 		}
 		else
 		{

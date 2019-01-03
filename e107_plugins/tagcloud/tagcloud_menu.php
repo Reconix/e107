@@ -1,3 +1,4 @@
+
 <?php
 /*
  * e107 website system
@@ -23,14 +24,18 @@ require_once('tagcloud_class.php');
 class tagcloud_menu
 {
 	
+  public $template = array();
+  
 	function __construct()
 	{
-		
+		 $this->template = e107::getTemplate('tagcloud','tagcloud_menu','default');
+ 
 	}	
 	
-	function render()
+	function render($parm=null)
 	{
-		$cloud = new TagCloud();
+ 
+    $cloud = new TagCloud();
 		$sql = e107::getDb();
 		
 		e107::getCache()->setMD5(e_LANGUAGE);
@@ -64,17 +69,30 @@ class tagcloud_menu
 		
 		$cloud->setHtmlizeTagFunction( function($tag, $size) 
 		{
-			return "<a class='tag' href='".$tag['url']."'><span class='size".$size."'>".$tag['tag']."</span></a> ";
+			$tp = e107::getParser();
+      $var = array('TAG_URL' => $tag['url'],
+                   'TAG_SIZE' => $size,
+                   'TAG_NAME' => $tag['tag'],
+                   'TAG_COUNT' => $tag['size'],
+       );
+ 
+      $text =  $tp->simpleParse($this->template['item'], $var);
+      //$text = "<a class='tag' href='".$tag['url']."'><span class='size".$size."'>".$tag['tag']."</span></a> ";
+ 
+      return $text;
 		});
 		
-		$cloud->setOrder('tag','ASC');
-		$cloud->setLimit(50);
+		$cloud->setOrder('size','DESC');
+
+		$limit = !empty($parm['tagcloud_limit']) ? intval($parm['tagcloud_limit']) : 50;
+
+		$cloud->setLimit($limit);
 		
 		$text = $cloud->render();
 		
 		e107::getCache()->set('tagcloud', $text, true);
 
-		$text .= "<div style='clear:both'></div>";
+		//$text .= "<div style='clear:both'></div>";   moved to $template['default']['end']
 		
 		return $text;	
 		
@@ -84,9 +102,9 @@ class tagcloud_menu
 	
 }
 
-
+/* TODO: add template type as parm, now always default */
 $tag = new tagcloud_menu;
-$text = $tag->render();
+$text = $tag->render($parm);
 
 
 if(!empty($parm))
@@ -102,9 +120,14 @@ else
 	$caption = LAN_PLUGIN_TAGCLOUD_NAME;
 }
 
+$var = array('TAGCLOUD_MENU_CAPTION' => $caption);
 
-
-e107::getRender()->tablerender($caption, "<div class='tagcloud-menu'>".$text."</div>", 'tagcloud_menu');
+$caption =  e107::getParser()->simpleParse($tag->template['caption'], $var);
+       
+$start = $tag->template['start']; 
+$end = $tag->template['end']; 
+ 
+e107::getRender()->tablerender($caption, $start.$text.$end, 'tagcloud_menu');
 
 
 

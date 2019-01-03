@@ -113,6 +113,19 @@ if($register_globals == true)
 //	}
 //}
 
+// Set Absolute file-path of directory containing class2.php
+if(!defined('e_ROOT'))
+{
+	$e_ROOT = realpath(dirname(__FILE__)."/");
+
+	if ((substr($e_ROOT,-1) !== '/') && (substr($e_ROOT,-1) !== '\\') )
+	{
+		$e_ROOT .= DIRECTORY_SEPARATOR;  // Should function correctly on both windows and Linux now.
+	}
+
+	define('e_ROOT', $e_ROOT);
+	unset($e_ROOT);
+}
 
 // MOVED TO $e107->prepare_request()
 // e107 uses relative url's, which are broken by "pretty" URL's. So for now we don't support / after .php
@@ -200,7 +213,9 @@ else
 //
 // F: Grab e107_config, get directory paths and create $e107 object
 //
-@include(realpath(dirname(__FILE__).'/e107_config.php'));
+
+
+@include(e_ROOT.'e107_config.php');
 
 if(!defined('e_POWEREDBY_DISABLE'))
 {
@@ -209,7 +224,7 @@ if(!defined('e_POWEREDBY_DISABLE'))
 
 if(isset($CLASS2_INCLUDE) && ($CLASS2_INCLUDE!=''))
 {
-	 require_once(realpath(dirname(__FILE__).'/'.$CLASS2_INCLUDE));
+	 require_once(e_ROOT.$CLASS2_INCLUDE);
 }
 
 //define("MPREFIX", $mySQLprefix); moved to $e107->set_constants()
@@ -221,91 +236,30 @@ if(!isset($ADMIN_DIRECTORY))
   exit();
 }
 
+// Upgrade Compatibility - Disable CL_WIDGETS before e107_class.php is loaded.
+$tmpPlugDir = e_ROOT.$PLUGINS_DIRECTORY;
+if(is_dir($tmpPlugDir."/cl_widgets"))
+{
+	rename($tmpPlugDir."/cl_widgets",$tmpPlugDir."/cl_widgets__");
+}
+unset($tmpPlugDir);
 //
 // clever stuff that figures out where the paths are on the fly.. no more need for hard-coded e_HTTP :)
 //
-$tmp = realpath(dirname(__FILE__).'/'.$HANDLERS_DIRECTORY);
+$tmp = e_ROOT.$HANDLERS_DIRECTORY;
 
 //Core functions - now API independent
 @require_once($tmp.'/core_functions.php');
 e107_require_once($tmp.'/e107_class.php');
 unset($tmp);
 
+
+
 $e107_paths = compact('ADMIN_DIRECTORY', 'FILES_DIRECTORY', 'IMAGES_DIRECTORY', 'THEMES_DIRECTORY', 'PLUGINS_DIRECTORY', 'HANDLERS_DIRECTORY', 'LANGUAGES_DIRECTORY', 'HELP_DIRECTORY', 'DOWNLOADS_DIRECTORY','UPLOADS_DIRECTORY','SYSTEM_DIRECTORY', 'MEDIA_DIRECTORY','CACHE_DIRECTORY','LOGS_DIRECTORY', 'CORE_DIRECTORY', 'WEB_DIRECTORY');
 $sql_info = compact('mySQLserver', 'mySQLuser', 'mySQLpassword', 'mySQLdefaultdb', 'mySQLprefix', 'mySQLport');
-$e107 = e107::getInstance()->initCore($e107_paths, realpath(dirname(__FILE__)), $sql_info, varset($E107_CONFIG, array()));
+$e107 = e107::getInstance()->initCore($e107_paths, e_ROOT, $sql_info, varset($E107_CONFIG, array()));
 
 e107::getSingleton('eIPHandler');			// This auto-handles bans etc
-
-
-### NEW Register Autoload - do it asap
-if(!function_exists('spl_autoload_register'))
-{
-	// PHP >= 5.1.2 required
-	die('Fatal exception - spl_autoload_* required.');
-}
-
-
-
-
-
-// allow disable of autoloading - may be removed as e107::autoload_register() is flexible enough
-if(!defset('E107_DISABLE_AUTOLOAD', false))
-{
-	/**
-	 * Generic autoloader. (didn't work while in e107_class.php) 
-	 * @example if your plugin calls 'use Xxxxx\Yyyyy\Zzzzz;' it will attempt to load: ./vendor/Xxxxx/Yyyyy/Zzzzz.php
-	 */
-	function autoloadPsr0($className)
-	{
-		$className = str_replace("_", "\\", $className);
-		$className = ltrim($className, '\\');
-		$fileName = '';
-		$namespace = '';
-		
-		if ($lastNsPos = strripos($className, '\\'))
-		{
-			$namespace = substr($className, 0, $lastNsPos);
-			$className = substr($className, $lastNsPos + 1);
-			$fileName = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
-		}
-		
-		$fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-		
-		$fullPath = 'vendor'. DIRECTORY_SEPARATOR . $fileName;
-		
-		if(file_exists($fullPath))
-		{
-			e107_require_once($fullPath);	
-		}
-		else
-		{
-			return false;	
-		} 
-		
-	}
-
-	e107::autoload_register(array('e107', 'autoload'));
-//	e107::autoload_register('autoloadPsr0');  // Generic 'use xxxx\yyyy\zzzz;' fix/solution for plugin developers. 
-	
-}
-
-	function genericAutoload($className)
-	    {
-	        $className = str_replace("_", "\\", $className);
-	        $className = ltrim($className, '\\');
-	        $fileName = '';
-	        $namespace = '';
-	        if ($lastNsPos = strripos($className, '\\'))
-	        {
-	            $namespace = substr($className, 0, $lastNsPos);
-	            $className = substr($className, $lastNsPos + 1);
-	            $fileName = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
-	        }
-	        $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-	
-	        e107_require_once($fileName);
-	    }
 
 /**
  * NEW - system security levels
@@ -348,6 +302,7 @@ if(!defined('e_SECURITY_LEVEL'))
 //$e107->url = e107::getUrl(); - caught by __get()
 //TODO - find & replace $e107->url
 //DEPRECATED, BC, $e107->tp caught by __get()
+/** @var e_parse $tp */
 $tp = e107::getParser(); //TODO - find & replace $tp, $e107->tp
 
 //define("e_QUERY", $matches[2]);
@@ -410,6 +365,7 @@ e107::getSingleton('e107_traffic'); // We start traffic counting ASAP
 // e107_require_once(e_HANDLER.'mysql_class.php');
 
 //DEPRECATED, BC, $e107->sql caught by __get()
+/** @var e_db_mysql $sql */
 $sql = e107::getDb(); //TODO - find & replace $sql, $e107->sql
 $sql->db_SetErrorReporting(false);
 
@@ -443,6 +399,10 @@ elseif ($merror === 'e2')
 /* PHP Compatabilty should *always* be on. */
 e107_require_once(e_HANDLER.'php_compatibility_handler.php');
 
+// SITEURL constant depends on the database
+// See https://github.com/e107inc/e107/issues/3033 for details.
+$e107->set_urls_deferred();
+
 //
 // L: Extract core prefs from the database
 //
@@ -473,6 +433,7 @@ $sysprefs = new prefs;
 e107::getConfig()->load(); // extra load, required if mysql handler already called e107::getConfig()
 if(!e107::getConfig()->hasData())
 {
+
 	// Core prefs error - admin log
 	e107::getAdminLog()->log_event('CORE_LAN8', 'CORE_LAN7', E_LOG_WARNING);
 
@@ -681,7 +642,11 @@ if(isset($pref['lan_global_list']))
 {
 	foreach($pref['lan_global_list'] as $path)
 	{
-		e107::plugLan($path,'global',true);			
+		if(e107::plugLan($path, 'global', true) === false)
+		{
+			e107::plugLan($path, 'global', false);
+		}
+
 	}			
 }
 
@@ -689,7 +654,7 @@ if(isset($pref['lan_global_list']))
 
 $sql->db_Mark_Time('CHAP challenge');
 
-$die = (e_AJAX_REQUEST == true) ? false : true; 
+$die = (e_AJAX_REQUEST == true) ? false : true;
 e107::getSession()
 	->challenge() // Make sure there is a unique challenge string for CHAP login
 	->check($die); // Token protection
@@ -749,6 +714,8 @@ define('SITECONTACTINFO', $tp->toHTML($pref['sitecontactinfo'], true, 'emotes_of
 define('SITEEMAIL', vartrue($pref['replyto_email'],$pref['siteadminemail']));
 define('USER_REGISTRATION', vartrue($pref['user_reg'],false)); // User Registration System Active or Not.
 define('e_DEVELOPER', $developerMode);
+define('e_VERSION', varset($pref['version'],''));
+
 unset($developerMode);
 
 if(!empty($pref['xurl']) && is_array($pref['xurl']))
@@ -762,6 +729,7 @@ if(!empty($pref['xurl']) && is_array($pref['xurl']))
 	define('XURL_FLICKR', vartrue($pref['xurl']['flickr'], false));
 	define('XURL_INSTAGRAM', vartrue($pref['xurl']['instagram'], false));
 	define('XURL_PINTEREST', vartrue($pref['xurl']['pinterest'], false));
+	define('XURL_STEAM', vartrue($pref['xurl']['steam'], false));
 	define('XURL_VIMEO', vartrue($pref['xurl']['vimeo'], false));
 }
 else
@@ -775,6 +743,7 @@ else
 	define('XURL_FLICKR', false);
 	define('XURL_INSTAGRAM', false);
 	define('XURL_PINTEREST', false);
+	define('XURL_STEAM', false);
 	define('XURL_VIMEO', false);
 }
 
@@ -806,6 +775,7 @@ if(isset($pref['e_module_list']) && $pref['e_module_list'])
 	{
 		if (is_readable(e_PLUGIN."{$mod}/e_module.php"))
 		{
+			$sql->db_Mark_Time('[e_module in '.$mod.']');
 			require_once(e_PLUGIN."{$mod}/e_module.php");
  		}
 	}
@@ -831,7 +801,8 @@ if (!function_exists('checkvalidtheme'))
 	{
 		// arg1 = theme to check
 		//global $ADMIN_DIRECTORY, $tp, $e107;
-		global $sql;
+	//	global $sql;
+		$sql = e107::getDb();
 		$e107 = e107::getInstance();
 		$tp = e107::getParser();
 		$ADMIN_DIRECTORY = $e107->getFolder('admin');
@@ -945,7 +916,7 @@ if (!class_exists('e107table', false))
 		
 		function __construct()
 		{
-		//	$this->themeClass 		= e107::getPref('sitetheme')."_theme"; // disabled at the moment. 
+			$this->themeClass 		= e107::getPref('sitetheme')."_theme"; // disabled at the moment.
 			$this->adminThemeClass 	= e107::getPref('admintheme')."_admintheme";	// Check for a class. 
 		}
 
@@ -956,7 +927,7 @@ if (!class_exists('e107table', false))
 		 */
 		public function setStyle($style)
 		{
-			$this->eSetStyle = $style;
+			$this->eSetStyle = (string) $style;
 		}
 
 		/**
@@ -966,12 +937,13 @@ if (!class_exists('e107table', false))
 		public function setUniqueId($id)
 		{
 			$this->uniqueId = $id;
+			return $this;
 		}
 
 
 		/**
-		 * Set Advanced Menu content (beyond just $caption and $text)
-		 * @param string $type header|footer|text|title|image
+		 * Set Advanced Page/Menu content (beyond just $caption and $text)
+		 * @param string $type header|footer|text|title|image|list
 		 * @param string $val
 		 */
 		public function setContent($type, $val)
@@ -982,6 +954,43 @@ if (!class_exists('e107table', false))
 			}
 
 			$this->content[$type] = (string) $val;
+		}
+
+
+		/**
+		 * Return the value of custom content
+		 * @param string $type header|footer|text|title|image|list
+		 * @return array
+		 */
+		public function getContent($type='')
+		{
+			if(empty($type))
+			{
+				return $this->content;
+			}
+
+			return $this->content[$type];
+
+		}
+
+
+		/**
+		 * Return the current value of {SETSTYLE}
+		 * @return mixed
+		 */
+		public function getStyle()
+		{
+			return $this->eSetStyle;
+		}
+
+
+		/**
+		 * Return the currenty set uniqueId.
+		 * @return mixed
+		 */
+		public function getUniqueId()
+		{
+			return $this->uniqueId;
 		}
 
 
@@ -1363,7 +1372,11 @@ if(!defined("THEME_LAYOUT"))
 	}
 	*/
 
-	if(varset($pref['themecss']) && file_exists(THEME.$pref['themecss']))
+	if(deftrue('e_ADMIN_AREA'))
+	{
+		define("THEME_STYLE", $pref['admincss']);
+	}
+	elseif(varset($pref['themecss']) && file_exists(THEME.$pref['themecss']))
 	{
 		define("THEME_STYLE", $pref['themecss']);
 	}
@@ -1842,6 +1855,8 @@ function init_session()
 	
 	// ----------------------------------------
 
+	// Set 'UTC' as default timezone to avoid PHP warnings.
+	date_default_timezone_set('UTC');
 
 	global $user_pref, $currentUser;
 
@@ -1877,6 +1892,9 @@ function init_session()
 		unset($tz);
 	}
 
+e107::getDebug()->log("Timezone: ".USERTIMEZONE); // remove later on.
+
+
 	define('USERIP', e107::getIPHandler()->getIP(FALSE));
 	define('POST_REFERER', md5($user->getToken()));
 
@@ -1899,8 +1917,7 @@ function init_session()
 		define('GUEST', false);
 		define('USERCLASS', '');
 		define('USEREMAIL', '');
-		define('USERCLASS_LIST', '');
-		define('USERCLASS', '');
+		define('USERCLASS_LIST', '253,254,250,251,0'); // needed to run some queries.
 		define('USERJOINED', '');
 		return;
 	}
@@ -2026,6 +2043,8 @@ if(!isset($_E107['no_online']) && varset($pref['track_online']))
 	e107::getOnline()->goOnline($pref['track_online'], $pref['flood_protect']);
 }
 
+$sql->db_Mark_Time('(After Go online)');
+
 /**
  * Set Cookie
  * @param string $name
@@ -2059,7 +2078,12 @@ function session_set($name, $value, $expire='', $path = e_HTTP, $domain = '', $s
 		if(($domain == '' && !e_SUBDOMAIN) || (defined('MULTILANG_SUBDOMAIN') && MULTILANG_SUBDOMAIN === TRUE))
 		{
 			$domain = (e_DOMAIN != FALSE) ? ".".e_DOMAIN : "";
-		}	
+		}
+
+		if(defined('e_MULTISITE_MATCH'))
+		{
+			$path = '/';
+		}
 		
 		setcookie($name, $value, $expire, $path, $domain, $secure, true);
 		$_COOKIE[$name] = $value;
@@ -2284,7 +2308,7 @@ class error_handler
 	{
 		$this->label = array(E_NOTICE => "Notice", E_WARNING => "Warning", E_DEPRECATED => "Deprecated", E_STRICT => "Strict");
 		$this->color = array(E_NOTICE=> 'info', E_WARNING=>'warning', E_DEPRECATED => 'danger', E_STRICT => 'primary');
-		$this->docroot = dirname(realpath(__FILE__)).DIRECTORY_SEPARATOR;
+		$this->docroot = e_ROOT; // dirname(realpath(__FILE__)).DIRECTORY_SEPARATOR;
 
 		// This is initialized before the current debug level is known
 		if(function_exists('xdebug_get_function_stack'))
@@ -2405,15 +2429,15 @@ class error_handler
 		{
 			$text .= "
 			<tr>
-				<td>".$key."</td>
-				<td>";
+				<td class='forumheader3'>".$key."</td>
+				<td class='forumheader3'>";
 			$text .= !empty($val['class']) ? $val['class']."->" : '';
 			$text .= !empty($val['include_filename']) ? "include: ". str_replace($this->docroot,'', $val['include_filename']) : '';
 			$text .= !empty($val['function']) ? $val['function']."(" : "";
 			$text .= !empty($val['params']) ? print_r($val['params'],true) : '';
 			$text .= !empty($val['function']) ? ")" : "";
 			$text .="</td>
-				<td>";
+				<td class='forumheader3'>";
 			$text .= str_replace($this->docroot,'', $val['file']).":".$val['line'];
 			$text .= "</td>
 			</tr>";
@@ -2451,7 +2475,7 @@ class error_handler
 		{
 			foreach ($this->errors as $key => $value)
 			{
-				$ret .= "<tr class='forumheader3'><td>{$value['short']}</td></tr>\n";
+				$ret .= "<tr><td class='forumheader3'>{$value['short']}</td></tr>\n";
 			}
 		}
 
@@ -2501,7 +2525,7 @@ class e_http_header
 
 		if($this->compression_server_support == true && $this->compression_browser_support == true)
 		{
-			$this->compress_output = varset(e107::getPref('compress_output'),false);
+			$this->compress_output = (bool) varset(e107::getPref('compress_output'),false);
 		}
 		else
 		{
@@ -2592,7 +2616,7 @@ class e_http_header
 
 		$text .=print_a($server,true);
 
-		if($this->compress_output == true)
+		if($this->compress_output === true)
 		{
 
 			$text = gzencode($text, $this->compression_level);
@@ -2601,7 +2625,14 @@ class e_http_header
 		echo $text;
 		
 	}			
-		
+
+	private function unsetHeader($header)
+	{
+		header_remove($header);
+	}
+
+
+
 	
 	function send()
 	{
@@ -2615,7 +2646,35 @@ class e_http_header
 		$this->setHeader("Cache-Control: max-age=0", false);
 		*/
 	//	$this->setHeader("Cache-Control: public", true);
-	
+
+/*
+		if(defined('e_HTTP_STATIC'))
+		{
+			unset($_COOKIE);
+
+			$siteurl = str_replace('https','http',SITEURL);
+			$static = str_replace('https','http', e_HTTP_STATIC);
+
+			if($siteurl === $static && deftrue('e_SUBDOMAIN'))
+			{
+				$accessControl = str_replace(e_SUBDOMAIN.'.', '', SITEURLBASE);
+
+				$this->unsetHeader("Cache-Control");
+			//	$this->unsetHeader("Content-Type");
+				$this->unsetHeader("Set-Cookie");
+				$this->unsetHeader("Pragma");
+				$this->unsetHeader("Expires");
+
+				$this->setHeader("Access-Control-Allow-Origin: ".$accessControl, true);
+				$this->setHeader("Cache-Control: public", true);
+			}
+			else
+			{
+				$this->setHeader("Access-Control-Allow-Origin: ".$static, true);
+			}
+		}
+*/
+
 	
 		$canCache = e107::canCache();
 		
@@ -2640,28 +2699,18 @@ class e_http_header
 		}
 		
 
-		if($this->compress_output != false)
+		if($this->compress_output !== false)
 		{
-		//	$this->setHeader("ETag: \"{$this->etag}-gzip\"");
-			$this->setHeader('ETag: "'.$this->etag.'-gzip"', true);	
+			$this->setHeader('ETag: "'.$this->etag.'-gzip"', true);
 			$this->content = gzencode($this->content, $this->compression_level);
+			$this->length = strlen($this->content);
 			$this->setHeader('Content-Encoding: gzip', true);
 			$this->setHeader("Content-Length: ".$this->length, true);
-
 		} 
 		else 
 		{
 
-/*
-			if($this->compression_browser_support ==true) 
-			{
-				$this->setHeader('ETag: "'.$this->etag.'-gzip"', true);	
-			}
-			else
-			{*/
-				$this->setHeader('ETag: "'.$this->etag.'"', true);	
-		//	}
-			
+			$this->setHeader('ETag: "'.$this->etag.'"', true);
 			$this->setHeader("Content-Length: ".$this->length, true);
 		}
 		
@@ -2669,7 +2718,7 @@ class e_http_header
 		{
 			$this->setHeader("X-Powered-By: e107", true); // no less secure than e107-specific html. 
 		}
-		
+
 		if($this->compression_server_support == true)
 		{
 			$this->setHeader('Vary: Accept-Encoding');	
@@ -2678,7 +2727,12 @@ class e_http_header
 		{
 			$this->setHeader('Vary: Accept');
 		}
-		
+
+		if(defset('X-FRAME-SAMEORIGIN') !== false)
+		{
+			$this->setHeader('X-Frame-Options: SAMEORIGIN');
+		}
+
 		// should come after the Etag header
 		if ($canCache && isset($_SERVER['HTTP_IF_NONE_MATCH']))
 		{
@@ -2702,7 +2756,7 @@ class e_http_header
 
 
 
-$sql->db_Mark_Time('(After class2)');
+
 
 
 function e107_ini_set($var, $value)
@@ -2730,3 +2784,4 @@ function plugInstalled($plugname)
 	return isset($pref['plug_installed'][$plugname]);*/
 }
 
+$sql->db_Mark_Time('(After class2)');

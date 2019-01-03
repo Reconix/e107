@@ -100,10 +100,13 @@ class e107_db_debug {
 		if (!strlen($sMarker)) {
 			$sMarker = "Mark not set";
 		}
-	
+
+		$srch = array('[',']');
+		$repl = array("<small>","</small>");
+
 		$this->aTimeMarks[$nMarks]=array(
 		'Index' => ($this->nTimeMarks),
-		'What' => $sMarker,
+		'What' => str_replace($srch,$repl,$sMarker),
 		'%Time' => 0,
 		'%DB Time' => 0,
 		'%DB Count' => 0,
@@ -354,6 +357,38 @@ class e107_db_debug {
 	}
 
 
+	function save($log)
+	{
+		e107::getMessage()->addDebug("Saving a log");
+
+		$titles = array_keys($this->aTimeMarks[0]);
+
+		$text = implode("\t\t\t",$titles)."\n\n";
+
+		foreach($this->aTimeMarks as $item)
+		{
+			$item['What'] = str_pad($item['What'],50," ",STR_PAD_RIGHT);
+			$text .= implode("\t\t\t",$item)."\n";
+		}
+
+		file_put_contents($log, $text, FILE_APPEND);
+
+	}
+
+
+	private function highlight($label, $value=0,$threshold=0)
+	{
+
+		if($value > $threshold)
+		{
+			return  "<span class='label label-danger'>".$label."</span>";
+		}
+
+		return $label;
+
+	}
+
+
 	function Show_Performance()
 	{
 			//
@@ -445,10 +480,12 @@ class e107_db_debug {
 				$tUsage = $tMarker['Memory Used'];
 				$tMarker['Memory Used'] = number_format($tUsage / 1024.0, 1);
 
+				$tMarker['Memory Used'] = $this->highlight($tMarker['Memory Used'],$tUsage,400000);
+/*
 				if($tUsage > 400000) // Highlight high memory usage.
 				{
 					$tMarker['Memory Used'] = "<span class='label label-danger'>".$tMarker['Memory Used']."</span>";
-				}
+				}*/
 
 				$aSum['Memory'] = $tMem;
 
@@ -474,6 +511,9 @@ class e107_db_debug {
 					$aSum['DB Time'] += $tMarker['DB Time'];
 					$aSum['DB Count'] += $tMarker['DB Count'];
 					$tMarker['Time'] = number_format($thisDelta * 1000.0, 1);
+					$tMarker['Time'] = $this->highlight($tMarker['Time'],$thisDelta,.2);
+
+
 					$tMarker['%Time'] = $totTime ? number_format(100.0 * ($thisDelta / $totTime), 0) : 0;
 					$tMarker['%DB Count'] = number_format(100.0 * $tMarker['DB Count'] / $sql->db_QueryCount(), 0);
 					$tMarker['%DB Time'] = $db_time ? number_format(100.0 * $tMarker['DB Time'] / $db_time, 0) : 0;
@@ -530,7 +570,14 @@ class e107_db_debug {
 			// Stats by Table
 			//
 
-			$text .= "\n<table class='fborder table table-striped table-condensed'>\n";
+			$text .= "\n<table class='fborder table table-striped table-condensed'>
+			<colgroup>
+				<col style='width:auto' />
+				<col style='width:9%' />
+					<col style='width:9%' />
+						<col style='width:9%' />
+							<col style='width:9%' />
+			</colgroup>\n";
 
 			$bRowHeaders = false;
 			$aSum = $this->aDBbyTable['core']; // create a template from the 'real' array
@@ -545,7 +592,7 @@ class e107_db_debug {
 				if(!$bRowHeaders)
 				{
 					$bRowHeaders = true;
-					$text .= "<tr><td class='fcaption'><b>" . implode("</b></td><td class='fcaption'><b>", array_keys($curTable)) . "</b></td></tr>\n";
+					$text .= "<tr><td class='fcaption'><b>" . implode("</b></td><td class='fcaption' style='text-align:right'><b>", array_keys($curTable)) . "</b></td></tr>\n";
 					$aUnits = $curTable;
 					foreach($aUnits as $key => $val)
 					{
@@ -566,7 +613,9 @@ class e107_db_debug {
 				$aSum['DB Count'] += $curTable['DB Count'];
 				$curTable['%DB Count'] = number_format(100.0 * $curTable['DB Count'] / $sql->db_QueryCount(), 0);
 				$curTable['%DB Time'] = number_format(100.0 * $curTable['DB Time'] / $db_time, 0);
-				$curTable['DB Time'] = number_format($curTable['DB Time'] * 1000.0, 1);
+				$timeLabel = number_format($curTable['DB Time'] * 1000.0, 1);
+				$curTable['DB Time'] = $this->highlight($timeLabel, ($curTable['DB Time'] * 1000), 500); // 500 msec
+
 				$text .= "<tr><td class='forumheader3'>" . implode("&nbsp;</td><td class='forumheader3' style='text-align:right'>", array_values($curTable)) . "&nbsp;</td></tr>\n";
 			}
 
@@ -698,10 +747,16 @@ class e107_db_debug {
 				<td class='forumheader3'>SQL Language</td>
 				<td class='forumheader3'>".$sql->mySQLlanguage."</td>
 			</tr>
+";
+	if($_SERVER['E_DEV'] == 'true')
+	{
+			$text .= "
+				<tr>
+					<td class='forumheader3' colspan='2'><pre>".htmlspecialchars(print_r($e107,TRUE))."</pre></td>
+				</tr>";
+	}
 
-			<tr>
-				<td class='forumheader3' colspan='2'><pre>".htmlspecialchars(print_r($e107,TRUE))."</pre></td>
-			</tr>
+		$text .="
 			<tr>
 				<td class='fcaption' colspan='2'><h2>Session</h2></td>
 			</tr>
@@ -762,7 +817,31 @@ class e107_db_debug {
 			return $text;
 		}
 	}
-	
+
+
+	/**
+	 * var_dump to debug log
+	 * @param mixed $message
+	 */
+	function dump($message, $TraceLev= 1)
+	{
+		ob_start();
+	    var_dump($message);
+	    $content = ob_get_contents();
+	    ob_end_clean();
+
+	    $bt = debug_backtrace();
+
+		$this->aLog[] =	array(
+			'Message'   => $content,
+			'Function'	=> (isset($bt[$TraceLev]['type']) && ($bt[$TraceLev]['type'] == '::' || $bt[$TraceLev]['type'] == '->') ? $bt[$TraceLev]['class'].$bt[$TraceLev]['type'].$bt[$TraceLev]['function'].'()' : $bt[$TraceLev]['function']).'()',
+				'File'	=> varset($bt[$TraceLev]['file']),
+				'Line'	=> varset($bt[$TraceLev]['line'])
+			);
+
+	   // $this->aLog[] =	array ('Message'   => $content, 'Function' => '', 	'File' => '', 'Line' => '' 	);
+
+	}
 //
 // Simple debug-level 'console' log
 // Record a "nice" debug message with
@@ -771,12 +850,14 @@ class e107_db_debug {
 	function log($message,$TraceLev=1)
 	{
 
+
+
 		if(is_array($message) || is_object($message))
 		{
 			$message = "<pre>".print_r($message,true)."</pre>";
 		}
 
-		if (!E107_DBG_BASIC && !E107_DBG_ALLERRORS && !E107_DBG_SQLDETAILS && !E107_DBG_NOTICES)
+		if (!deftrue('E107_DBG_BASIC') && !deftrue('E107_DBG_ALLERRORS') && !deftrue('E107_DBG_SQLDETAILS') && !deftrue('E107_DBG_NOTICES'))
 		{
 			return false;
 		}
@@ -819,10 +900,10 @@ class e107_db_debug {
 			if (!$bRowHeaders)
 			{
 				$bRowHeaders = true;
-				$text .= "<tr class='fcaption'><td><b>".implode("</b></td><td><b>", array_keys($curLog))."</b></td></tr>\n";
+				$text .= "<tr><td class='fcaption' style='text-align:left'><b>".implode("</b></td><td class='fcaption' style='text-align:left'><b>", array_keys($curLog))."</b></td></tr>\n";
 			}
 
-			$text .= "<tr class='forumheader3'><td>".implode("&nbsp;</td><td>", array_values($curLog))."&nbsp;</td></tr>\n";
+			$text .= "<tr ><td class='forumheader3'>".implode("&nbsp;</td><td class='forumheader3'>", array_values($curLog))."&nbsp;</td></tr>\n";
 		}
 
 		$text .= "</table><br />\n";

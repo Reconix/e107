@@ -189,14 +189,9 @@ class e_db_mysql
 		if($this->pdo)
 		{	
 		
-			if(strpos($mySQLserver,':')!==false)
+			if(strpos($mySQLserver,':')!==false && substr_count($mySQLserver, ':')===1)
 			{
 				list($this->mySQLserver,$this->mySQLport) = explode(':',$mySQLserver,2);
-			}
-
-			if($this->mySQLserver === 'localhost')
-			{
-				$this->mySQLserver = '127.0.0.1';  // faster by almost 1 second
 			}
 
 			try
@@ -285,14 +280,14 @@ class e_db_mysql
 		$this->mySQLpassword 	= $mySQLpassword;
 		$this->mySQLerror 		= false;
 
-		if(strpos($mySQLserver,':')!==false)
+		if(strpos($mySQLserver,':')!==false && substr_count($mySQLserver, ':')===1)
 		{
 			list($this->mySQLserver,$this->mySQLport) = explode(':',$mySQLserver,2);
 		}
 
-		if($this->mySQLserver === 'localhost')
+	//	if($this->mySQLserver === 'localhost') // problematic.
 		{
-			$this->mySQLserver = '127.0.0.1'; // faster by almost 1 second. 
+	//		$this->mySQLserver = '127.0.0.1'; // faster by almost 1 second.
 		}
 
 
@@ -328,7 +323,10 @@ class e_db_mysql
 		$this->db_Set_Charset();
 		$this->setSQLMode();
 		
-		if ($db_ConnectionID == NULL){ 	$db_ConnectionID = $this->mySQLaccess; }
+		//if ($db_ConnectionID == NULL){
+			$db_ConnectionID = $this->mySQLaccess;
+
+	//	}
 		
 		return true;
 	}
@@ -347,20 +345,28 @@ class e_db_mysql
 
 	/**
 	 * Select the database to use. 
-	 * @param string database name
-	 * @param string table prefix . eg. e107_
+	 * @param string $database name
+	 * @param string $table prefix . eg. e107_
+	 * @param boolean $multiple set to maintain connection to a secondary database.
 	 * @return boolean true when database selection was successful otherwise false. 
 	 */
-	public function database($database, $prefix = MPREFIX)
+	public function database($database, $prefix = MPREFIX, $multiple=false)
 	{
 		$this->mySQLdefaultdb 	= $database;
 		$this->mySQLPrefix 		= $prefix;
-		
+
+		if($multiple === true)
+		{
+			$this->mySQLPrefix 		= "`".$database."`.".$prefix;
+			return true;
+		}
+
 		if($this->pdo)
 		{
-			try 
+
+			try
 			{
-				$this->mySQLaccess->query("use ".$database);
+				$this->mySQLaccess->query("use `".$database."`");
         		// $this->mySQLaccess->select_db($database); $dbh->query("use newdatabase");
 		    }
 			catch (PDOException $e) 
@@ -464,18 +470,15 @@ class e_db_mysql
 		}
 		if ($debug !== FALSE || strstr($_SERVER['QUERY_STRING'], 'showsql'))
 		{
-			$queryinfo[] = "<b>{$qry_from}</b>: $query";
+			$debugQry = is_array($query) ? print_a($query,true) : $query;
+			$queryinfo[] = "<b>{$qry_from}</b>: ".$debugQry;
 		}
 		if ($log_type != '')
 		{
 			$this->db_Write_log($log_type, $log_remark, $query);
 		}
 
-		if(!$this->mySQLaccess)
-		{
-			global $db_ConnectionID;
-        	$this->mySQLaccess = $db_ConnectionID;
-		}
+		$this->provide_mySQLaccess();
 
 		$b = microtime();
 		
@@ -603,8 +606,14 @@ class e_db_mysql
 					}
 				}
 
-			//	$query = var_export($query,true);
-			   	$db_debug->Mark_Query($query, $buglink, $sQryRes, $aTrace, $mytime, $pTable);
+				if($this->pdo == true && $buglink instanceof PDO)
+				{
+					$db_debug->Mark_Query($query, 'PDO', $sQryRes, $aTrace, $mytime, $pTable);
+				}
+				else
+				{
+					$db_debug->Mark_Query($query, $buglink, $sQryRes, $aTrace, $mytime, $pTable);
+				}
 			}
 			else
 			{
@@ -657,7 +666,7 @@ class e_db_mysql
 	 * @param boolean $multi if true, fetch all (multi mode)
 	 * @param string $indexField field name to be used for indexing when in multi mode
 	 * @param boolean $debug
-	 * @return array
+	 * @return string|array
 	 */
 	public function retrieve($table, $fields = null, $where=null, $multi = false, $indexField = null, $debug = false)
 	{
@@ -849,6 +858,7 @@ class e_db_mysql
 		$this->mySQLcurTable = $table;
 		$REPLACE = false; // kill any PHP notices
 		$DUPEKEY_UPDATE = false;
+		$IGNORE = '';
 
 		if(is_array($arg))
 		{
@@ -867,7 +877,12 @@ class e_db_mysql
 			{
 				$DUPEKEY_UPDATE = true;
 				unset($arg['_DUPLICATE_KEY_UPDATE']);
+			}
 
+			if(isset($arg['_IGNORE']))
+			{
+				$IGNORE = ' IGNORE';
+				unset($arg['_IGNORE']);
 			}
 
 			if(!isset($arg['_FIELD_TYPES']) && !isset($arg['data']))
@@ -912,7 +927,7 @@ class e_db_mysql
 			foreach($arg['data'] as $fk => $fv)
 			{
 				$tmp[] = ($this->pdo == true) ? ':'.$fk : $this->_getFieldValue($fk, $fv, $fieldTypes);
-				$bind[$fk] = array('value'=>$this->_getPDOValue($fieldTypes[$fk],$fv), 'type'=> $this->_getPDOType($fieldTypes[$fk]));
+				$bind[$fk] = array('value'=>$this->_getPDOValue($fieldTypes[$fk],$fv), 'type'=> $this->_getPDOType($fieldTypes[$fk],$this->_getPDOValue($fieldTypes[$fk],$fv)));
 			}
 
 			$valList= implode(', ', $tmp);
@@ -924,7 +939,7 @@ class e_db_mysql
 
 			if($REPLACE === false)
 			{
-				$query = "INSERT INTO `".$this->mySQLPrefix."{$table}` ({$keyList}) VALUES ({$valList})";
+				$query = "INSERT".$IGNORE." INTO `".$this->mySQLPrefix."{$table}` ({$keyList}) VALUES ({$valList})";
 
 				if($DUPEKEY_UPDATE === true)
 				{
@@ -954,11 +969,7 @@ class e_db_mysql
 			$query = 'INSERT INTO '.$this->mySQLPrefix."{$table} VALUES ({$arg})";
 		}
 
-		if(!$this->mySQLaccess)
-		{
-			global $db_ConnectionID;
-			$this->mySQLaccess = $db_ConnectionID;
-		}
+		$this->provide_mySQLaccess();
 
 		$this->mySQLresult = $this->db_Query($query, NULL, 'db_Insert', $debug, $log_type, $log_remark);
 
@@ -1137,7 +1148,7 @@ class e_db_mysql
 
 				if($ftype != 'cmd')
 				{
-					$this->pdoBind[$fn] = array('value'=>$this->_getPDOValue($ftype,$fv), 'type'=> $this->_getPDOType($ftype));
+					$this->pdoBind[$fn] = array('value'=>$this->_getPDOValue($ftype,$fv), 'type'=> $this->_getPDOType($ftype,$this->_getPDOValue($ftype,$fv)));
 				}
 			}
 
@@ -1173,11 +1184,7 @@ class e_db_mysql
 		$table = $this->db_IsLang($tableName);
 		$this->mySQLcurTable = $table;
 
-		if(!$this->mySQLaccess)
-		{
-			global $db_ConnectionID;
-			$this->mySQLaccess = $db_ConnectionID;
-		}
+		$this->provide_mySQLaccess();
 
 		$arg = $this->_prepareUpdateArg($tableName, $arg);
 
@@ -1283,11 +1290,13 @@ class e_db_mysql
 
 			case 'float':
 				// fix - convert localized float numbers
-				$larr = localeconv();
-				$search = array($larr['decimal_point'], $larr['mon_decimal_point'], $larr['thousands_sep'], $larr['mon_thousands_sep'], $larr['currency_symbol'], $larr['int_curr_symbol']);
-				$replace = array('.', '.', '', '', '', '');
+				// $larr = localeconv();
+				// $search = array($larr['decimal_point'], $larr['mon_decimal_point'], $larr['thousands_sep'], $larr['mon_thousands_sep'], $larr['currency_symbol'], $larr['int_curr_symbol']);
+				// $replace = array('.', '.', '', '', '', '');
 
-				return str_replace($search, $replace, floatval($fieldValue));
+				// return str_replace($search, $replace, floatval($fieldValue));
+
+				return e107::getParser()->toNumber($fieldValue);
 			break;
 
 			case 'null':
@@ -1342,15 +1351,20 @@ class e_db_mysql
 
 			case 'float':
 				// fix - convert localized float numbers
-				$larr = localeconv();
-				$search = array($larr['decimal_point'], $larr['mon_decimal_point'], $larr['thousands_sep'], $larr['mon_thousands_sep'], $larr['currency_symbol'], $larr['int_curr_symbol']);
-				$replace = array('.', '.', '', '', '', '');
+				// $larr = localeconv();
+				// $search = array($larr['decimal_point'], $larr['mon_decimal_point'], $larr['thousands_sep'], $larr['mon_thousands_sep'], $larr['currency_symbol'], $larr['int_curr_symbol']);
+				// $replace = array('.', '.', '', '', '', '');
 
-				return str_replace($search, $replace, floatval($fieldValue));
+				// return str_replace($search, $replace, floatval($fieldValue));
+				return e107::getParser()->toNumber($fieldValue);
 			break;
 
 			case 'null':
-				return null;
+			    return (
+                    is_string($fieldValue) && (
+                        ($fieldValue !== '_NULL_') && ($fieldValue !== '')
+                    )
+                ) ? $fieldValue : null;
 				break;
 
 			case 'array':
@@ -1387,7 +1401,7 @@ class e_db_mysql
 	 * @param $type
 	 * @return int
 	 */
-	private function _getPDOType($type)
+	private function _getPDOType($type, $value = null)
 	{
 		switch($type)
 		{
@@ -1397,7 +1411,7 @@ class e_db_mysql
 				break;
 
 			case 'null':
-				return PDO::PARAM_NULL;
+				return ($value === null) ? PDO::PARAM_NULL : PDO::PARAM_STR;
 				break;
 
 			case 'cmd':
@@ -1418,8 +1432,6 @@ class e_db_mysql
 	}
 
 
-
-
 	/**
 	 *  @DEPRECATED
 	 	Similar to db_Update(), but splits the variables and the 'WHERE' clause.
@@ -1434,11 +1446,7 @@ class e_db_mysql
 	  $table = $this->db_IsLang($table);
 	  $this->mySQLcurTable = $table;
 
-	  if(!$this->mySQLaccess)
-	  {
-		global $db_ConnectionID;
-        $this->mySQLaccess = $db_ConnectionID;
-	  }
+		$this->provide_mySQLaccess();
 
 	  $new_data = '';
 	  if (is_array($vars))
@@ -1459,7 +1467,8 @@ class e_db_mysql
 	  }
 	  else
 	  {
-		$this->dbError("db_Update ($query)");
+	    $query = 'UPDATE '.$this->mySQLPrefix.$table.' SET '.$new_data.$vars.' '.$arg;
+		$this->dbError("Error in deprecated db_UpdateArray method query:($query)");
 		return FALSE;
 	  }
 	}
@@ -1640,11 +1649,7 @@ class e_db_mysql
 	 */
 	function close()
 	{
-		if(!$this->mySQLaccess)
-		{
-			global $db_ConnectionID;
-			$this->mySQLaccess = $db_ConnectionID;
-		}
+		$this->provide_mySQLaccess();
 		e107::getSingleton('e107_traffic')->BumpWho('db Close', 1);
 		$this->mySQLaccess = NULL; // correct way to do it when using shared links.
 		$this->dbError('dbClose');
@@ -1676,11 +1681,7 @@ class e_db_mysql
 		$table = $this->db_IsLang($table);
 		$this->mySQLcurTable = $table;
 
-		if(!$this->mySQLaccess)
-		{
-			global $db_ConnectionID;
-        	$this->mySQLaccess = $db_ConnectionID;
-		}
+		$this->provide_mySQLaccess();
 
 
 		if (!$arg)
@@ -1816,7 +1817,8 @@ class e_db_mysql
 			$this->mySQLcurTable = $table;
 			$this->tabset = true;
 		}
-		return ' `'.$this->mySQLPrefix.$table.'`'.substr($matches[0],-1);
+
+		return " ".$this->mySQLPrefix.$table.substr($matches[0],-1);
 	}
 
 
@@ -1865,7 +1867,7 @@ class e_db_mysql
 
 	/**
 	* Check for the existence of a matching language table when multi-language tables are active.
-	* @param string $table Name of table, without the prefix. or an array of table names.
+	* @param string|array $table Name of table, without the prefix. or an array of table names.
 	* @access private
 	* @return mixed the name of the language table (eg. lan_french_news) or an array of all matching language tables. (with mprefix)
 	*/
@@ -1881,11 +1883,7 @@ class e_db_mysql
 		  	return $table;
 		}
 
-		if(!$this->mySQLaccess)
-		{
-			global $db_ConnectionID;
-        	$this->mySQLaccess = $db_ConnectionID;
-		}
+		$this->provide_mySQLaccess();
 
 		if($multiple == FALSE)
 		{
@@ -2014,6 +2012,121 @@ class e_db_mysql
 	}
 
 
+	/**
+	 * Return a sorted list of parent/child tree with an optional where clause.
+	 * @param string $table Name of table (without the prefix)
+	 * @param string $parent Name of the parent field
+	 * @param string $pid  Name of the primary id
+	 * @param string $where (Optional ) where condition.
+	 * @param string $order Name of the order field.
+	 * @todo Add extra params to each procedure so we only need 2 of them site-wide.
+	 * @return boolean | integer with the addition of  _treesort and _depth fields in the results.
+	 */
+	public function selectTree($table, $parent, $pid, $order, $where=null)
+	{
+
+		if(empty($table) || empty($parent) || empty($pid))
+		{
+			$this->mySQLlastErrText = "missing variables in sql->categories()";
+			return false;
+		}
+
+		$sql = "DROP FUNCTION IF EXISTS `getDepth` ;";
+
+		$this->gen($sql);
+
+		$sql = "
+		CREATE FUNCTION `getDepth` (project_id INT) RETURNS int
+		BEGIN
+		    DECLARE depth INT;
+		    SET depth=1;
+
+		    WHILE project_id > 0 DO
+
+		        SELECT IFNULL(".$parent.",-1)
+		        INTO project_id
+		        FROM ( SELECT ".$parent." FROM `#".$table."` WHERE ".$pid." = project_id) AS t;
+
+		        IF project_id > 0 THEN
+		            SET depth = depth + 1;
+		        END IF;
+
+		    END WHILE;
+
+		    RETURN depth;
+
+		END
+		;
+		";
+
+
+		$this->gen($sql);
+
+		$sql = "DROP FUNCTION IF EXISTS `getTreeSort`;";
+
+		$this->gen($sql);
+
+        $sql = "
+        CREATE FUNCTION getTreeSort(incid INT)
+        RETURNS CHAR(255)
+        BEGIN
+                SET @parentstr = CONVERT(incid, CHAR);
+                SET @parent = -1;
+                label1: WHILE @parent != 0 DO
+                        SET @parent = (SELECT ".$parent." FROM `#".$table."` WHERE ".$pid." =incid);
+                        SET @order = (SELECT ".$order." FROM `#".$table."` WHERE ".$pid." =incid);
+                        SET @parentstr = CONCAT(if(@parent = 0,'',@parent), LPAD(@order,4,0), @parentstr);
+                        SET incid = @parent;
+                END WHILE label1;
+
+                RETURN @parentstr;
+        END
+   ;
+
+        ";
+
+
+        $this->gen($sql);
+
+        $qry =  "SELECT SQL_CALC_FOUND_ROWS *, getTreeSort(".$pid.") as _treesort, getDepth(".$pid.") as _depth FROM `#".$table."` ";
+
+		if($where !== null)
+		{
+			$qry .= " WHERE ".$where;
+		}
+
+
+		$qry .= " ORDER BY _treesort";
+
+
+		return $this->gen($qry);
+
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	/**
 	* @return integer
@@ -2108,11 +2221,7 @@ class e_db_mysql
 			$this->mySQLdefaultdb = $mySQLdefaultdb;
 		}
 
-		if(!$this->mySQLaccess)
-		{
-			global $db_ConnectionID;
-			$this->mySQLaccess = $db_ConnectionID;
-		}
+		$this->provide_mySQLaccess();
 
 		if ($prefix == '') $prefix = $this->mySQLPrefix;
 
@@ -2180,11 +2289,7 @@ class e_db_mysql
 		$convert = array("PRIMARY"=>"PRI","INDEX"=>"MUL","UNIQUE"=>"UNI");
 		$key = (isset($convert[$key])) ? $convert[$key] : "OFF";
 
-		if(!$this->mySQLaccess)
-		{
-			global $db_ConnectionID;
-			$this->mySQLaccess = $db_ConnectionID;
-		}
+		$this->provide_mySQLaccess();
 
         $result = $this->gen("SHOW COLUMNS FROM ".$this->mySQLPrefix.$table);
         if ($result && ($this->rowCount() > 0))
@@ -2216,6 +2321,73 @@ class e_db_mysql
 
 
 	/**
+	 *	Determines if a table index (key) exist.
+	 *
+	 *	@param string $table - table name (no prefix)
+	 *	@param string $keyname - Name of the key to
+	 *  @param array $fields - OPTIONAL list of fieldnames, the index (key) must contain
+	 *	@param boolean $retinfo = FALSE - just returns true|false. TRUE - returns all key info
+	 *	@return array|boolean - FALSE on error, key information on success
+	 */
+	function index($table, $keyname, $fields=null, $retinfo = FALSE)
+	{
+		if(!$this->mySQLdefaultdb)
+		{
+			global $mySQLdefaultdb;
+			$this->mySQLdefaultdb = $mySQLdefaultdb;
+		}
+
+		$this->provide_mySQLaccess();
+
+		if (!empty($fields) && !is_array($fields))
+		{
+			$fields = explode(',', str_replace(' ', '', $fields));
+		}
+		elseif(empty($fields))
+		{
+			$fields = array();
+		}
+
+		$check_field = count($fields) > 0;
+
+		$info = array();
+		$result = $this->gen("SHOW INDEX FROM ".$this->mySQLPrefix.$table);
+		if ($result && ($this->rowCount() > 0))
+		{
+			$c=0;
+			while ($row = $this->fetch())
+			{
+				// Check for match of key name - and allow that key might not be used
+				if($keyname == $row['Key_name'])
+				{
+					// a key can contain severeal fields which are returned as 1 row per field
+					if (!$check_field)
+					{   // Check only for keyname
+						$info[] = $row;
+					}
+					elseif ($check_field && in_array($row['Column_name'], $fields))
+					{   // Check also for fieldnames
+						$info[] = $row;
+					}
+					$c++;
+				}
+			}
+
+			if (count($info) > 0)
+			{
+				// Kex does not consist of all keys
+				if ($check_field && $c != count($fields)) return false;
+				// Return full information
+				if ($retinfo) return $info;
+				// Return only if index was found
+				return true;
+			}
+		}
+		return FALSE;
+	}
+
+
+	/**
 	 * A pointer to mysql_real_escape_string() - see http://www.php.net/mysql_real_escape_string
 	 *
 	 * @param string $data
@@ -2229,11 +2401,7 @@ class e_db_mysql
 			$data = strip_if_magic($data);
 		}
 
-		if(!$this->mySQLaccess)
-		{
-			global $db_ConnectionID;
-        	$this->mySQLaccess = $db_ConnectionID;
-		}
+		$this->provide_mySQLaccess();
 		
 		if($this->pdo)
 		{
@@ -2552,7 +2720,7 @@ class e_db_mysql
 		$header = "-- e107 Database Backup File \n";	
 		$header .= "-- Host: ".$_SERVER['SERVER_NAME']."\n";
 		$header .= "-- Generation Time: ".date('r')."\n";
-		$header .= "-- Encoding: ANSI\n\n\n";
+		$header .= "-- Encoding: UTF-8\n\n\n";
 		
 		file_put_contents($backupFile,$header, FILE_APPEND);	
 		
@@ -2583,12 +2751,12 @@ class e_db_mysql
 				$d = array();
 				foreach($fields as $val)
 				{
-					$d[] = is_numeric($row[$val]) ? $row[$val] : "'".mysqli_real_escape_string($row[$val])."'"; 				
+					$d[] = is_numeric($row[$val]) ? $row[$val] : "'".$this->escape($row[$val])."'";
 				}
 	
 				$data_array = "(".implode(", ",$d).");\n"; 
 				file_put_contents($backupFile, $data_array, FILE_APPEND); // Do this here to save memory. 
-		
+
 			}
 				
 			$text = "\n\n\n";		
@@ -2809,7 +2977,8 @@ class e_db_mysql
 	 */
 	protected function loadTableDef($defFile, $tableName)
 	{
-		$result = FALSE;
+		$result =false;
+
 		if (is_readable($defFile))
 		{
 			// Read the file using the array handler routines
@@ -2818,26 +2987,31 @@ class e_db_mysql
 			// Strip any comments  (only /*...*/ supported)
 			$temp = preg_replace("#\/\*.*?\*\/#mis", '', $temp);
 			//echo "Check: {$defFile}, {$tableName}<br />";
-			if ($temp !== FALSE)
+			if ($temp !== false)
 			{
-				$array = e107::getArrayStorage();
-				$typeDefs = $array->ReadArray($temp);
+			//	$array = e107::getArrayStorage();
+				$typeDefs = e107::unserialize($temp);
+
 				unset($temp);
 				if (isset($typeDefs[$tableName]))
 				{
 					$this->dbFieldDefs[$tableName] = $typeDefs[$tableName];
-					$fileData = $array->WriteArray($typeDefs[$tableName], FALSE);
-					if (FALSE === file_put_contents(e_CACHE_DB.$tableName.'.php', $fileData))
+
+					$fileData = e107::serialize($typeDefs[$tableName], false);
+
+					if (false === file_put_contents(e_CACHE_DB.$tableName.'.php', $fileData))
 					{	// Could do something with error - but mustn't return FALSE - would trigger auto-generated structure
+
 					}
-					$result = TRUE;
+
+					$result = true;
 				}
 			}
 		}
 
 		if (!$result)
 		{
-			$this->dbFieldDefs[$tableName] = FALSE;
+			$this->dbFieldDefs[$tableName] = false;
 		}
 		return $result;
 	}
@@ -2857,7 +3031,10 @@ class e_db_mysql
 
 		$baseStruct = $dbAdm->get_current_table($tableName);
 		$fieldDefs = $dbAdm->parse_field_defs($baseStruct[0][2]);					// Required definitions
+
 		$outDefs = array();
+
+
 		foreach ($fieldDefs as $k => $v)
 		{
 			switch ($v['type'])
@@ -2867,17 +3044,25 @@ class e_db_mysql
 					{
 						//break;		Probably include autoinc fields in array
 					}
+
 					$baseType = preg_replace('#\(\d+?\)#', '', $v['fieldtype']);		// Should strip any length
+
 					switch ($baseType)
 					{
 						case 'int' :
+						case 'integer':
 						case 'shortint' :
 						case 'tinyint' :
+						case 'mediumint':
 							$outDefs['_FIELD_TYPES'][$v['name']] = 'int';
 							break;
+
 						case 'char' :
 						case 'text' :
 						case 'varchar' :
+						case 'tinytext' :
+						case 'mediumtext' :
+						case 'longtext' :
 							$outDefs['_FIELD_TYPES'][$v['name']] = 'escape'; //XXX toDB() causes serious BC issues. 
 							break;
 					}
@@ -2899,9 +3084,10 @@ class e_db_mysql
 					echo "Unexpected field type: {$k} => {$v['type']}<br />";
 			}
 		}
-		$array = e107::getArrayStorage();
+	//	$array = e107::getArrayStorage();
 		$this->dbFieldDefs[$tableName] = $outDefs;
-		$toSave = $array->WriteArray($outDefs, FALSE);	// 2nd parameter to TRUE if needs to be written to DB
+		$toSave = e107::serialize($outDefs, false);	// 2nd parameter to TRUE if needs to be written to DB
+
 		if (FALSE === file_put_contents(e_CACHE_DB.$tableName.'.php', $toSave))
 		{	// Could do something with error - but mustn't return FALSE - would trigger auto-generated structure
 			$mes = e107::getMessage();
@@ -2911,10 +3097,38 @@ class e_db_mysql
 
 	}
 
+	/**
+	 * In case e_db_mysql::$mySQLaccess is not set, set it.
+	 *
+	 * Uses the global variable $db_ConnectionID if available.
+	 *
+	 * When the global variable has been unset like in https://github.com/e107inc/e107-test/issues/6 ,
+	 * use the "mySQLaccess" from the default e_db_mysql instance singleton.
+	 */
+	private function provide_mySQLaccess()
+	{
+		if (!$this->mySQLaccess) {
+			global $db_ConnectionID;
+			$this->mySQLaccess = $db_ConnectionID;
+		}
+		if (!$this->mySQLaccess) {
+			$this->mySQLaccess = e107::getDb()->get_mySQLaccess();
+		}
+	}
+
+	/**
+	 * @deprecated 2.1.9 Used only to provide $mySQLaccess to other instances of e_db_mysql scattered around
+	 * @return PDO
+	 */
+	public function get_mySQLaccess()
+	{
+		return $this->mySQLaccess;
+	}
+
 }
 
 /**
- * BC
+ * Backwards compatibility
  */
 class db extends e_db_mysql
 {

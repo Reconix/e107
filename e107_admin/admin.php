@@ -63,14 +63,19 @@ if(in_array($pref['adminstyle'], array('infopanel', 'flexpanel')))
 }
 
 
+
+
 define('e_ADMIN_HOME', true); // used by some admin shortcodes.
 
 require_once(e_ADMIN.'boot.php');
-require_once(e_ADMIN.'auth.php');
 require_once(e_HANDLER.'upload_handler.php');
+new admin_start;
+
+require_once(e_ADMIN.'auth.php');
+
 
 e107::getDb()->db_Mark_Time('(Start Admin Checks)');
-new admin_start;
+
 
 e107::getDb()->db_Mark_Time('(After Admin Checks)');
 $mes = e107::getMessage();
@@ -85,19 +90,22 @@ class admin_start
 {
 	
 	private $incompat = array(
-			'banhelper'		=> 1.7,
-			'slir_admin'	=> 1.0,
-			'facebook_like'	=> 0.7,
-			'unanswered'	=> 1.4,
-			'lightwindow'	=> '1.0b',
-			'aa_jquery'		=> 1.2,
-			'aa_jquery'		=> 1.4,
-			'who'			=> 1.0,
-			'ratings'		=> 4.2,
-			'lightbox'		=> 1.5,
-			'e107slider'	=> 0.1,
-			'forumthanks'   => 0.5
-
+			array('banhelper',      1.5),
+			array('banhelper',      1.7),
+			array('slir_admin',     1.0),
+			array('facebook_like',  0.7),
+			array('unanswered',     1.4),
+			array('lightwindow',    '1.0b'),
+			array('aa_jquery',      1.2),
+			array('aa_jquery',      1.4),
+			array('who',            1.0),
+			array('ratings',        4.2),
+			array('lightbox',       1.5),
+			array('e107slider',     0.1),
+			array('forumthanks',    0.5),
+			array('eclassifieds',   1.11),
+			array('jshelpers',      '0.3b'),
+			array('akismet',        7.0)
 	);
 
 
@@ -137,18 +145,19 @@ class admin_start
 			e_PLUGIN."online_extended_menu/languages/English.php",
 			e_PLUGIN."pm/sendpm.sc",
 			e_PLUGIN."pm/shortcodes/",
-			e_PLUGIN."social/e_header.php"
-
+			e_PLUGIN."social/e_header.php",
+		//	e_PLUGIN."download/url/url.php", // removed by download_setup.php
+		//	e_PLUGIN."download/url/sef_url.php",
 		);
 
-
+		$this->checkCoreVersion();
 
 		if(!empty($_POST['delete-deprecated']))
 		{
 			$this->deleteDeprecated();
 		}
 
-
+		unset($_SESSION['lancheck']);
 
 
 		e107::getDb()->db_Mark_Time('Check Paths');
@@ -222,7 +231,8 @@ class admin_start
 				}
 				else
 				{
-					$mes->addWarning("Unable to create <b>".$dr."</b>. Please check your folder permissions.");
+					$message = e107::getParser()->lanVars(ADLAN_187,$dr,true);
+					$mes->addWarning($message);
 				}
 			}
 		}
@@ -238,12 +248,35 @@ class admin_start
 
 		if(e107::getDate()->isValidTimezone($timezone) == false)
 		{
-			$mes->addWarning("Your timezone setting (".$timezone.") is invalid. It has been reset to UTC. To Modify, please go to Admin -> Preferences -> Date Display Options.", 'default', true);
+			$message = e107::getParser()->lanVars(ADLAN_188, $timezone);
+			$mes->addWarning($message, 'default', true);
 			e107::getConfig()->set('timezone','UTC')->save(false,true,false);
 			$this->refresh = true;
 		}
 
 	}
+
+
+	private function checkCoreVersion()
+	{
+
+		$e107info = array();
+
+		require(e_ADMIN."ver.php");
+
+		if(!empty($e107info['e107_version']) && (e_VERSION !==  $e107info['e107_version']))
+		{
+			e107::getConfig()->set('version', $e107info['e107_version'])->save(false,true,false);
+
+			// When version has changed, clear plugin/theme version cache.
+			e107::getPlug()->clearCache();
+			e107::getTheme()->clearCache();
+
+			e107::getDebug()->log("Updating core version pref");
+		}
+
+	}
+
 
 
 	private function checkCoreUpdate()
@@ -253,6 +286,9 @@ class admin_start
 		{
 			return null;
 		}
+
+		return null;
+
 
 		$checked = e107::getSession()->get('core-update-checked');
 
@@ -275,8 +311,25 @@ class admin_start
 		e107::getSession()->set('core-update-checked',true);
 		e107::getMessage()->addDebug("Checking for core updates");
 
+
 		if(update_check() === true)
 		{
+
+			$JS = <<<TMPO
+			$(function () {
+
+                 $('[data-toggle="popover"]').popover('show');
+                 $('.popover').on('click', function() {
+                     $('[data-toggle="popover"]').popover('hide');
+                  }
+				);
+			});
+
+TMPO;
+
+			e107::js('footer-inline', $JS);
+			e107::css('inline', '.hide.e-popover { display:block!important }');
+
 			if(e_DEBUG !== true)
 			{
 				$this->exit = true;
@@ -401,13 +454,17 @@ class admin_start
 
 		if($numDays < 3) // installed in the past 3 days.
 		{
-			echo e107::getMessage()->setTitle('Need Help?',E_MESSAGE_INFO)->addInfo("<p>Connect with our community for <a href='http://e107help.org' rel='external'>free support</a> with any e107 issues you may encounter. </p>")->render();
+			$srch = array('[',']');
+			$repl = array("<a href='http://e107help.org' target='_blank' rel='external'>","</a>");
+			echo e107::getMessage()->setTitle(ADLAN_190,E_MESSAGE_INFO)->addInfo("<p>".str_replace($srch,$repl,ADLAN_192)."</p>")->render();
 		}
 		elseif($pref < $v2ReleaseDate && !file_exists($upgradeAlertFlag)) // installed prior to v2 release.
 		{
-			$message = "Connect with our community for <a href='http://e107help.org' rel='external'>free support</a> with any upgrading issues you may encounter.";
-			$message .= "<div class='text-right'><a class='btn btn-xs btn-primary ' href='admin.php?dismiss=upgrade'>Don't show again</a></div>"; //todo do it with class=e-ajax and data-dismiss='alert'
-			echo e107::getMessage()->setTitle('Upgrading?',E_MESSAGE_INFO)->addInfo($message)->render();
+			$srch = array('[',']');
+			$repl = array("<a href='http://e107help.org' target='_blank' rel='external'>","</a>");
+			$message = str_replace($srch,$repl,ADLAN_191);
+			$message .= "<div class='text-right'><a class='btn btn-xs btn-primary ' href='admin.php?dismiss=upgrade'>".LAN_DONT_SHOW_AGAIN."</a></div>"; //todo do it with class=e-ajax and data-dismiss='alert'
+			echo e107::getMessage()->setTitle(LAN_UPGRADING,E_MESSAGE_INFO)->addInfo($message)->render();
 		}
 
 		e107::getMessage()->setTitle(null,E_MESSAGE_INFO);
@@ -423,12 +480,14 @@ class admin_start
 		
 		if(deftrue('e_MEDIA') && is_dir(e_MEDIA) && !is_writable(e_MEDIA))
 		{
-			$mes->addWarning("The folder ".e_MEDIA." is not writable. Please correct before proceeding.");			
+			$message = str_replace("[x]", e_MEDIA, ADLAN_193);
+			$mes->addWarning($message);			
 		}	
 		
 		if(deftrue('e_SYSTEM') && is_dir(e_SYSTEM) && !is_writable(e_SYSTEM))
 		{
-			$mes->addWarning("The folder ".e_SYSTEM." is not writable. Please correct before proceeding.");			
+			$message = str_replace("[x]", e_SYSTEM, ADLAN_193);
+			$mes->addWarning($message);			
 		}
 
 		$files = e107::getFile()->scandir(e_IMAGE."avatars",'jpg,gif,png,jpeg');
@@ -436,7 +495,8 @@ class admin_start
 
 		if(is_dir(e_IMAGE."avatars") && !is_writable(e_IMAGE."avatars") && !empty($files))
 		{
-			$mes->addWarning("Legacy avatars folder detected. Please make sure ".e_IMAGE."avatars/ is writable. Please correct before proceeding.");
+			$message = str_replace("[x]", e_IMAGE, ADLAN_194);
+			$mes->addWarning($message);
 		}
 		
 	}
@@ -464,9 +524,12 @@ class admin_start
 		$inCompatText = "";
 		$incompatFolders = array_keys($this->incompat);
 		
-		foreach($this->incompat as $folder => $version)
+		foreach($this->incompat as $data)
 		{
-			if(vartrue($installedPlugs[$folder]) && $version == $installedPlugs[$folder])
+			$folder = $data[0];
+			$version = $data[1];
+
+			if(!empty($installedPlugs[$folder]) && ($version == $installedPlugs[$folder] || $version === '*'))
 			{
 				$inCompatText .= "<li>".$folder." v".$installedPlugs[$folder]."</li>";				
 			}	
@@ -475,7 +538,7 @@ class admin_start
 		if($inCompatText)
 		{
 			$text = "<ul>".$inCompatText."</ul>";
-			$mes->addWarning("The following plugins are not compatible with this version of e107 and should be uninstalled: ".$text."<a class='btn btn-default' href='".e_ADMIN."plugin.php'>uninstall</a>");
+			$mes->addWarning(ADLAN_189."&nbsp;".$text."<a class='btn btn-default' href='".e_ADMIN."plugin.php'>".LAN_UNINSTALL."</a>");
 		}	
 		
 	}
@@ -488,7 +551,7 @@ class admin_start
 
 		if($us->passwordAPIExists() === true && $us->getDefaultHashType() !== PASSWORD_E107_PHP && e107::pref('core','password_CHAP')==0)
 		{
-			$message = "It is HIGHLY recommended that you [change your password encoding] to the PHP Default. (Password hashes will be automatically upgraded during user login.)";
+			$message = LAN_PASSWORD_WARNING;
 			$srch = array('[',']');
 			$repl = array("<a class='alert-link' href='".e_ADMIN."prefs.php#nav-core-prefs-security'>","</a>");
 			$mes->addWarning(str_replace($srch,$repl,$message));
@@ -552,11 +615,13 @@ class admin_start
 
 			if(@unlink($file))
 			{
-				$mes->addSuccess("Deleted ".$file);
+				$message = e107::getParser()->lanVars(LAN_UI_FILE_DELETED, array('x'=>$file));
+				$mes->addSuccess($message);
 			}
 			else
 			{
-				$mes->addError("Unable to delete ".$file.". Please remove the file manually.");
+				$message = e107::getParser()->lanVars(LAN_UI_FILE_DELETED_FAILED, array('x'=>$file));
+				$mes->addError($message);
 			}
 		}
 

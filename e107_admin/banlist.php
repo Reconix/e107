@@ -79,7 +79,7 @@ class banlist_admin extends e_admin_dispatcher
 		'main/transfer'		=> array('caption'=> BANLAN_35, 'perm' => '4'),
 		'main/times'		=> array('caption'=> BANLAN_15, 'perm' => '0'),
 		'main/options'		=> array('caption'=> LAN_OPTIONS, 'perm' => '0'),
-//		'main/banlog'		=> array('caption'=> BANLAN_81, 'perm' => '0'),
+	//	'main/banlog'		=> array('caption'=> BANLAN_81, 'perm' => '0'),
 	);
 
 	protected $adminMenuAliases = array(
@@ -109,7 +109,7 @@ class banlist_ui extends e_admin_ui
 		protected $fields 	= array (  
 		  'checkboxes' 			=>   array ( 'title' => '', 				'type' => null, 		'data' => null, 'width' => '5%', 'thclass' => 'center', 'forced' => '1', 'class' => 'center', 'toggle' => 'e-multiselect',  ),
 		  'banlist_id'			 =>  array ( 'title' => LAN_ID, 			'data' => 'int',        'width' => '5%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
-		  'banlist_ip' 			=>   array ( 'title' => LAN_IP, 			'type' => 'ip', 		'data' => 'str', 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
+		  'banlist_ip' 			=>   array ( 'title' => BANLAN_126, 			'type' => 'method', 		'data' => 'str', 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 		  'banlist_bantype' 	=>   array ( 'title' => LAN_TYPE, 			'type' => 'method', 	'data' => 'str', 'width' => 'auto', 'filter'=>true, 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 		  'banlist_datestamp' 	=>   array ( 'title' => LAN_DATESTAMP, 		'type' => 'datestamp', 	'data' => 'int', 'width' => 'auto', 'filter' => true, 'help' => '', 'readParms' => '', 'writeParms' => 'auto=1&hidden=1&readonly=1', 'class' => 'left', 'thclass' => 'left',  ),
 		  'banlist_banexpires' 	=>   array ( 'title' => BANLAN_124,	 		'type' => 'method', 	'data' => 'int', 'inline'=>true, 'width' => 'auto', 'batch' => true, 'filter' => true, 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
@@ -127,6 +127,19 @@ class banlist_ui extends e_admin_ui
 	//		'pref_folder' 				=> array('title'=> 'folder', 'type' => 'boolean', 'data' => 'integer'),
 	//		'pref_name' 				=> array('title'=> 'name', 'type' => 'text', 'data' => 'string', 'validate' => 'regex', 'rule' => '#^[\w]+$#i', 'help' => 'allowed characters are a-zA-Z and underscore')
 	//	);
+
+
+		function CreateObserver()
+		{
+			parent::CreateObserver();
+			$this->fields['banlist_ip']['title']= BANLAN_5;
+		}
+
+		function EditObserver()
+		{
+			parent::EditObserver();
+			$this->fields['banlist_ip']['title']= BANLAN_5;
+		}
 
 		
 		// optional
@@ -162,12 +175,24 @@ class banlist_ui extends e_admin_ui
 		public function beforeCreate($new_data, $old_data, $id)
 		{
 			$new_data['banlist_admin'] = ADMINID;
+
+			if(filter_var($new_data['banlist_ip'], FILTER_VALIDATE_IP)) // check it's an IP
+			{
+				$new_data['banlist_ip'] = e107::getIPHandler()->ipEncode($new_data['banlist_ip']);
+			}
+
 			return $new_data;
 		}
 
 		public function beforeUpdate($new_data, $old_data, $id)
 		{
 			$new_data['banlist_admin'] = ADMINID;
+
+			if(filter_var($new_data['banlist_ip'], FILTER_VALIDATE_IP)) // check it's an IP
+			{
+				$new_data['banlist_ip'] = e107::getIPHandler()->ipEncode($new_data['banlist_ip']);
+			}
+
 			return $new_data;
 		}
 
@@ -200,9 +225,139 @@ class banlist_ui extends e_admin_ui
 		}
 
 		
-		public function transferPage()
+		protected function transferPage()
 		{
-			//FIXME Put Import code in here. 
+
+			$ipAdministrator = new banlistManager;
+
+			// Character options for import & export
+			$separator_char = array(1 => ',', 2 => '|');
+			$quote_char = array(1 => '(none)', 2 => "'", 3 => '"');
+
+			$frm = e107::getForm();
+			$mes = e107::getMessage();
+
+			$error = false;
+
+			if(isset($_POST['ban_import']))  // Got a file to import
+			{
+				require_once(e_HANDLER . 'upload_handler.php');
+
+				if(($files = process_uploaded_files(e_UPLOAD, false, array('overwrite' => true, 'max_file_count' => 1, 'file_mask' => 'csv'))) === false)
+				{ // Invalid file
+					$error = true;
+					$mes->addError(BANLAN_47);
+				}
+
+				if(empty($files) || vartrue($files[0]['error']))
+				{
+					$error = true;
+					if(varset($files[0]['message']))
+					{
+						$mes->addError($files[0]['message']);
+					}
+				}
+
+				if(!$error) // Got a file of some sort
+				{
+					$message = process_csv(e_UPLOAD . $files[0]['name'],
+						intval(varset($_POST['ban_over_import'], 0)),
+						intval(varset($_POST['ban_over_expiry'], 0)),
+						$separator_char[intval(varset($_POST['ban_separator'], 1))],
+						$quote_char[intval(varset($_POST['ban_quote'], 3))]);
+					banlist_adminlog('07', 'File: ' . e_UPLOAD . $files[0]['name'] . '<br />' . $message);
+				}
+
+			}
+
+			$text = "
+				<form method='post' action='" . e_ADMIN_ABS . "banlist_export.php' id='core-banlist-transfer-form' >
+					<fieldset id='core-banlist-transfer-export'>
+						<legend>" . BANLAN_40 . "</legend>
+						<table class='table adminlist'>
+							<colgroup>
+								<col style='width:30%' />
+								<col style='width:30%' />
+								<col style='width:40%' />
+							</colgroup>
+							<tbody>
+								<tr>
+									<th colspan='2'>" . BANLAN_36 . "</th>
+									<th>&nbsp;</th>
+								</tr>
+				";
+
+
+			foreach($ipAdministrator->getValidReasonList() as $i) //FIXME $frm->label()
+			{
+				$text .= "
+								<tr>
+								<td colspan='3'>
+									" . $frm->checkbox("ban_types[{$i}]", $i) . $frm->label($ipAdministrator->getBanTypeString($i, false), "ban_types[{$i}]", $i) . "
+									<span class='field-help'>(" . $ipAdministrator->getBanTypeString($i, true) . ")</span>
+								</td></tr>
+				";
+			}
+
+			$text .= "<tr>
+				<td>" . BANLAN_79 . "</td>
+				<td>" . $frm->select('ban_separator', $separator_char) . ' ' . BANLAN_37 . "</td>
+			<td>" . $frm->select('ban_quote', $quote_char) . ' ' . BANLAN_38 . "</td></tr>";
+
+			$text .= "
+	
+							</tbody>
+						</table>
+						<div class='buttons-bar center'>" . $frm->admin_button('ban_export', BANLAN_39, 'export', BANLAN_39) . "</div>
+							<input type='hidden' name='e-token' value='" . e_TOKEN . "' />
+					</fieldset>
+				</form>
+			";
+
+			// Now do the import options
+			$text .= "
+				<form enctype='multipart/form-data' method='post' action='" . e_SELF . "?transfer' id='ban_import_form' >
+					<fieldset id='core-banlist-transfer-import'>
+						<legend>" . BANLAN_41 . "</legend>
+						<table class='table adminlist'>
+							<colgroup>
+								<col style='width:30%' />
+								<col style='width:30%' />
+								<col style='width:40%' />
+							</colgroup>
+							<tbody>
+								<tr>
+									<th colspan='2'>" . BANLAN_42 . "</th>
+									<th>&nbsp;</th>
+								</tr>
+								<tr>
+									<td colspan='3'>" . $frm->checkbox('ban_over_import', 1, '', array('label' => BANLAN_43)) . "</td>
+								</tr>
+								<tr>
+									<td colspan='3'>" . $frm->checkbox('ban_over_expiry', 1, '', array('label' => BANLAN_44)) . "</td>
+								</tr>
+								<tr>
+									<td>" . BANLAN_46 . "</td>
+									<td colspan='2'>
+										" . $frm->file('file_userfile[]', array('size' => '40')) . "
+									</td>
+								</tr>
+								<tr>
+				<td>" . BANLAN_80 . "</td>
+				<td>" . $frm->select('ban_separator', $separator_char) . ' ' . BANLAN_37 . "</td>
+				<td>" . $frm->select('ban_quote', $quote_char) . ' ' . BANLAN_38 . "</td></tr>
+					</tbody>
+						</table>
+						<div class='buttons-bar center'>
+						" . $frm->admin_button('ban_import', BANLAN_45, 'import') . $frm->token(). "
+						</div>
+	
+	
+					</fieldset>
+				</form>
+			";
+
+			return $mes->render() . $text;
 		}
 		
 	
@@ -334,10 +489,140 @@ class banlist_ui extends e_admin_ui
 			echo $mes->render().$text; 
 		}		
 
+
+		private function drop_box($box_name, $curval)
+		{
+			$frm = e107::getForm();
+
+			$opts = array(50, 100, 150, 200, 250, 300, 400, 500);
+			$ret = $frm->select_open($box_name, array('class' => 'tbox'));
+			foreach ($opts as $o)
+			{
+				$ret .= $frm->option($o, $o, ($curval == $o));
+			}
+			$ret .= "</select>\n";
+			return $ret;
+		}
+
 		
 		protected function optionsPage()
 		{
-			//FIXME Put Options code in here. 
+			if (!getperms('0'))
+			{
+				exit();
+			}
+
+			$mes = e107::getMessage();
+			$tp = e107::getParser();
+			$sql = e107::getDb();
+			$frm = e107::getForm();
+			$pref = e107::getPref();
+
+
+			if (isset($_POST['update_ban_options']))
+			{
+				$pref['enable_rdns']            = intval($_POST['ban_rdns_on_access']);
+				$pref['enable_rdns_on_ban']     = intval($_POST['ban_rdns_on_ban']);
+				$pref['ban_max_online_access']  = intval($_POST['ban_access_guest']).','.intval($_POST['ban_access_member']);
+				$pref['ban_retrigger']          = intval($_POST['ban_retrigger']);
+				$pref['ban_date_format']        = $tp->toDB($_POST['ban_date_format']);
+
+				e107::getConfig()->setPref($pref)->save(true,true,true);
+			}
+
+			if (isset($_POST['remove_expired_bans']))
+			{
+				$result = $sql->delete('banlist',"`banlist_bantype` < ".eIPHandler::BAN_TYPE_WHITELIST." AND `banlist_banexpires` > 0 AND `banlist_banexpires` < ".time());
+				banlist_adminlog('12', $result);
+				$mes->addSuccess(str_replace('[y]', $result, BANLAN_48));
+			}
+
+			list($ban_access_guest, $ban_access_member) = explode(',', varset($pref['ban_max_online_access'], '100,200'));
+			$ban_access_member = max($ban_access_guest, $ban_access_member);
+
+
+			$text = "
+				<form method='post' action='".e_SELF."?mode=main&action=options'>
+					<fieldset id='core-banlist-options'>
+						<legend>".BANLAN_72."</legend>
+						<table class='table adminform'>
+							<colgroup>
+								<col class='col-label' />
+								<col class='col-control' />
+							</colgroup>
+							<tbody>
+								<tr>
+									<td>".BANLAN_63."</td>
+									<td>
+										<div class='auto-toggle-area autocheck'>
+											".$frm->checkbox('ban_rdns_on_access', 1, $pref['enable_rdns'] == 1)."
+											<div class='field-help'>".BANLAN_65."</div>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td>".BANLAN_64."</td>
+									<td>
+										<div class='auto-toggle-area autocheck'>
+											".$frm->checkbox('ban_rdns_on_ban', 1, $pref['enable_rdns_on_ban'] == 1)."
+											<div class='field-help'>".BANLAN_66."</div>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td>".BANLAN_67."</td>
+									<td>
+										<div class='field-spacer'>".$this->drop_box('ban_access_guest', $ban_access_guest).BANLAN_70."</div>
+										<div class='field-spacer'>".$this->drop_box('ban_access_member', $ban_access_member).BANLAN_69."</div>
+										<div class='field-help'>".BANLAN_68."</div>
+									</td>
+								</tr>
+								<tr>
+									<td>".BANLAN_71."</td>
+									<td>
+										<div class='auto-toggle-area autocheck'>
+											".$frm->checkbox('ban_retrigger', 1, $pref['ban_retrigger'] == 1)."
+											<div class='field-help'>".BANLAN_73."</div>
+										</div>
+									</td>
+								</tr>
+	
+								<tr>
+								  <td>".BANLAN_91."</td>
+								  <td>
+								  ".$frm->text('ban_date_format', varset($pref['ban_date_format'], '%H:%M %d-%m-%y'), 40)."
+								  <div class='field-help'>".BANLAN_92."</div>
+								  </td>
+								</tr>
+							</tbody>
+						</table>
+						<div class='buttons-bar center'>
+							".$frm->admin_button('update_ban_options', LAN_UPDATE, 'update')."
+							<input type='hidden' name='e-token' value='".e_TOKEN."' />
+						</div>
+					</fieldset>
+					<fieldset id='core-banlist-options-ban'>
+						<legend>".BANLAN_74."</legend>
+						<table class='table adminform'>
+							<colgroup>
+								<col class='col-label' />
+								<col class='col-control' />
+							</colgroup>
+							<tbody>
+								<tr>
+									<td>".BANLAN_75."</td>
+									<td>
+										".$frm->admin_button('remove_expired_bans', BANLAN_76, 'delete')."
+										<input type='hidden' name='e-token' value='".e_TOKEN."' />
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</fieldset>
+				</form>
+			";
+
+			return $text;
 		}				
 
 		protected function banlogPage()
@@ -373,6 +658,37 @@ class banlist_form_ui extends e_admin_form_ui
 		}
 	}
 
+	// Custom Method/Function
+	function banlist_ip($curVal,$mode) //TODO
+	{
+
+		if(!empty($curVal))
+		{
+			$tmp = explode(":",$curVal);
+
+			if(count($tmp) === 8)
+			{
+				$curVal = e107::getIPHandler()->ipDecode($curVal);
+			}
+		}
+
+		switch($mode)
+		{
+			case 'read': // List Page
+				return $curVal;
+				break;
+
+			case 'write': // Edit Page
+
+				return $this->text('banlist_ip', $curVal, array());
+				break;
+
+			case 'filter':
+			case 'batch':
+
+				break;
+		}
+	}
 
 	
 	// Custom Method/Function 
@@ -535,7 +851,7 @@ class banlist_form_ui extends e_admin_form_ui
 
 			$allFailedTotal = e107::getDB()->count('generic', '(*)', "gen_type='failed_login'");
 
-			$this->batchOptions = array('delete-all'=>"Delete all ".$allFailedTotal." failed logins from database");
+			$this->batchOptions = array('delete-all'=>str_replace('[x]', $allFailedTotal, BANLAN_127));
 
 			if(!empty($_POST['etrigger_batch']) && $_POST['etrigger_batch'] == "delete-all")
 			{
@@ -621,16 +937,12 @@ require_once(e_ADMIN."auth.php");
 e107::getAdminUI()->runPage();
 
 
+require_once(e_ADMIN.'footer.php');
+exit;
 
 
 
-
-
-
-
-
-
-
+// Unused code below, but left here for reference.
 
 
 
@@ -946,7 +1258,7 @@ switch ($action)
 				$text .= "<tr><td colspan='5' style='text-align:center'><br />".$tp->parseTemplate("{NEXTPREV={$parms}}".'<br /><br /></td></tr>');
 			}
 			$text .= "<tr><td colspan='4' style='text-align:center'>
-						<input class='btn btn-default button' type='submit' name='delete_ban_log' value='".BANLAN_88."' />
+						<input class='btn btn-default btn-secondary button' type='submit' name='delete_ban_log' value='".BANLAN_88."' />
 						<input type='hidden' name='e-token' value='".e_TOKEN."' />
 					</td>
 					  </tr>";
@@ -955,7 +1267,7 @@ switch ($action)
 
 		if (count($banLogEntries))
 		{
-			$text .= "&nbsp;&nbsp;&nbsp;".str_replace('--NUM--', $num_entry, BANLAN_87);
+			$text .= "&nbsp;&nbsp;&nbsp;".str_replace('[y]', $num_entry, BANLAN_87);
 		}
 		
 		echo $text; 
@@ -981,7 +1293,7 @@ switch ($action)
 		{
 			$result = $sql->db_Delete('banlist',"`banlist_bantype` < ".eIPHandler::BAN_TYPE_WHITELIST." AND `banlist_banexpires` > 0 AND `banlist_banexpires` < ".time());
 			banlist_adminlog('12', $result);
-			$mes->addSuccess(str_replace('--NUM--', $result, BANLAN_48));
+			$mes->addSuccess(str_replace('[y]', $result, BANLAN_48));
 		}
 
 		list($ban_access_guest, $ban_access_member) = explode(',', varset($pref['ban_max_online_access'], '100,200'));
@@ -1601,8 +1913,8 @@ function process_csv($filename, $override_imports, $override_expiry, $separator 
 	if ($override_imports)
 		$sql->db_Delete('banlist', "`banlist_bantype` = ".eIPHandler::BAN_TYPE_TEMPORARY);
 	@unlink($filename);		// Delete file once done
-	$mes->addSuccess(str_replace('--NUM--', $line_num, BANLAN_51).$filename);
-	return str_replace('--NUM--', $line_num, BANLAN_51).$filename;
+	$mes->addSuccess(str_replace('[y]', $line_num, BANLAN_51).$filename);
+	return str_replace('[y]', $line_num, BANLAN_51).$filename;
 }
 
 

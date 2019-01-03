@@ -99,22 +99,6 @@ class plugin_blank_admin_ui extends e_admin_ui
 		protected $table = "blank";
 
 		/**
-		 * If present this array will be used to build your list query
-		 * You can link fileds from $field array with 'table' parameter, which should equal to a key (table) from this array
-		 * 'leftField', 'rightField' and 'fields' attributes here are required, the rest is optional
-		 * Table alias is supported
-		 * Note:
-		 * - 'leftTable' could contain only table alias
-		 * - 'leftField' and 'rightField' shouldn't contain table aliases, they will be auto-added
-		 * - 'whereJoin' and 'where' should contain table aliases e.g. 'whereJoin' => 'AND u.user_ban=0'
-		 *
-		 * @var array [optional] table_name => array join parameters
-		 */
-		protected $tableJoin = array(
-			//'u.user' => array('leftField' => 'comment_author_id', 'rightField' => 'user_id', 'fields' => '*'/*, 'leftTable' => '', 'joinType' => 'LEFT JOIN', 'whereJoin' => '', 'where' => ''*/)
-		);
-
-		/**
 		 * This is only needed if you need to JOIN tables AND don't wanna use $tableJoin
 		 * Write your list query without any Order or Limit.
 		 *
@@ -132,14 +116,17 @@ class plugin_blank_admin_ui extends e_admin_ui
 		// optional
 		protected $perPage = 20;
 
-		// default - true - TODO - move to displaySettings
 		protected $batchDelete = true;
 
-		// UNDER CONSTRUCTION
-		protected $displaySettings = array();
+	//	protected \$sortField		= 'somefield_order';
 
-		// UNDER CONSTRUCTION
-		protected $disallowPages = array('main/create', 'main/prefs');
+
+	//	protected \$sortParent      = 'somefield_parent';
+
+
+	//	protected \$treePrefix      = 'somefield_title';
+
+
 
 		//TODO change the blank_url type back to URL before blank.
 		// required
@@ -274,12 +261,14 @@ class plugin_blank_admin_ui extends e_admin_ui
             'blank_date' 				=> array('title'=> LAN_DATE, 			'type' => 'datestamp', 	'data' => 'int',		'width' => 'auto',	'thclass' => '', 'readParms' => 'long', 'writeParms' => 'type=datetime'),
 			'blank_compatibility' 		=> array('title'=> 'Compatible',			'type' => 'text', 		'data' => 'str',		'width' => '10%',	'thclass' => 'center' ),
 			'blank_url' 				=> array('title'=> LAN_URL,		'type' => 'file', 		'data' => 'str',		'width' => '20%',	'thclass' => 'center',	'batch' => TRUE, 'filter'=>TRUE, 'parms' => 'truncate=30', 'validate' => false, 'help' => 'Enter blank URL here', 'error' => 'please, ener valid URL'),
-			'test_list_1'				=> array('title'=> 'test 1',			'type' => 'boolean', 		'data' => 'int',		'width' => '5%',	'thclass' => 'center',	'batch' => TRUE, 'filter'=>TRUE, 'noedit' => true),
+			'test_list_1'				=> array('title'=> 'test 1',			'type' => 'boolean', 		'data' => false,		'width' => '5%',	'thclass' => 'center',	'batch' => TRUE, 'filter'=>TRUE, 'noedit' => true),
+			'blank_class'               => array('title'=> LAN_VISIBILITY,      'type' => 'userclass',  'data'=>'int', 'inline'=>true, 'filter'=>true, 'batch'=>true, 'width'=>'auto'),
+
 			'options' 					=> array('title'=> LAN_OPTIONS, 		'type' => null, 		'data' => null,			'width' => '10%',	'thclass' => 'center last', 'class' => 'center last', 'forced'=>TRUE)
 		);
 
 		//required - default column user prefs
-		protected $fieldpref = array('checkboxes', 'blank_id', 'blank_type', 'blank_url', 'blank_compatibility', 'options');
+		protected $fieldpref = array('checkboxes', 'blank_id', 'blank_date', 'blank_type', 'blank_url', 'blank_compatibility', 'blank_class', 'options');
 
 		// FORMAT field_name=>type - optional if fields 'data' attribute is set or if custom model is set in init()
 		/*protected $dataFields = array();*/
@@ -308,6 +297,11 @@ class plugin_blank_admin_ui extends e_admin_ui
 			$text = "Hello World!";
 			$ns->tablerender("Hello",$text);	
 			
+		}
+
+		public function beforePrefsSave($new_data, $old_data)
+		{
+			// return $new_data;
 		}
 }
 

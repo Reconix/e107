@@ -90,29 +90,48 @@ class contact_shortcodes extends e_shortcode
 	}
 	
 	
+	/* example {CONTACT_NAME} */
+	/* example {CONTACT_NAME: class=form-control} */
+	/* example {CONTACT_NAME: class=col-md-12&placeholder=".LANCONTACT_03." *} */
+		
 	function sc_contact_name($parm='')
 	{
 		$userName = deftrue('USERNAME');
-
-		return "<input type='text'   id='contactName' title='".LANCONTACT_17."' name='author_name' required='required' size='30' class='tbox form-control' value=\"".varset($_POST['author_name'],$userName)."\" />";
-
+		$class = (!empty($parm['class'])) ? $parm['class'] : 'tbox form-control';
+		$placeholder = (!empty($parm['placeholder'])) ? " placeholder= '".$parm['placeholder']."'" : '';
+		$value      = 	!empty($_POST['author_name']) ?  e107::getParser()->filter( $_POST['author_name']) : $userName;
+		return "<input type='text'   id='contactName' title='".LANCONTACT_17."' name='author_name' required='required' size='30' ".$placeholder."  class='".$class."' value=\"".$value."\" />";
 	}
 
 
+
+	/* example {CONTACT_EMAIL} */
+	/* example {CONTACT_EMAIL: class=form-control} */
+	/* example {CONTACT_EMAIL: class=col-md-12&placeholder=".LANCONTACT_04." *} */
 
 	function sc_contact_email($parm='')
 	{
 		$userEmail = deftrue('USEREMAIL');
 		$disabled = (!empty($userEmail)) ? 'readonly' : ''; // don't allow change from a verified email address.
 
-		return "<input type='email'   ".$disabled." id='contactEmail' title='".LANCONTACT_18."' name='email_send' required='required' size='30' class='tbox form-control' value='".(vartrue($_POST['email_send']) ? $_POST['email_send'] : USEREMAIL)."' />";
+		$class = (!empty($parm['class'])) ? $parm['class'] : 'tbox form-control';
+		$placeholder = (!empty($parm['placeholder'])) ? " placeholder= '".$parm['placeholder']."'" : '';
+		$value = !empty($_POST['email_send'] ) ? e107::getParser()->filter($_POST['email_send'],'email') : USEREMAIL;
+		return "<input type='email'   ".$disabled." id='contactEmail' title='".LANCONTACT_18."' name='email_send' required='required' size='30' ".$placeholder." class='".$class."' value='".$value."' />";
 	}
 	
 	
 	
+	/* example {CONTACT_SUBJECT} */
+	/* example {CONTACT_SUBJECT: class=form-control} */
+	/* example {CONTACT_SUBJECT: class=col-md-12&placeholder=".LANCONTACT_05." *} */
+	
 	function sc_contact_subject($parm='')
 	{
-		return "<input type='text' id='contactSubject' title='".LANCONTACT_19."' name='subject' required='required' size='30' class='tbox form-control' value=\"".varset($_POST['subject'])."\" />";
+		$class = (!empty($parm['class'])) ? $parm['class'] : 'tbox form-control';
+		$placeholder = (!empty($parm['placeholder'])) ? " placeholder= '".$parm['placeholder']."'" : '';
+		$value = !empty($_POST['subject']) ? e107::getParser()->filter($_POST['subject'], 'str') : '';
+		return "<input type='text' id='contactSubject' title='".LANCONTACT_19."' name='subject' required='required' size='30' ".$placeholder." class='".$class."' value=\"".$value."\" />";
 	}
 	
 	
@@ -131,17 +150,46 @@ class contact_shortcodes extends e_shortcode
 		{
 			$size = 'input-xxlarge';	
 		}
+		$class = (!empty($parm['class'])) ? $parm['class'] : 'tbox '.$size.' form-control';
 
 
+		$value = !empty($_POST['body']) ? stripslashes($_POST['body']) : '';
 		
-		return "<textarea cols='{$cols}'  id='contactBody' rows='{$rows}' title='".LANCONTACT_20."' name='body' ".$placeholder." required='required' class='tbox {$size} form-control'>".stripslashes(varset($_POST['body']))."</textarea>";
+		return "<textarea cols='{$cols}'  id='contactBody' rows='{$rows}' title='".LANCONTACT_20."' name='body' ".$placeholder." required='required' class='".$class."'>".$value."</textarea>";
 	}
 	
 	
+	/* example {CONTACT_SUBMIT_BUTTON} */
+	/* example {CONTACT_SUBMIT_BUTTON: class=contact submit btn btn-minimal} */
 	function sc_contact_submit_button($parm='')
 	{
-		return "<input type='submit' name='send-contactus' value=\"".LANCONTACT_08."\" class='btn btn-primary button' />";	
+		$class = (!empty($parm['class'])) ? $parm['class'] : 'btn btn-primary button';
+		
+		return "<input type='submit' name='send-contactus' value=\"".LANCONTACT_08."\" class='".$class."' />";	
 	}
+
+	function sc_contact_gdpr_check($parm='')
+	{
+		$parm['class'] = (!empty($parm['class'])) ? $parm['class'] : '';
+		$parm = array_merge(array('required'=>1), $parm);
+		return e107::getForm()->checkbox('gdpr', 1,false, $parm);
+	}
+     
+	/* {CONTACT_GDPR_LINK} */
+	function sc_contact_gdpr_link($parm='')
+	{
+		$pp = e107::getPref('gdpr_privacypolicy', '');
+		if (!$pp)
+		{
+			return '';
+		}
+		$pp = e107::getParser()->replaceConstants($pp, 'full'); 
+		$class = (!empty($parm['class'])) ? $parm['class'] : '';
+		$link = sprintf('<span class="%s"><a href="%s" target="_blank">%s</a></span>', $class, $pp, LANCONTACT_22);
+		$text = e107::getParser()->lanVars(LANCONTACT_23, $link);
+		return $text;
+	}
+
 
 }
 

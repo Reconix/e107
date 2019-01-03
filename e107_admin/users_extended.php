@@ -289,11 +289,11 @@ e107::js('footer-inline', js());
 
 		protected $adminMenu = array(
 
-			'main/list'			=> array('caption'=> LAN_MANAGE, 'perm' => '0'),
-			'main/add'		=> array('caption'=>  EXTLAN_45, 'perm' => '0'),
-			'main/create'		=> array('caption'=> EXTLAN_81, 'perm' => '0'),
-			'cat/list'		=> array('caption'=> LAN_CATEGORIES, 'perm' => '0'),
-			'cat/create'		=> array('caption'=> LAN_CREATE_CATEGORY, 'perm' => '0'),
+			'main/list'			=> array('caption'=> LAN_MANAGE, 'perm' => '0|4'),
+			'main/add'		=> array('caption'=>  EXTLAN_45, 'perm' => '0|4'),
+			'main/create'		=> array('caption'=> EXTLAN_81, 'perm' => '0|4'),
+			'cat/list'		=> array('caption'=> LAN_CATEGORIES, 'perm' => '0|4'),
+			'cat/create'		=> array('caption'=> LAN_CREATE_CATEGORY, 'perm' => '0|4'),
 
 
 			// 'main/custom'		=> array('caption'=> 'Custom Page', 'perm' => 'P')
@@ -388,29 +388,34 @@ e107::js('footer-inline', js());
 		);
 
 
+		/**
+		 *  Automatically exectured when edit mode is active.
+		 */
+		public function EditObserver()
+		{
+			parent::EditObserver();
+
+			$parms = e107::getDb()->retrieve('user_extended_struct', 'user_extended_struct_parms',"user_extended_struct_id = ".intval($_GET['id']));
+			$tmp = explode('^,^', $parms);
+
+			$this->fields['field_include']['writeParms']['default']     =  $tmp[0];
+			$this->fields['field_regex']['writeParms']['default']       =  $tmp[1];
+			$this->fields['field_regexfail']['writeParms']['default']   =  $tmp[2];
+			$this->fields['field_userhide']['writeParms']['default']    =  $tmp[3];
+			$this->fields['field_placeholder']['writeParms']['default'] =  $tmp[4];
+			$this->fields['field_helptip']['writeParms']['default']     =  $tmp[5];
+
+		}
+
+
+
 
 		public function init()
 		{
 
-
-
-
 			if($this->getAction() == 'edit' || $this->getAction() == 'create')
 			{
 				$this->fields['user_extended_struct_type']['title'] = LAN_TYPE;
-			}
-
-			if($this->getAction() == 'edit')
-			{
-				$parms = e107::getDb()->retrieve('user_extended_struct', 'user_extended_struct_parms',"user_extended_struct_id = ".intval($_GET['id']));
-				$tmp = explode('^,^', $parms);
-
-				$this->fields['field_include']['writeParms']['default']     =  $tmp[0];
-				$this->fields['field_regex']['writeParms']['default']       =  $tmp[1];
-				$this->fields['field_regexfail']['writeParms']['default']   =  $tmp[2];
-				$this->fields['field_userhide']['writeParms']['default']    =  $tmp[3];
-				$this->fields['field_placeholder']['writeParms']['default'] =  $tmp[4];
-				$this->fields['field_helptip']['writeParms']['default']     =  $tmp[5];
 			}
 
 			$data = e107::getDb()->retrieve("user_extended_struct", "*", "user_extended_struct_type = 0 ORDER BY user_extended_struct_order ASC", true);
@@ -447,7 +452,7 @@ e107::js('footer-inline', js());
 				$new_data['user_extended_struct_parms'] = implode('^,^', $parms);
 			}
 
-			if($new_data['user_extended_struct_values']==EUF_DB_FIELD)
+			if($new_data['user_extended_struct_type'] == EUF_DB_FIELD)
 			{
 		        $new_data['user_extended_struct_values'] = array($new_data['table_db'],$new_data['field_id'],$new_data['field_value'],$new_data['field_order']);
 			}
@@ -621,7 +626,7 @@ e107::js('footer-inline', js());
 						}
 						else
 						{
-							$ret .= str_replace('--FILE--',e_CORE.'sql/extended_'.$f.'.php',EXTLAN_78);
+							$ret .= str_replace('[x]',e_CORE.'sql/extended_'.$f.'.php',EXTLAN_78);
 						}
 					}
 				}
@@ -2111,7 +2116,7 @@ class users_ext
 				<input type='hidden' name='eu_action' value='delcat' />
 				<input type='hidden' name='key' value='{$ext['user_extended_struct_id']},{$ext['user_extended_struct_name']}' />
 				<a class='btn btn-default'  href='".e_SELF."?cat.{$ext['user_extended_struct_id']}'>".ADMIN_EDIT_ICON."</a>
-				<button class='btn btn-default action delete' type='submit' title='".LAN_DELETE."' name='eudel' data-confirm='".LAN_JSCONFIRM."' >".ADMIN_DELETE_ICON."</button>
+				<button class='btn btn-default btn-secondary action delete' type='submit' title='".LAN_DELETE."' name='eudel' data-confirm='".LAN_JSCONFIRM."' >".ADMIN_DELETE_ICON."</button>
 				</div>
 				</form>
 				</td>
@@ -2373,7 +2378,7 @@ class users_ext
 				}
 					else
 					{
-						$ret .= str_replace('--FILE--',e_CORE.'sql/extended_'.$f.'.php',EXTLAN_78);
+						$ret .= str_replace('[x]',e_CORE.'sql/extended_'.$f.'.php',EXTLAN_78);
 					}
 				}
 			}

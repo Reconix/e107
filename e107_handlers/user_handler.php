@@ -92,7 +92,8 @@ class UserHandler
 */
 	$this->userVettingInfo = array(
 		'user_name' => array('niceName'=> LAN_USER_01, 'fieldType' => 'string', 'vetMethod' => '1,2', 'vetParam' => 'signup_disallow_text', 'srcName' => 'username', 'stripTags' => TRUE, 'stripChars' => '/&nbsp;|\#|\=|\$/', 'fixedBlock' => 'anonymous', 'minLength' => 2, 'maxLength' => varset($pref['displayname_maxlength'],15)),				// Display name
-		'user_loginname' => array('niceName'=> LAN_USER_02, 'fieldType' => 'string', 'vetMethod' => '1', 'vetParam' => '', 'srcName' => 'loginname', 'stripTags' => TRUE, 'stripChars' => '#[^a-z0-9_\.]#i', 'minLength' => 2, 'maxLength' => varset($pref['loginname_maxlength'],30)),			// User name
+		//'user_loginname' => array('niceName'=> LAN_USER_02, 'fieldType' => 'string', 'vetMethod' => '1', 'vetParam' => '', 'srcName' => 'loginname', 'stripTags' => TRUE, 'stripChars' => '#[^a-z0-9_\.]#i', 'minLength' => 2, 'maxLength' => varset($pref['loginname_maxlength'],30)),			// User name
+		'user_loginname' => array('niceName'=> LAN_USER_02, 'fieldType' => 'string', 'vetMethod' => '1', 'vetParam' => '', 'srcName' => 'loginname', 'stripTags' => TRUE, 'stripChars' => '#[^\p{L}\p{M}a-z0-9_\.]#ui', 'minLength' => 2, 'maxLength' => varset($pref['loginname_maxlength'],30)),			// User name
 		'user_login' => array('niceName'=> LAN_USER_03, 'fieldType' => 'string', 'vetMethod' => '0', 'vetParam' => '', 'srcName' => 'realname', 'dbClean' => 'toDB', 'stripTags' => TRUE, 'stripChars' => '#<|>#i'),				// Real name (no real vetting)
 		'user_customtitle' => array('niceName'=> LAN_USER_04, 'fieldType' => 'string', 'vetMethod' => '0', 'vetParam' => '', 'srcName' => 'customtitle', 'dbClean' => 'toDB', 'enablePref' => 'signup_option_customtitle', 'stripTags' => TRUE, 'stripChars' => '#<|>#i'),		// No real vetting
 		'user_password' => array('niceName'=> LAN_PASSWORD, 'fieldType' => 'string', 'vetMethod' => '0', 'vetParam' => '', 'srcName' => 'password1', 'dataType' => 2, 'minLength' => varset($pref['signup_pass_len'],1)),
@@ -735,7 +736,7 @@ class UserHandler
 		}
 		foreach (array(e_UC_MEMBER, e_UC_READONLY, e_UC_PUBLIC) as $c)
 		{
-			if (!in_array($c, vartrue($classList)))
+			if (!in_array($c, vartrue($classList, array())))
 			{
 				$classList[] = $c;
 			}
@@ -844,7 +845,7 @@ Following fields auto-filled in code as required:
 			{
 				$errMsg = ERR_INVALID_EMAIL;
 			}
-			elseif ($u_sql->db_Count('user', '(*)', "WHERE `user_email`='".$v."' AND `user_ban`=1 "))
+			elseif ($u_sql->count('user', '(*)', "WHERE `user_email`='".filter_var($v,FILTER_SANITIZE_EMAIL)."' AND `user_ban`=1 "))
 			{
 				$errMsg = ERR_BANNED_USER; 
 			}
@@ -1573,12 +1574,29 @@ class e_userperms
 		);
 	
 
-		$sql = e107::getDb('sql2');
-		$tp = e107::getParser();
+	//	$sql = e107::getDb('sql2');
+	//	$tp = e107::getParser();
 
+		$pg = e107::getPlug();
+		$installed = $pg->getInstalled();
+		foreach($installed as $plug=>$version)
+		{
+			$pg->load($plug);
+
+			$arr = array(
+				0 => $pg->getName(),
+				1 => $pg->getIcon(16),
+				2 => $pg->getIcon(32)
+			);
+
+			$key = "P".$pg->getId();
+			$this->plugin_perms[$key] = $arr;
+		}
+
+/*
 		$plg = e107::getPlugin();
-		$allPlugins = $plg->getall(1); // Needs all for 'reading' and 'installed' for writing. 
-		
+		$allPlugins = $plg->getall(1); // Needs all for 'reading' and 'installed' for writing.
+
 		foreach($allPlugins as $k=>$row2)
 		{
 			if($plg->parse_plugin($row2['plugin_path']))
@@ -1589,15 +1607,8 @@ class e_userperms
 				$this->plugin_perms[("P".$row2['plugin_id'])][2] = $plg->getIcon($row2['plugin_path'],32);
 			}
 		}
-		
-	//	echo $plg->getIcon('forum');
-		
-	//	$sql->db_Select("plugin", "*", "plugin_installflag='1'");
-	//	while ($row2 = $sql->db_Fetch())
-	//	{
-	//		$this->plugin_perms[("P".$row2['plugin_id'])] = array($tp->toHTML($row2['plugin_name'], false, 'RAWTEXT,defs'));
-		//	$this->plugin_perms[("P".$row2['plugin_id'])][1] = $plg->getIcon('forum')
-	//	}
+*/
+
 
 		asort($this->plugin_perms);
 
@@ -1988,12 +1999,13 @@ class e_userperms
 		if(!$sysuser->isAdmin())
 		{
 			$sysuser->set('user_admin', 1)->save();
-			$lan = str_replace(array('--UID--', '--NAME--', '--EMAIL--'), array($sysuser->getId(), $sysuser->getName(), $sysuser->getValue('email')), USRLAN_164);
+			$vars = array('x'=>$sysuser->getId(), 'y'=> $sysuser->getName(), 'z'=>$sysuser->getValue('email'));
+			$lan = e107::getParser()->lanVars( USRLAN_164, $vars);
 			e107::getLog()->add('USET_08', $lan, E_LOG_INFORMATIVE);
 		}
 		
 		e107::getMessage()->addAuto($sysuser->set('user_perms', $perm)->save(), 'update', sprintf(LAN_UPDATED, $tp->toDB($_POST['ad_name'])), false, false);
-		$logMsg = str_replace(array('--ID--', '--NAME--'),array($modID, $a_name),ADMSLAN_72).$perm;
+		$logMsg = str_replace(array('[x]', '[y]'),array($modID, $a_name),ADMSLAN_72).$perm;
 		e107::getLog()->add('ADMIN_01',$logMsg,E_LOG_INFORMATIVE,'');
 	}
 

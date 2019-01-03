@@ -127,6 +127,7 @@ if (!$forum->checkPerm($forumId, 'view'))
 }
 
 $forumInfo = $forum->forumGet($forumId);
+$forumSCvars = array();
 //----$threadsViewed = $forum->threadGetUserViewed();
 
 if (empty($FORUM_VIEW_START))
@@ -177,6 +178,8 @@ if(!empty($FORUM_VIEWFORUM_TEMPLATE) && is_array($FORUM_VIEWFORUM_TEMPLATE) && T
 	$FORUM_IMPORTANT_ROW			= $FORUM_VIEWFORUM_TEMPLATE['divider-important'];
 	$FORUM_NORMAL_ROW				= $FORUM_VIEWFORUM_TEMPLATE['divider-normal'];	
 	
+	$FORUM_CRUMB				    = $FORUM_VIEWFORUM_TEMPLATE['forum-crumb'];	
+	
 }
 
 
@@ -192,25 +195,20 @@ if(!empty($forumInfo['forum_description']))
 {
 	define("META_DESCRIPTION", $tp->text_truncate(
 		str_replace(
-			array('"', "'"), '', strip_tags($tp->toHTML($forumInfo['forum_description']))
+			//array('"', "'"), '', strip_tags($tp->toHTML($forumInfo['forum_description']))
+			array('"', "'"), '', $tp->toText($forumInfo['forum_description'])
 	), 250, '...'));
 }
 
-//define('MODERATOR', $forum_info['forum_moderators'] != '' && check_class($forum_info['forum_moderators']));
-//$modArray = $forum->forum_getmods($forum_info['forum_moderators']);
+$moderatorUserIds = $forum->getModeratorUserIdsByForumId($forumId);
+define('MODERATOR', (USER && in_array(USERID, $moderatorUserIds)));
 
-// $thread???
-$modArray = $forum->forumGetMods($thread->forum_info['forum_moderators']);
-define('MODERATOR', (USER && is_array($modArray) && in_array(USERID, array_keys($modArray))));
-
-//----$message = '';
 if (MODERATOR)
 {
 	if ($_POST)
 	{
 		require_once(e_PLUGIN.'forum/forum_mod.php');
-//--		$message = forum_thread_moderate($_POST);
-    $forumSCvars['message']=forum_thread_moderate($_POST);
+		$forumSCvars['message'] = forum_thread_moderate($_POST);
 	}
 }
 
@@ -253,7 +251,7 @@ if ($message)
 }
 --*/
 
-$threadCount = $forumInfo['forum_threads'];
+$threadCount = (int) $forumInfo['forum_threads'];
 
 if ($threadCount > $view)
 {
@@ -265,16 +263,18 @@ else
 }
 
 
-
 if ($pages)
 {
 	if(strpos($FORUM_VIEW_START, 'THREADPAGES') !== false || strpos($FORUM_VIEW_END, 'THREADPAGES') !== false)
 	{
-		$url = e107::url('forum','forum',$forumInfo, array('query'=>array('p'=>'[FROM]')));
-/*--
+		// issue #3087 url need to be decoded first (because the [FROM] get's encoded in url())
+		// and to encode the full url to not loose the id param when being used in the $forumSCvars['parms']
+		$url = rawurlencode(rawurldecode(e107::url('forum','forum',$forumInfo, array('query'=>array('p'=>'[FROM]')))));
+
+		/*--
 		$parms = "total={$pages}&type=page&current={$page}&url=".$url."&caption=off";
 		$fVars->THREADPAGES = $tp->parseTemplate("{NEXTPREV={$parms}}");
---*/
+		--*/
 		$forumSCvars['parms'] = "total={$pages}&type=page&current={$page}&url=".$url."&caption=off";
 //-- ?????????? unset $ulrparms????
 		unset($urlparms);
@@ -331,6 +331,7 @@ $fVars->MODERATORS = LAN_FORUM_1009.': '.implode(', ', $modUser);
 $fVars->BROWSERS = '';
 --*/
 		$forumSCvars['forum_name']= $forumInfo['forum_name'];
+		$forumSCvars['forum_image']= $forumInfo['forum_image'];
 		$forumSCvars['modUser']= $modUser;
 		$forumSCvars['track_online']= varset($pref['track_online']);
 
@@ -490,56 +491,67 @@ if(is_array($subList) && isset($subList[$forumInfo['forum_parent']][$forumId]))
 	$fVars->SUBFORUMS = $FORUM_VIEW_SUB_START.$sub_info.$FORUM_VIEW_SUB_END;
 }
 --*/
-if (count($threadList) )
-{
-	foreach($threadList as $thread_info)
+	if(count($threadList))
 	{
-		if($thread_info['thread_options'])
+		foreach($threadList as $thread_info)
 		{
-			$thread_info['thread_options'] = unserialize($thread_info['thread_options']);
-		}
-		else
-		{
-			$thread_info['thread_options'] = array();
-		}
-		if ($thread_info['thread_sticky'])
-		{
-			$sticky_threads ++;
-		}
-		if ($sticky_threads > 0 && !$stuck && $forum->prefs->get('hilightsticky'))
-		{
-			if($FORUM_IMPORTANT_ROW)
+			if($thread_info['thread_options'])
 			{
-				$forum_view_forum .= $FORUM_IMPORTANT_ROW;
+				$thread_info['thread_options'] = unserialize($thread_info['thread_options']);
 			}
 			else
 			{
-				$forum_view_forum .= "<tr><td class='forumheader'>&nbsp;</td><td colspan='5'  class='forumheader'><span class='mediumtext'><b>".LAN_FORUM_1006."</b></span></td></tr>";
+				$thread_info['thread_options'] = array();
 			}
-			$stuck = true;
-		}
-		if (!$thread_info['thread_sticky'])
-		{
-			$reg_threads ++;
-		}
-		if ($reg_threads == '1') //  Removed as not needed in new template. && !$unstuck && $stuck
-		{
-			if($FORUM_NORMAL_ROW)
+
+			if($thread_info['thread_sticky'])
 			{
-				$forum_view_forum .= $FORUM_NORMAL_ROW;
+				$sticky_threads++;
 			}
-			else
+
+			if($sticky_threads > 0 && !$stuck && $forum->prefs->get('hilightsticky'))
 			{
-				$forum_view_forum .= "<tr><td class='forumheader'>&nbsp;</td><td colspan='5'  class='forumheader'><span class='mediumtext'><b>".LAN_FORUM_1007."</b></span></td></tr>"; 
+				if(!empty($FORUM_IMPORTANT_ROW))
+				{
+					$forum_view_forum .= $FORUM_IMPORTANT_ROW;
+				}
+				else
+				{
+					$forum_view_forum .= "<tr><td class='forumheader'>&nbsp;</td><td colspan='5'  class='forumheader'><span class='mediumtext'><b>" . LAN_FORUM_1006 . "</b></span></td></tr>";
+				}
+
+				$stuck = true;
 			}
-			$unstuck = true;
+
+			if(!$thread_info['thread_sticky'])
+			{
+				$reg_threads++;
+			}
+
+			if($reg_threads === 1) //  Removed as not needed in new template. && !$unstuck && $stuck
+			{
+				if(THEME_LEGACY === true && ($stuck === false || $unstuck === true))
+				{
+					// do nothing.
+				}
+				elseif(!empty($FORUM_NORMAL_ROW))
+				{
+					$forum_view_forum .= $FORUM_NORMAL_ROW;
+				}
+				else
+				{
+					$forum_view_forum .= "<tr><td class='forumheader'>&nbsp;</td><td colspan='5'  class='forumheader'><span class='mediumtext'><b>" . LAN_FORUM_1007 . "</b></span></td></tr>";
+				}
+
+				$unstuck = true;
+			}
+
+			$forum_view_forum .= parse_thread($thread_info);
 		}
-		$forum_view_forum .= parse_thread($thread_info);
 	}
-}
 else
 {
-	$forum_view_forum .= deftrue('BOOTSTRAP')?"<div class='alert alert-warning'>".LAN_FORUM_1008."</div>":
+	$forum_view_forum .= deftrue('BOOTSTRAP') ? "<div class='alert alert-warning'>".LAN_FORUM_1008."</div>":
 "<tr><td class='forumheader alert alert-warning alert-block' colspan='6'>".LAN_FORUM_1008."</td></tr>";
 }
 
@@ -559,9 +571,9 @@ if($container_only)
 
 //var_dump ($FORUM_VIEW_START);
 //  	var_dump ($FORUM_VIEW_SUB);
-$forum_view_start = $tp->parseTemplate($FORUM_VIEW_START_CONTAINER.$FORUM_VIEW_START, false, $sc);
-$forum_view_forum = $tp->parseTemplate($forum_view_forum, false, $sc);
-$forum_view_end = $tp->parseTemplate($FORUM_VIEW_END.$FORUM_VIEW_END_CONTAINER, false, $sc);
+$forum_view_start = $tp->parseTemplate($FORUM_VIEW_START_CONTAINER.$FORUM_VIEW_START, true, $sc);
+$forum_view_forum = $tp->parseTemplate($forum_view_forum, true, $sc);
+$forum_view_end = $tp->parseTemplate($FORUM_VIEW_END.$FORUM_VIEW_END_CONTAINER, true, $sc);
 
 //$forum_view_start .= "<hr><hr>FVARS FORUM<hr><hr>".$tp->simpleParse($FORUM_VIEW_START, $fVars);
 //$forum_view_end = $tp->simpleParse($FORUM_VIEW_END, $fVars);
@@ -569,9 +581,9 @@ $forum_view_end = $tp->parseTemplate($FORUM_VIEW_END.$FORUM_VIEW_END_CONTAINER, 
 if ($forum->prefs->get('enclose'))
 {	
 // $forum_view_subs????
-	$caption = varset($FORUM_VIEW_CAPTION) ? $tp->parseTemplate($FORUM_VIEW_CAPTION, TRUE, $sc) : $forum->prefs->get('title');
+	$caption = varset($FORUM_VIEW_CAPTION) ? $tp->parseTemplate($FORUM_VIEW_CAPTION, true, $sc) : $forum->prefs->get('title');
 
-	$ns->tablerender($caption, $forum_view_start.$forum_view_subs.$forum_view_forum.$forum_view_end, array('forum_viewforum', 'main1'));
+	$ns->tablerender($caption, $forum_view_start.$forum_view_subs.$forum_view_forum.$forum_view_end, 'forum-viewforum');
 }
 else
 {
@@ -961,7 +973,7 @@ function forumjump()
 	{
 		$text .= "\n<option value='".e107::url('forum','forum',$val, 'full')."'>".$val['forum_name']."</option>";
 	}
-	$text .= "</select> <input class='btn btn-default button' type='submit' name='fjsubmit' value='".LAN_GO."' /></form>";
+	$text .= "</select> <input class='btn btn-default btn-secondary button' type='submit' name='fjsubmit' value='".LAN_GO."' /></form>";
 	return $text;
 }
 
@@ -973,7 +985,7 @@ function fadminoptions($thread_info)
 	$tp = e107::getParser();
 	
 //	$text = "<form method='post' action='".e_REQUEST_URI."' id='frmMod_{$forumId}_{$threadId}' style='margin:0;'>";
-	$text = '<div class="btn-group"><button class="btn btn-default btn-sm btn-mini dropdown-toggle" data-toggle="dropdown">
+	$text = '<div class="btn-group"><button class="btn btn-default btn-secondary btn-sm btn-mini dropdown-toggle" data-toggle="dropdown">
     <span class="caret"></span>
     </button>
     <ul class="dropdown-menu pull-right">	
@@ -999,11 +1011,11 @@ function fadminoptions($thread_info)
 	
 
 
-	$text .= "<li class='text-right'><a href='".e_REQUEST_URI."' data-forum-action='delete' data-forum-thread='".$id."'>".LAN_DELETE." ".$tp->toGlyph('trash');
+	$text .= "<li class='text-right'><a href='".e_REQUEST_URI."' data-forum-action='delete' data-forum-thread='".$id."'>".LAN_DELETE." ".$tp->toGlyph('trash')."</a></li>";
 	$text .= "<li class='text-right'><a href='".e_REQUEST_URI."' data-forum-action='".$stickUnstick."' data-forum-thread='".$id."'>".$lan[$stickUnstick]." ".$icon[$stickUnstick]."</a></li>";
 	$text .= "<li class='text-right'><a href='".e_REQUEST_URI."' data-forum-action='".$lockUnlock."' data-forum-thread='".$id."'>".$lan[$lockUnlock]." ".$icon[$lockUnlock]."</a></li>";
 	
-	$text .= "<li class='text-right'><a href='{$moveUrl}'>".LAN_FORUM_2042." ".$tp->toGlyph('move')."</i></a></li>";
+	$text .= "<li class='text-right'><a href='{$moveUrl}'>".LAN_FORUM_2042." ".$tp->toGlyph('move')."</a></li>";
 
 	if(e_DEVELOPER)
 	{
@@ -1033,8 +1045,12 @@ function fpages($thread_info, $replies)
 {
 	global $forum;
 	$tp = e107::getParser();
+
+	$replies        = (int) $replies;
+	$postsPerPage   = (int) $forum->prefs->get('postspage');
 	
-	$pages = ceil(($replies)/$forum->prefs->get('postspage'));
+	$pages = ceil(($replies)/$postsPerPage);
+
 	$thread_info['thread_sef'] = eHelper::title2sef($thread_info['thread_name'],'dashl');
 	$urlparms = $thread_info;
 	$text = '';
@@ -1091,7 +1107,7 @@ function fpages($thread_info, $replies)
 		}
 		else 
 		{
-			$text = implode("",$opts); // ."</div>";
+			$text = implode(" ",$opts); // ."</div>";
 		}
 		
 	}

@@ -23,25 +23,25 @@ $sql = e107::getDb();
 
 $sql->db_Mark_Time('(Header Top)');
 
-
+// Load library dependencies.
+e107::getTheme('current', true)->loadLibrary();
 
 //e107::js('core',	'bootstrap/js/bootstrap-tooltip.js','jquery');
 // e107::css('core',	'bootstrap/css/tooltip.css','jquery');
 
 if(deftrue('BOOTSTRAP'))
 {
-	e107::js('core',	'bootstrap-notify/js/bootstrap-notify.js','jquery');
-	e107::css('core',	'bootstrap-notify/css/bootstrap-notify.css','jquery');
+	e107::js('footer', '{e_WEB}js/bootstrap-notify/js/bootstrap-notify.js', 'jquery', 2);
+	e107::css('core', 'bootstrap-notify/css/bootstrap-notify.css', 'jquery');
 }
 
 // ------------------
 
-// e107::js('core', 	'jquery.elastic.js', 'jquery', 2);
-e107::js('core', 	'rate/js/jquery.raty.js', 'jquery', 2);
-e107::css('core', 	'core/all.jquery.css', 'jquery');
+e107::js('footer', '{e_WEB}js/rate/js/jquery.raty.js', 'jquery', 2);
+e107::css('core', 'core/all.jquery.css', 'jquery');
 
-e107::js("core",	"core/front.jquery.js","jquery",5); // Load all default functions.
-e107::js("core",	"core/all.jquery.js","jquery",5); // Load all default functions.
+e107::js('footer', '{e_WEB}js/core/front.jquery.js', 'jquery', 5); // Load all default functions.
+e107::js('footer', '{e_WEB}js/core/all.jquery.js', 'jquery', 5); // Load all default functions.
 
 $js_body_onload = array();		// Legacy array of code to load with page.
 
@@ -120,7 +120,8 @@ if (!function_exists("parseheader"))
 if(!defined("XHTML4"))
 {
 	echo "<!doctype html>\n";
-	echo "<html".(defined("TEXTDIRECTION") ? " dir='".TEXTDIRECTION."'" : "").(defined("CORE_LC") ? " lang=\"".CORE_LC."\"" : "").">\n";	
+	$htmlTag = "<html".(defined("TEXTDIRECTION") ? " dir='".TEXTDIRECTION."'" : "").(defined("CORE_LC") ? " lang=\"".CORE_LC."\"" : "").">";
+	echo deftrue('HTMLTAG', $htmlTag)."\n";
 	echo "<head>\n";
 	echo "<meta charset='utf-8' />\n";
 }
@@ -139,12 +140,22 @@ else
 // C: Send start of HTML
 //
 
-if(vartrue($pref['meta_copyright'][e_LANGUAGE])) e107::meta('dcterms.rights',$pref['meta_copyright'][e_LANGUAGE]);
-if(vartrue($pref['meta_author'][e_LANGUAGE])) e107::meta('author',$pref['meta_author'][e_LANGUAGE]);
-$siteButton = (strpos($pref['sitelogo'],'{e_MEDIA') !== false) ? $tp->thumbUrl($pref['sitelogo'],'w=800',false, true) : $tp->replaceConstants($pref['sitelogo'],'full');
-if($pref['sitebutton']) e107::meta('og:image',$siteButton);
+if(!empty($pref['meta_copyright'][e_LANGUAGE])) e107::meta('dcterms.rights',$pref['meta_copyright'][e_LANGUAGE]);
+if(!empty($pref['meta_author'][e_LANGUAGE])) e107::meta('author',$pref['meta_author'][e_LANGUAGE]);
+if(!empty($pref['sitebutton']))
+{
+	$siteButton = (strpos($pref['sitebutton'],'{e_MEDIA') !== false) ? $tp->thumbUrl($pref['sitebutton'],'w=800',false, true) : $tp->replaceConstants($pref['sitebutton'],'full');
+	e107::meta('og:image',$siteButton);
+	unset($siteButton);
+}
+elseif(!empty($pref['sitelogo'])) // fallback to sitelogo
+{
+	$siteLogo = (strpos($pref['sitelogo'],'{e_MEDIA') !== false) ? $tp->thumbUrl($pref['sitelogo'],'w=800',false, true) : $tp->replaceConstants($pref['sitelogo'],'full');
+	e107::meta('og:image',$siteLogo);
+	unset($siteLogo);
+}
+
 if(defined("VIEWPORT")) e107::meta('viewport',VIEWPORT); //BC ONLY
-unset($siteButton);
 
 
 // Load Plugin Header Files, allow them to load CSS/JSS/Meta via JS Manager early enouhg
@@ -161,19 +172,25 @@ if ($e_headers && is_array($e_headers))
 }
 unset($e_headers);
 
-echo e107::getUrl()->response()->renderMeta()."\n"; // render all the e107::meta() entries.
+// echo e107::getUrl()->response()->renderMeta()."\n"; // render all the e107::meta() entries.
+echo e107::getSingleton('eResponse')->renderMeta()."\n";
 
-echo "<title>".(defined('e_PAGETITLE') ? e_PAGETITLE.' - ' : (defined('PAGE_NAME') ? PAGE_NAME.' - ' : "")).SITENAME."</title>\n\n";
-
-
-
-
+if (deftrue('e_FRONTPAGE'))
+{
+	// Ignore any additional title when current page is the frontpage
+	echo "<title>".SITENAME."</title>\n\n";
+}
+else
+{
+	echo "<title>".(defined('e_PAGETITLE') ? e_PAGETITLE.' - ' : (defined('PAGE_NAME') ? PAGE_NAME.' - ' : "")).SITENAME."</title>\n\n";
+}
 
 
 //
 // D: Register CSS
 //
 $e_js = e107::getJs();
+
 $e_pref = e107::getConfig('core');
 
 // Other Meta tags. 
@@ -187,7 +204,7 @@ if (/*!defined("PREVIEWTHEME") && */! (isset($no_core_css) && $no_core_css !==tr
 	$e_js->otherCSS('{e_WEB_CSS}e107.css');
 }
 
-if(THEME_LEGACY === true)
+if(THEME_LEGACY === true || !deftrue('BOOTSTRAP'))
 {
 	$e_js->otherCSS('{e_WEB_CSS}backcompat.css');
 }
@@ -225,7 +242,7 @@ if (is_array($pref['e_meta_list']))
 
 if(isset($pref['sitebutton']))
 {
-	$appleIcon = $tp->thumbUrl($pref['sitebutton'],'w=144&h=144&crop=1',true);
+	$appleIcon = $tp->thumbUrl($pref['sitebutton'],'w=144&h=144&crop=1',null, true);
 	echo "<link rel='apple-touch-icon' href='".$appleIcon."' />\n";	
 	unset($appleIcon);
 }
@@ -271,30 +288,21 @@ else
 		// Theme default
 		
 		$e_js->themeCSS(THEME_STYLE, $css_default);
-		
-		/* Moved to class2 and defined as THEME_STYLE
-		if($e_pref->get('themecss') && file_exists(THEME.$e_pref->get('themecss')))
+
+		// Support for style.css - override theme default CSS
+		if(file_exists(THEME."style_custom.css"))
 		{
-			//echo "<link rel='stylesheet' href='".THEME_ABS."{$pref['themecss']}' type='text/css' media='{$css_default}' />\n";
-			$e_js->themeCSS($e_pref->get('themecss'), $css_default);
+			$e_js->themeCSS('style_custom.css',$css_default);
 		}
-		else
-		{
-		//	echo "<link rel='stylesheet' href='".THEME_ABS."style.css' type='text/css' media='{$css_default}' />\n";
-			$e_js->themeCSS('style.css', $css_default);
-		}
-		*/
+
 		// Support for print and handheld media - override theme default CSS
 		if(file_exists(THEME."style_mobile.css"))
 		{
-            //echo "<link rel='stylesheet' href='".THEME_ABS."style_mobile.css' type='text/css' media='handheld' />\n";
-			//$css_default = "screen";
 			$e_js->themeCSS('style_mobile.css', 'handheld');
 		}
+
 		if(file_exists(THEME."style_print.css"))
 		{
-            // echo "<link rel='stylesheet' href='".THEME_ABS."style_print.css' type='text/css' media='print' />\n";
-            // $css_default = "screen";
 			$e_js->themeCSS('style_print.css', 'print');
 		}
 	}
@@ -326,7 +334,7 @@ else
 
 
 
-$CSSORDER = deftrue('CSSORDER') ? explode(",",CSSORDER) : array('other','core','plugin','theme','inline');
+$CSSORDER = deftrue('CSSORDER') ? explode(",",CSSORDER) : array('library', 'other','core','plugin','theme','inline');
 
 
 foreach($CSSORDER as $val)
@@ -472,7 +480,7 @@ if(function_exists('theme_head'))
 	echo theme_head();
 }
 
-// FIXME description and keywords meta tags shouldn't be sent on all pages
+/* @deprecated */
 $diz_merge = (defined("META_MERGE") && META_MERGE != FALSE && $pref['meta_description'][e_LANGUAGE]) ? $pref['meta_description'][e_LANGUAGE]." " : "";
 $key_merge = (defined("META_MERGE") && META_MERGE != FALSE && $pref['meta_keywords'][e_LANGUAGE]) ? $pref['meta_keywords'][e_LANGUAGE]."," : "";
 
@@ -500,15 +508,30 @@ function render_meta($type)
 	}
 }
 
-echo (defined("META_DESCRIPTION")) ? "\n<meta name=\"description\" content=\"".$diz_merge.META_DESCRIPTION."\" />\n" : render_meta('description');
-echo (defined("META_KEYWORDS")) ? "\n<meta name=\"keywords\" content=\"".$key_merge.META_KEYWORDS."\" />\n" : render_meta('keywords');
+// legay meta-tag checks.
+/*
+$isKeywords = e107::getUrl()->response()->getMetaKeywords();
+$isDescription = e107::getUrl()->response()->getMetaDescription();
+*/
 
+$isKeywords = e107::getSingleton('eResponse')->getMetaKeywords();
+$isDescription = e107::getSingleton('eResponse')->getMetaDescription();
+
+
+if(empty($isKeywords))
+{
+	echo (defined("META_KEYWORDS")) ? "\n<meta name=\"keywords\" content=\"".$key_merge.META_KEYWORDS."\" />\n" : render_meta('keywords');
+}
+if(empty($isDescription))
+{
+	echo (defined("META_DESCRIPTION")) ? "\n<meta name=\"description\" content=\"".$diz_merge.META_DESCRIPTION."\" />\n" : render_meta('description');
+}
 
 //echo render_meta('copyright');
 //echo render_meta('author');
 echo render_meta('tag');
 
-unset($key_merge,$diz_merge);
+unset($key_merge,$diz_merge,$isKeywords,$isDescription);
 
 // ---------- Favicon ---------
 if (file_exists(THEME."favicon.ico")) 
@@ -779,13 +802,13 @@ if ($e107_popup != 1) {
 
 	if(deftrue('BOOTSTRAP'))
 	{
-		echo "<div id='uiAlert' class='notifications center'></div>"; // Popup Alert Message holder. @see http://nijikokun.github.io/bootstrap-notify/
+		echo "<div id='uiAlert' class='notifications'></div>"; // Popup Alert Message holder. @see http://nijikokun.github.io/bootstrap-notify/
 	}
 
     /**
      * Display Welcome Message when old method activated.
      * fix - only when e_FRONTPAGE set to true
-     * @see \core_index_index_controller\actionIndex
+     * @see core_index_index_controller/actionIndex
      */
     if(deftrue('e_FRONTPAGE') && strstr($HEADER,"{WMESSAGE")===false && strstr($FOOTER,"{WMESSAGE")===false) // Auto-detection to override old pref.
 	{

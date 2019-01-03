@@ -52,6 +52,8 @@
   14 => 'e-users',
   15 => 'e-wmessage',
 )]]></core>
+		<core name="db_updates"><![CDATA[array (
+)]]></core>
 		<core name="developer">0</core>
 		<core name="disable_emailcheck">0</core>
 		<core name="disallowMultiLogin">0</core>
@@ -126,6 +128,7 @@
   'rss_menu' => 'rss_sql',
 )]]></core>
 		<core name="e_url_list"><![CDATA[array (
+  'news' => 'news',
   'rss_menu' => 'rss_menu',
 )]]></core>
 		<core name="email_text"></core>
@@ -146,6 +149,8 @@
 		<core name="frontpage_force"><![CDATA[array (
   0 => '',
 )]]></core>
+		<core name="gdpr_privacypolicy"></core>
+		<core name="gdpr_termsandconditions"></core>
 		<core name="html_abuse">0</core>
 		<core name="im_height">80</core>
 		<core name="im_path">/usr/X11R6/bin/</core>
@@ -330,6 +335,8 @@ City, State, Country
   'system' => 'core',
   'user' => 'core',
 )]]></core>
+<core name="url_profiles"><![CDATA[array (
+)]]></core>
 		<core name="url_disable_pathinfo">1</core>
 		<core name="url_error_redirect">0</core>
 		<core name="url_locations"><![CDATA[array (
@@ -394,6 +401,7 @@ City, State, Country
 		<core name="user_reg_secureveri">1</core>
 		<core name="user_reg_veri">1</core>
 		<core name="user_tracking">cookie</core>
+		<core name="version">2.2.0</core>
 		<core name="wm_enclose">1</core>
 		<core name="wmessage_sc">0</core>
 		<core name="wysiwyg">1</core>
@@ -653,6 +661,28 @@ City, State, Country
 			</item>
 			<item>
 				<field name="media_cat_id">3</field>
+				<field name="media_cat_owner">_common</field>
+				<field name="media_cat_category">_common_video</field>
+				<field name="media_cat_title">(Common Videos)</field>
+				<field name="media_cat_sef"></field>
+				<field name="media_cat_diz">Media in this category will be available in all areas of admin.</field>
+				<field name="media_cat_class">253</field>
+				<field name="media_cat_image"></field>
+				<field name="media_cat_order">0</field>
+			</item>
+			<item>
+				<field name="media_cat_id">4</field>
+				<field name="media_cat_owner">_common</field>
+				<field name="media_cat_category">_common_audio</field>
+				<field name="media_cat_title">(Common Audio)</field>
+				<field name="media_cat_sef"></field>
+				<field name="media_cat_diz">Media in this category will be available in all areas of admin.</field>
+				<field name="media_cat_class">253</field>
+				<field name="media_cat_image"></field>
+				<field name="media_cat_order">0</field>
+			</item>
+			<item>
+				<field name="media_cat_id">5</field>
 				<field name="media_cat_owner">news</field>
 				<field name="media_cat_category">news</field>
 				<field name="media_cat_title">News</field>
@@ -663,7 +693,7 @@ City, State, Country
 				<field name="media_cat_order">1</field>
 			</item>
 			<item>
-				<field name="media_cat_id">4</field>
+				<field name="media_cat_id">6</field>
 				<field name="media_cat_owner">page</field>
 				<field name="media_cat_category">page</field>
 				<field name="media_cat_title">Custom Pages</field>
@@ -674,7 +704,7 @@ City, State, Country
 				<field name="media_cat_order">0</field>
 			</item>
 			<item>
-				<field name="media_cat_id">5</field>
+				<field name="media_cat_id">7</field>
 				<field name="media_cat_owner">download</field>
 				<field name="media_cat_category">download_image</field>
 				<field name="media_cat_title">Download Images</field>
@@ -685,7 +715,7 @@ City, State, Country
 				<field name="media_cat_order">0</field>
 			</item>
 			<item>
-				<field name="media_cat_id">6</field>
+				<field name="media_cat_id">8</field>
 				<field name="media_cat_owner">download</field>
 				<field name="media_cat_category">download_thumb</field>
 				<field name="media_cat_title">Download Thumbnails</field>
@@ -696,7 +726,7 @@ City, State, Country
 				<field name="media_cat_order">0</field>
 			</item>
 			<item>
-				<field name="media_cat_id">7</field>
+				<field name="media_cat_id">9</field>
 				<field name="media_cat_owner">download</field>
 				<field name="media_cat_category">download_file</field>
 				<field name="media_cat_title">Download Files</field>
@@ -707,7 +737,7 @@ City, State, Country
 				<field name="media_cat_order">0</field>
 			</item>
 			<item>
-				<field name="media_cat_id">8</field>
+				<field name="media_cat_id">10</field>
 				<field name="media_cat_owner">news</field>
 				<field name="media_cat_category">news_thumb</field>
 				<field name="media_cat_title">News Thumbnails (Legacy)</field>
@@ -718,7 +748,7 @@ City, State, Country
 				<field name="media_cat_order">1</field>
 			</item>
 			<item>
-				<field name="media_cat_id">9</field>
+				<field name="media_cat_id">11</field>
 				<field name="media_cat_owner">_icon</field>
 				<field name="media_cat_category">_icon_16</field>
 				<field name="media_cat_title">Icons 16px</field>
@@ -729,7 +759,7 @@ City, State, Country
 				<field name="media_cat_order">0</field>
 			</item>
 			<item>
-				<field name="media_cat_id">10</field>
+				<field name="media_cat_id">12</field>
 				<field name="media_cat_owner">_icon</field>
 				<field name="media_cat_category">_icon_32</field>
 				<field name="media_cat_title">Icons 32px</field>
@@ -740,7 +770,7 @@ City, State, Country
 				<field name="media_cat_order">0</field>
 			</item>
 			<item>
-				<field name="media_cat_id">11</field>
+				<field name="media_cat_id">13</field>
 				<field name="media_cat_owner">_icon</field>
 				<field name="media_cat_category">_icon_48</field>
 				<field name="media_cat_title">Icons 48px</field>
@@ -751,7 +781,7 @@ City, State, Country
 				<field name="media_cat_order">0</field>
 			</item>
 			<item>
-				<field name="media_cat_id">12</field>
+				<field name="media_cat_id">14</field>
 				<field name="media_cat_owner">_icon</field>
 				<field name="media_cat_category">_icon_64</field>
 				<field name="media_cat_title">Icons 64px</field>
@@ -762,7 +792,7 @@ City, State, Country
 				<field name="media_cat_order">0</field>
 			</item>
 			<item>
-				<field name="media_cat_id">13</field>
+				<field name="media_cat_id">15</field>
 				<field name="media_cat_owner">_icon</field>
 				<field name="media_cat_category">_icon_svg</field>
 				<field name="media_cat_title">Icons SVG</field>
@@ -843,8 +873,8 @@ City, State, Country
 				<field name="link_open">0</field>
 				<field name="link_class">0</field>
 				<field name="link_function"></field>
-				<field name="link_sefurl"></field>
-			    <field name="link_owner"></field>
+				<field name="link_sefurl">index</field>
+			    <field name="link_owner">contact</field>
 			</item>
 			<item>
 				<field name="link_id">6</field>
@@ -858,8 +888,8 @@ City, State, Country
 				<field name="link_open">0</field>
 				<field name="link_class">0</field>
 				<field name="link_function"></field>
-				<field name="link_sefurl"></field>
-			    <field name="link_owner"></field>
+				<field name="link_sefurl">index</field>
+			    <field name="link_owner">news</field>
 			</item>
 			<item>
 				<field name="link_id">7</field>
@@ -1205,7 +1235,7 @@ City, State, Country
 			<item>
 				<field name="category_id">1</field>
 				<field name="category_name">Misc</field>
-				<field name="category_sef"></field>
+				<field name="category_sef">misc</field>
 				<field name="category_meta_description"></field>
 				<field name="category_meta_keywords"></field>
 				<field name="category_manager">254</field>

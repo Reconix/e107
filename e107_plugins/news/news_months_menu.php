@@ -8,7 +8,7 @@
 
 if (!defined('e107_INIT')) { exit; }
 
-$cString = 'nq_news_months_menu_'.md5(serialize($parm));
+$cString = 'nq_news_months_menu_'.md5(serialize($parm).USERCLASS_LIST.e_LANGUAGE);
 $cached = e107::getCache()->retrieve($cString);
 
 if(!empty($parm))
@@ -108,7 +108,7 @@ if(false === $cached)
 
 	// go over the link array and create the option fields
 	$menu_text = array();
-	$template = e107::getTemplate('news', 'news_menu', 'months');
+	$template = e107::getTemplate('news', 'news_menu', 'months', true, true);
 	$bullet = defined('BULLET') ? THEME_ABS.'images/'.BULLET : THEME_ABS.'images/bullet2.gif';
 	$vars = new e_vars(array('bullet' => $bullet));
 	foreach($month_links as $index => $val) 
@@ -116,7 +116,7 @@ if(false === $cached)
 		$vars->addData(array(
 			'active' => $index == $req_month ? " active" : '',
 			'url' => $val,
-			'month' => $marray[$index-1],
+			'month' => $marray[$index],
 			'count' => $xmonth_cnt[$index],
 		));
 		$menu_text[] = $tp->simpleParse($template['item'], $vars);
@@ -129,7 +129,7 @@ if(false === $cached)
 	{
 		if(!$parms['showarchive'])
 		{
-			$footer = '<div class="e-menu-link news-menu-archive"><a class="btn btn-default btn-sm" href="'.e_PLUGIN_ABS.'blogcalendar_menu/archive.php">'.BLOGCAL_L2.'</a></div>';
+			$footer = '<div class="e-menu-link news-menu-archive"><a class="btn btn-default btn-secondary btn-sm" href="'.e_PLUGIN_ABS.'blogcalendar_menu/archive.php">'.BLOGCAL_L2.'</a></div>';
 			$ns->setContent('footer', $footer);
 			$cached .= $footer;
 

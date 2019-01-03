@@ -240,7 +240,7 @@ class e_pref extends e_front_model
 		{
 			return $this;
 		}
-		if(isset($this->_data[$pref_name])) 
+		if(array_key_exists($pref_name, $this->_data))
 		{
 			if($this->_data[$pref_name] != $value) $this->data_has_changed = true;
 			$this->_data[$pref_name] = $value;
@@ -469,10 +469,10 @@ class e_pref extends e_front_model
 		$id = $this->prefid;
 		$data = $force ? false : $this->getPrefCache(true);
 
-		if($data !== false)
+		if(!empty($data))
 		{
 			$this->pref_cache = e107::getArrayStorage()->WriteArray($data, false); //runtime cache
-			$this->loadData($data, false);
+			$this->loadData((array) $data, false);
 			return $this;
 		}
 

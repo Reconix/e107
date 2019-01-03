@@ -162,8 +162,6 @@ class system_tools
 		
 		$this->_utf8_exclude = array(MPREFIX."core");
 
-		
-
 		$this->_options = array(
 			"db_update"				=> array('diz'=>DBLAN_15, 'label'=>DBLAN_16),
 			"verify_sql"			=> array('diz'=>DBLAN_4, 'label'=>DBLAN_5),
@@ -205,13 +203,15 @@ class system_tools
 			$this->del_pref_val($_POST['pref_type']);
 		}
 		
-		if(isset($_POST['verify_sql']) || varset($_GET['mode'])=='verify_sql')
+		if(isset($_POST['verify_sql']) || !empty($_POST['verify_table']) || varset($_GET['mode']) =='verify_sql')
 		{
 			e107::getCache()->clear('Dbverify',true);
 			require_once(e_HANDLER."db_verify_class.php");
 			$dbv = new db_verify;
 			$dbv->backUrl = e_SELF."?mode=verify_sql";
 			$dbv->verify();
+
+			//echo e107::getMessage()->render();
 			return;
 		}
 		
@@ -231,12 +231,13 @@ class system_tools
 		if(isset($_POST['db_update']) || varset($_GET['mode'])=='db_update') // Requires further testing. 
 		{
 		//	header("location: ".e_ADMIN."e107_update.php");
+			$dbupdate = null;
 			require_once(e_ADMIN."update_routines.php");
 			new e107Update($dbupdate);
 			return;
 		}
 		
-		if(isset($_POST['convert_to_utf8']) ||  $_GET['mode']=='convert_to_utf8')
+		if(isset($_POST['convert_to_utf8']) ||  $_GET['mode'] =='convert_to_utf8')
 		{
 			$this->convertUTF8Form();
 		}
@@ -322,126 +323,57 @@ class system_tools
 	}
 
 
-
-
-
-	// Developer Mode ONly.. No LANS.
+	// Developer Mode ONly.. No LANS required. 
 	private function githubSync()
 	{
 
 		$frm = e107::getForm();
 		$mes = e107::getMessage();
 
-	//	$message = DBLAN_70;
-	//	$message .= "<br /><a class='e-ajax btn btn-success' data-loading-text='".DBLAN_71."' href='#backupstatus' data-src='".e_SELF."?mode=backup' >".LAN_CREATE."</a>";
-
-		$message = $frm->open('githubSync');
-		$message .= "<p>".DBLAN_116." <b>".e_SYSTEM."temp</b> ".DBLAN_117." </p>";
-		$message .= $frm->button('githubSyncProcess',1,'delete', DBLAN_113);
-		$message .= $frm->close();
+		//	$message = DBLAN_70;
+		//	$message .= "<br /><a class='e-ajax btn btn-success' data-loading-text='".DBLAN_71."' href='#backupstatus' data-src='".e_SELF."?mode=backup' >".LAN_CREATE."</a>";
 
 
-		$mes->addInfo($message);
-
-	//	$text = "<div id='backupstatus' style='margin-top:20px'></div>";
-
+		// Check for minimum required PHP version, and display warning instead of sync button to avoid broken functionality after syncing
+		// MIN_PHP_VERSION constant only defined in install.php, thus hardcoded here
+		$min_php_version = '5.6'; 
+		
+		if(version_compare(PHP_VERSION, $min_php_version, "<"))
+		{
+			$mes->addWarning("The minimum required PHP version is <strong>".$min_php_version."</strong>. You are using PHP version <strong>".PHP_VERSION."</strong>. <br /> Syncing with Github has been disabled to avoid broken fuctionality."); // No nee to translate, developer mode only
+		}
+		else 
+		{
+			$message = $frm->open('githubSync');
+			$message .= "<p>".DBLAN_116." <b>".e_SYSTEM."temp</b> ".DBLAN_117." </p>";
+			$message .= $frm->button('githubSyncProcess',1,'delete', DBLAN_113);
+			$message .= $frm->close();
+			
+			$mes->addInfo($message);
+		} 
+		
+		//	$text = "<div id='backupstatus' style='margin-top:20px'></div>";
 
 		e107::getRender()->tablerender(DBLAN_10.SEP.DBLAN_112, $mes->render());
-
-
-
 	}
-
-
 
 
 
 	// Developer Mode ONly.. No LANS.
 	private function githubSyncProcess()
 	{
+		$result = e107::getFile()->unzipGithubArchive('core');
 
-		// Delete any existing file.
-		if(file_exists(e_TEMP."e107-master.zip"))
-		{
-			unlink(e_TEMP."e107-master.zip");
-		}
-
-		$result = e107::getFile()->getRemoteFile('https://codeload.github.com/e107inc/e107/zip/master', 'e107-master.zip', 'temp');
-
-		if($result == false)
+		if($result === false)
 		{
 			e107::getMessage()->addError( DBLAN_118 );
+			return null;
 		}
 
+		$success = $result['success'];
+		$error = $result['error'];
 
-		$localfile = 'e107-master.zip';
-
-		chmod(e_TEMP.$localfile, 0755);
-		require_once(e_HANDLER."pclzip.lib.php");
-
-//	$base = realpath(dirname(__FILE__));
-
-
-		$newFolders = array(
-			'e107-master/e107_admin/'       => e_BASE.e107::getFolder('ADMIN'),
-			'e107-master/e107_core/'        => e_BASE.e107::getFolder('CORE'),
-			'e107-master/e107_docs/'        => e_BASE.e107::getFolder('DOCS'),
-			'e107-master/e107_handlers/'    => e_BASE.e107::getFolder('HANDLERS'),
-			'e107-master/e107_images/'      => e_BASE.e107::getFolder('IMAGES'),
-			'e107-master/e107_languages/'   => e_BASE.e107::getFolder('LANGUAGES'),
-			'e107-master/e107_media/'       => e_BASE.e107::getFolder('MEDIA'),
-			'e107-master/e107_plugins/'     => e_BASE.e107::getFolder('PLUGINS'),
-			'e107-master/e107_system/'      => e_BASE.e107::getFolder('SYSTEM'),
-			'e107-master/e107_themes/'      => e_BASE.e107::getFolder('THEMES'),
-			'e107-master/e107_web/'         => e_BASE.e107::getFolder('WEB'),
-			'e107-master/'                  => e_BASE
-		);
-
-		$srch = array_keys($newFolders);
-		$repl = array_values($newFolders);
-
-		$archive 	= new PclZip(e_TEMP.$localfile);
-		$unarc 		= ($fileList = $archive -> extract(PCLZIP_OPT_PATH, e_TEMP, PCLZIP_OPT_SET_CHMOD, 0755)); // Store in TEMP first.
-
-		$error = array();
-		$success = array();
-		$skipped = array();
-//	print_a($unarc);
-
-
-		$excludes = array('e107-master/','e107-master/install.php','e107-master/favicon.ico');
-
-		foreach($unarc as $k=>$v)
-		{
-			if(in_array($v['stored_filename'],$excludes))
-			{
-				continue;
-			}
-
-			$oldPath = $v['filename'];
-			$newPath =  str_replace($srch,$repl, $v['stored_filename']);
-
-			$message = e107::getParser()->lanVars(DBLAN_121, array('x'=>$oldPath, 'y'=>$newPath));
-
-			if($v['folder'] ==1 && is_dir($newPath))
-			{
-				// $skipped[] =  $newPath. " (already exists)";
-				continue;
-			}
-
-			if(!rename($oldPath,$newPath))
-			{
-				$error[] =  $message;
-			}
-			else
-			{
-				$success[] = $message;
-			}
-
-
-			//	echo $message."<br />";
-
-		}
+	//		$message = e107::getParser()->lanVars(DBLAN_121, array('x'=>$oldPath, 'y'=>$newPath));
 
 		if(!empty($success))
 		{
@@ -455,11 +387,9 @@ class system_tools
 
 		if(!empty($error))
 		{
-			e107::getMessage()->addError(print_a($error,true));
+			//e107::getMessage()->addError(print_a($error,true));
+			e107::getMessage()->setTitle("Ignored",E_MESSAGE_WARNING)->addWarning(print_a($error,true));
 		}
-
-
-
 
 		e107::getRender()->tablerender(DBLAN_10.SEP.DBLAN_112, e107::getMessage()->render());
 
@@ -631,7 +561,7 @@ class system_tools
 		define('LANINS_133', "This will create a fresh installation of e107 at the domain you specify. Using your server administration software (e.g. cPanel) - park your other domain on top of [x]");
 
 
-		e107::getMySQLConfig('user'); // prefix|server|user|password|
+		$config = e107::getMySQLConfig(); // prefix|server|user|password|defaultdb
 		
 		if(!isset($POST['create_multisite']))
 		{
@@ -1108,7 +1038,7 @@ class system_tools
 		{
 			
 			$text .= "<div class='pull-left' style='width:50%;padding-bottom:10px'>
-			<a class='btn btn-default btn-large pull-left' style='margin-right:10px' href='".e_SELF."?mode=".$key."' title=\"".$val['label']."\">".ADMIN_EXECUTE_ICON."</a>
+			<a class='btn btn-default btn-secondary btn-large pull-left' style='margin-right:10px' href='".e_SELF."?mode=".$key."' title=\"".$val['label']."\">".ADMIN_EXECUTE_ICON."</a>
 			<h4 style='margin-bottom:3px'><a href='".e_SELF."?mode=".$key."' title=\"".$val['label']."\">".$val['label']."</a></h4><small>".$val['diz']."</small>
 			</div>";
 		
@@ -1544,6 +1474,8 @@ class system_tools
 		);
 	}
 
+
+
 	/**
 	 * Plugin Folder Scanner
 	 * @return none
@@ -1553,7 +1485,6 @@ class system_tools
 		$error_messages = array(0 => DBLAN_31, 1 => LAN_ERROR, 2 => DBLAN_33, 3 => DBLAN_34);
 	//	$error_image = array("integrity_pass.png", "integrity_fail.png", "warning.png", "blank.png");
 		$error_glyph = array(ADMIN_TRUE_ICON,ADMIN_FALSE_ICON,ADMIN_WARNING_ICON,"<i style='display:inline-block;width:17px;height:16px;'> </i>");
-		
 		$error_type = array('warning'=>2, 'error'=>1);
 
 
@@ -1563,16 +1494,10 @@ class system_tools
 		$frm = e107::getForm();
 		$mes = e107::getMessage();
 
-		require_once (e_HANDLER."plugin_class.php");
-		$ep = new e107plugin();
-		$ep->update_plugins_table($mode); // scan for e_xxx changes and save to plugin table.
-		$ep->save_addon_prefs($mode); // generate global e_xxx_list prefs from plugin table.
-
-		/* we all are awaiting for PHP5 only support - method chaining...
-		$mes->add(DBLAN_22.' - '.DBLAN_23, E_MESSAGE_SUCCESS)
-				 ->add("<a href='".e_SELF."'>".LAN_BACK."</a>", E_MESSAGE_SUCCESS)
-				 ->add(DBLAN_30);
-		*/
+	//	require_once (e_HANDLER."plugin_class.php");
+	//	$ep = new e107plugin();
+	//	$ep->update_plugins_table($mode); // scan for e_xxx changes and save to plugin table.
+	//	$ep->save_addon_prefs($mode); // generate global e_xxx_list prefs from plugin table.
 
 		$mes->add(DBLAN_23, E_MESSAGE_SUCCESS);
 		$mes->add("<a href='".e_SELF."'>".LAN_BACK."</a>", E_MESSAGE_SUCCESS);
@@ -1600,13 +1525,80 @@ class system_tools
 							<tbody>
 			";
 
+
+		$plg = e107::getPlug()->clearCache();
+
+		$plg->buildAddonPrefLists();
+
+		foreach($plg->getDetected() as $folder)
+		{
+			$plg->load($folder);
+
+			$name   = $plg->getName();
+			$addons = $plg->getAddons();
+
+				$text .= "
+								<tr>
+									<td>".$name."</td>
+	               					<td>".$folder."</td>
+									<td>";
+
+				if(!empty($addons))
+				{
+
+					foreach(explode(',', $addons) as $this_addon)
+					{
+						$ret_code = 3; // Default to 'not checked
+						if((strpos($this_addon, 'e_') === 0) || (substr($this_addon, - 4, 4) == '_sql'))
+						{
+							$ret_code = $plg->getAddonErrors($this_addon); // See whether spaces before opening tag or after closing tag
+						}
+						elseif(strpos($this_addon, 'sc_') === 0)
+						{
+							$this_addon = substr($this_addon, 3). ' (sc)';
+						}
+
+						if(!is_numeric($ret_code))
+						{
+							$errorMessage = $ret_code['msg'];
+							$ret_code = $error_type[$ret_code['type']];
+						}
+						else
+						{
+							$errorMessage  = $error_messages[$ret_code];
+						}
+
+						$text .= "<span class='clear e-tip' style='cursor:pointer' title='".$errorMessage."'>";
+						$text .= $error_glyph[$ret_code]."&nbsp;";
+
+						$text .= trim($this_addon); // $ret_code - 0=OK, 1=content error, 2=access error
+						$text .= "</span><br />";
+					}
+				}
+
+
+				$text .= "	</td>
+								<td class='center'>";
+
+				$text .= ($plg->isInstalled() === true) ? "<span class='label label-warning'>".DBLAN_27."</span>" : " ";
+
+
+				$text .= " </td>
+							</tr>
+				";
+
+
+		}
+
+/*
+
 		$sql->select("plugin", "*", "plugin_id !='' order by plugin_path ASC"); // Must order by path to pick up duplicates. (plugin names may change).
 		$previous = '';
 		while($row = $sql->fetch())
 		{
 			e107::loadLanFiles($row['plugin_path'],'admin');
-			e107::plugLan($row['plugin_path'],'global',true);	
-			
+			e107::plugLan($row['plugin_path'],'global',true);
+
 			$text .= "
 								<tr>
 									<td>".$tp->toHtml($row['plugin_name'], FALSE, "defs,emotes_off")."</td>
@@ -1670,7 +1662,7 @@ class system_tools
 							</tr>
 				";
 			$previous = $row['plugin_path'];
-		}
+		}*/
 
 		$text .= "
 							</tbody>
@@ -1681,6 +1673,10 @@ class system_tools
 
 		e107::getRender()->tablerender(DBLAN_10.SEP.DBLAN_22, $mes->render().$text);
 	}
+
+
+
+
 }
 
 //XXX - what is this for (backup core)? <input type='hidden' name='sqltext' value='{$sqltext}' />

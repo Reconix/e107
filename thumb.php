@@ -24,11 +24,42 @@
 
 define('e107_INIT', true);
 
-// error_reporting(E_ALL);
+
+function thumbExceptionHandler(Exception $exception)
+{
+	http_response_code(500);
+	echo "Fatal Thumbnail Error\n";
+	echo $exception->getMessage();
+
+}
+
+function thumbErrorHandler($errno, $errstr, $errfile, $errline)
+{
+
+	switch($errno)
+	{
+		case E_USER_ERROR:
+			echo "<b>My ERROR</b> [$errno] $errstr<br />\n";
+			echo "  Fatal error on line $errline in file $errfile";
+			echo ", PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
+			echo "Aborting...<br />\n";
+			thumbExceptionHandler(new Exception);
+			exit(1);
+			break;
+
+		default:
+			return;
+	}
+
+}
+
+set_exception_handler('thumbExceptionHandler'); // disable to troubleshoot.
+set_error_handler("thumbErrorHandler"); // disable to troubleshoot.
+
+// error_reporting(0); // suppress all errors or image will be corrupted.
 
 
 
-error_reporting(0); // suppress all errors or image will be corrupted.
 ini_set('gd.jpeg_ignore_warning', 1);
 //require_once './e107_handlers/benchmark.php';
 //$bench = new e_benchmark();
@@ -88,13 +119,22 @@ class e_thumbpage
 		// initial path
 		$self = realpath(dirname(__FILE__));
 
+		$e_ROOT = $self."/";
+
+		if ((substr($e_ROOT,-1) !== '/') && (substr($e_ROOT,-1) !== '\\') )
+		{
+			$e_ROOT .= DIRECTORY_SEPARATOR;  // Should function correctly on both windows and Linux now.
+		}
+
+		define('e_ROOT', $e_ROOT);
+
 		$mySQLdefaultdb = '';
 		$HANDLERS_DIRECTORY = '';
 		$mySQLprefix = '';
 
 		// Config
 
-		include($self.'/e107_config.php');
+		include($self.DIRECTORY_SEPARATOR.'e107_config.php');
 
 		// support early include feature
 		if(isset($CLASS2_INCLUDE) && !empty($CLASS2_INCLUDE))
@@ -105,12 +145,17 @@ class e_thumbpage
 
 		ob_end_clean(); // Precaution - clearout utf-8 BOM or any other garbage in e107_config.php
 
-		$tmp = $self.'/'.$HANDLERS_DIRECTORY;
+		if(empty($HANDLERS_DIRECTORY))
+		{
+			$HANDLERS_DIRECTORY = 'e107_handlers/'; // quick fix for CLI Unit test.
+		}
+
+		$tmp = $self.DIRECTORY_SEPARATOR.$HANDLERS_DIRECTORY;
 
 		//Core functions - now API independent
-		@require($tmp.'/core_functions.php');
+		@require($tmp.DIRECTORY_SEPARATOR.'core_functions.php');
 		//e107 class
-		@require($tmp.'/e107_class.php');
+		@require($tmp.DIRECTORY_SEPARATOR.'e107_class.php');
 
 		$e107_paths = compact(
 			'ADMIN_DIRECTORY',
@@ -143,15 +188,18 @@ class e_thumbpage
 		$e107->file_path = $e107->fix_windows_paths($self)."/";
 		$e107->set_base_path();
 		$e107->set_request(false);
-		$e107->set_urls(false);
+	//	$e107->set_urls(false); //todo check if this is still required after the 'prepare' issue is fixed.
 		unset($tmp, $self);
-	
+		$e107->set_urls(false);
 		// basic Admin area detection - required for proper path parsing
 		define('ADMIN', strpos(e_SELF, ($e107->getFolder('admin')) !== false || strpos(e_PAGE, 'admin') !== false));
-		$e107->set_urls(false);
-			
+
+		// Next function call maintains behavior identical to before; might not be needed
+		//  See https://github.com/e107inc/e107/issues/3033
+		$e107->set_urls_deferred();
+
 		$pref = $e107->getPref(); //TODO optimize/benchmark
-		
+
 		$this->_watermark = array(
 			'activate'		=> vartrue($pref['watermark_activate'], false),
 			'text'			=> vartrue($pref['watermark_text']),
@@ -223,6 +271,11 @@ class e_thumbpage
 			return true;
 		}
 
+		if($this->_debug === true)
+		{
+			echo "File Not Found: ".$path;
+		}
+
 		$this->_placeholder = true;
 		return true;
 
@@ -232,6 +285,12 @@ class e_thumbpage
 	function sendImage()
 	{
 		//global $bench;
+		if($this->_debug === true)
+		{
+			var_dump($this->_request);
+		//	return false;
+		}
+
 	
 		if($this->_placeholder == true)
 		{
@@ -244,11 +303,7 @@ class e_thumbpage
 			return false;
 		}
 
-		if($this->_debug === true)
-		{
-			var_dump($this->_request);
-		//	return false;
-		}
+
 		
 		if(!$this->_src_path)
 		{
@@ -264,16 +319,17 @@ class e_thumbpage
 		//	return false;
 		}
 
-		$cache_str = md5(serialize($options). $this->_src_path. $this->_thumbQuality. $options['c']);
-		$fname = strtolower('Thumb_'.$thumbnfo['filename'].'_'.$cache_str.'.'.$thumbnfo['extension']).'.cache.bin';
+	//	$cache_str = md5(serialize($options). $this->_src_path. $this->_thumbQuality);
+	//	$fname = strtolower('Thumb_'.$thumbnfo['filename'].'_'.$cache_str.'.'.$thumbnfo['extension']).'.cache.bin';
 
+		$fname = e107::getParser()->thumbCacheFile($this->_src_path, $options);
 
-
-		if(($this->_cache === true) && is_file(e_CACHE_IMAGE.$fname) && is_readable(e_CACHE_IMAGE.$fname) && ($this->_debug !== true))
+		$cache_filename = e_CACHE_IMAGE . $fname;
+		if(($this->_cache === true) && is_file($cache_filename) && is_readable($cache_filename) && ($this->_debug !== true))
 		{
-			$thumbnfo['lmodified'] = filemtime(e_CACHE_IMAGE.$fname);
-			$thumbnfo['md5s'] = md5_file(e_CACHE_IMAGE.$fname);
-			$thumbnfo['fsize'] = filesize(e_CACHE_IMAGE.$fname);
+			$thumbnfo['lmodified'] = filemtime($cache_filename);
+			$thumbnfo['md5s'] = md5_file($cache_filename);
+			$thumbnfo['fsize'] = filesize($cache_filename);
 			
 			// Send required headers
 			if($this->_debug !== true)
@@ -294,9 +350,7 @@ class e_thumbpage
 			// Send required headers
 			//$this->sendHeaders($thumbnfo);
 
-
-
-			@readfile(e_CACHE_IMAGE.$fname);
+			eShims::readfile($cache_filename);
 			//$bench->end()->logResult('thumb.php', $_GET['src'].' - retrieve cache');
 			
 			exit;
@@ -388,7 +442,7 @@ class e_thumbpage
 	//exit;
 
 		// set cache
-		$thumb->save(e_CACHE_IMAGE.$fname);
+		$thumb->save($cache_filename);
 
 
 		
@@ -470,6 +524,12 @@ class e_thumbpage
 	// Display a placeholder image. 
 	function placeholder($parm)
 	{
+		if($this->_debug === true)
+		{
+			echo "Placeholder activated";
+			return null;
+		}
+
 		$getsize = isset($parm['size']) ? $parm['size'] : '100x100';
 
 		header('location: https://placehold.it/'.$getsize);

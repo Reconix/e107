@@ -50,6 +50,7 @@ define("EMESSLAN_TITLE_SUCCESS", "Success");
 define("EMESSLAN_TITLE_WARNING", "Warning");
 define("EMESSLAN_TITLE_DEBUG", "System Debug");
 
+define("LAN_NO_PERMISSIONS", "You do not have permission to view this page.");
 define("LAN_EDIT","Edit");
 define("LAN_DELETE","Delete");
 define("LAN_DEFAULT","Default");
@@ -114,6 +115,7 @@ define("LAN_FILES","Files");
 define("LAN_SIZE", "Size");
 define("LAN_VERSION", "Version");
 define("LAN_DOWNLOAD", "Download");
+define("LAN_DOWNLOAD_NO_PERMISSION", "File not found or you have no permission to download this file!");
 define("LAN_WEBSITE", "Website");
 define("LAN_COMMENTS", "Comments");
 define("LAN_LOCATION", "Location");
@@ -130,6 +132,7 @@ define("LAN_RE_ORDER", "Re-order");
 define("LAN_RELATED", "Related");
 define("LAN_CLOSE", "Close");
 define("LAN_EXPAND", "Expand");
+define("LAN_LIST", "List");
 
 define("LAN_ENTER_USRNAME_EMAIL", "Please enter your username or email"); // admin php hover field admin name
 define("LAN_PWD_REQUIRED", "Password is required"); // admin php hover field admin password
@@ -139,5 +142,4 @@ define("LAN_SUMMARY", "Summary");  // TODO   more files use summary replace
 define("LAN_REQUIRED_BLANK", "Required field(s) were left blank.");
 define("LAN_PLEASEWAIT", "Please Wait");
 define("LAN_CHOOSE_FILE", "Choose a file");
-
 ?>

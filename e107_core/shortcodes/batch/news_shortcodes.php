@@ -62,6 +62,11 @@ class news_shortcodes extends e_shortcode
 			$text = e107::getParser()->toAttribute($text);
 		}
 
+		if(!empty($this->param['titleLimit']))
+		{
+			$parm['limit'] = $this->param['titleLimit'];
+		}
+
 		if(!empty($parm['limit']))
 		{
 			$text = e107::getParser()->text_truncate($text, $parm['limit']);
@@ -234,6 +239,13 @@ class news_shortcodes extends e_shortcode
 	}
 
 
+
+	function sc_news_category_id($parm=null)
+	{
+		return (int) $this->news_item['category_id'];
+	}
+
+
 	function sc_news_category_icon($parm=null)
 	{
 		return $this->sc_newscaticon($parm);
@@ -268,6 +280,14 @@ class news_shortcodes extends e_shortcode
 		}
 	}
 
+	function sc_news_category_url($parm=null)
+	{
+		$category = array('id' => $this->news_item['category_id'], 'name' => $this->news_item['category_sef'] );
+
+		return e107::getUrl()->create('news/list/category', $category);	
+	}
+
+
 
 	//New v2.x Aliases
 
@@ -298,7 +318,6 @@ class news_shortcodes extends e_shortcode
 
 	public function sc_news_author_signature($parm=null)
 	{
-
 		$user = e107::user($this->news_item['user_id']);
 
 		if(!empty($user['user_signature']))
@@ -357,6 +376,49 @@ class news_shortcodes extends e_shortcode
 		return $this->sc_newsimage($parm);
 	}
 
+	private function news_carousel($parm)
+	{
+		if(empty($this->news_item['news_thumbnail']))
+		{
+			return null;
+		}
+
+		$options = $parm;
+
+		if(!isset($options['interval']))
+		{
+			$options['interval'] = 'false';
+		}
+
+
+		$tp = e107::getParser();
+
+		$media = explode(",", $this->news_item['news_thumbnail']);
+		$images = array();
+
+		foreach($media as $file)
+		{
+			if($tp->isVideo($file) || empty($file))
+			{
+				continue;
+			}
+
+			$images[] = array('caption'=>'', 'text'=> $tp->toImage($file,$parm));
+		}
+
+	//	return print_a($images,true);
+
+		return e107::getForm()->carousel('news-carousel-'.$this->news_item['news_id'],$images, $options);
+	}
+
+	/**
+	*
+	* @param array $array
+	* @param string $array['types']
+	* @param int $array['limit']
+	* @example {NEWS_RELATED: types=news&limit-3}
+	* @return string
+	*/
 	public function sc_news_related($parm=null)
 	{
 		return $this->sc_newsrelated($parm);
@@ -367,6 +429,11 @@ class news_shortcodes extends e_shortcode
 		$string= e107::getUserClass()->getIdentifier($this->news_item['news_class']);
 		return $string;
 
+	}
+
+	public function sc_news_rate($parm=array())
+	{
+		return e107::getRate()->render("news", $this->news_item['news_id'],$parm);
 	}
 
 
@@ -415,7 +482,9 @@ class news_shortcodes extends e_shortcode
 	{
 		if(!empty($this->news_item['user_id']))
 		{
-			return e107::getParser()->toAvatar($this->news_item['user_id'], $parm);
+
+
+			return e107::getParser()->toAvatar($this->news_item, $parm);
 		}
 	} 
 
@@ -583,6 +652,12 @@ class news_shortcodes extends e_shortcode
 			}
 		}
 
+		if(!empty($this->param['summaryLimit']))
+		{
+			$parm['limit'] = $this->param['summaryLimit'];
+		}
+
+
 		if(!empty($parm['limit']))
 		{
 			$text = e107::getParser()->text_truncate($text, $parm['limit']);
@@ -721,7 +796,7 @@ class news_shortcodes extends e_shortcode
 		$this->imageItem = varset($media[$parm['item']]); // Set the current Image for other image shortcodes. 
 
 
-		if(vartrue($parm['placeholder']))
+		if(!empty($parm['placeholder']))
 		{
 			return $this->sc_newsimage('placeholder');	
 		}
@@ -815,6 +890,11 @@ class news_shortcodes extends e_shortcode
 	 */
 	function sc_newsimage($parm = null)
 	{
+		if(!empty($parm['carousel']))
+		{
+			return $this->news_carousel($parm);
+		}
+
 		$tp = e107::getParser();
 		
 		if(is_string($parm))
@@ -824,6 +904,9 @@ class news_shortcodes extends e_shortcode
 
 
 		$tmp = $this->handleMultiple($parm);
+
+
+
 		$srcPath = $tmp['file'];
 		
 		$class = (!empty($parm['class'])) ? $parm['class'] : "news_image news-image img-responsive img-fluid img-rounded rounded";
@@ -833,22 +916,20 @@ class news_shortcodes extends e_shortcode
 			
 		if($tp->isVideo($srcPath))
 		{
-			return; 
+
+			return null;
 		}
 		else 
 		{
-		
-			if(!$srcPath)
+
+			if(empty($srcPath))
 			{
-				if(varset($parm['type']) == 'placeholder' || vartrue($parm['placeholder']))
+				if(varset($parm['type']) == 'placeholder' || !empty($parm['placeholder']))
 				{
 					$src = 	$tp->thumbUrl(); // placeholder;
 					$dimensions = $tp->thumbDimensions();
 				}
-				else
-				{
-					return;
-				}
+
 			}
 			elseif($srcPath[0] == '{' ) // Always resize. Use {SETIMAGE: w=x&y=x&crop=0} PRIOR to calling shortcode to change. 
 			{
@@ -860,19 +941,20 @@ class news_shortcodes extends e_shortcode
 			else
 			{
 				// We store SC path in DB now + BC
+
 				$src = $srcPath[0] == '{' ? $tp->replaceConstants($srcPath, 'abs') : e_IMAGE_ABS."newspost_images/".$srcPath;			
 			}
 		}
 		
 	
 		
-		if(vartrue($parm['nolegacy'])) // Remove legacy thumbnails. 
+		if(!empty($parm['nolegacy'])) // Remove legacy thumbnails.
 		{
 			$legSrc = urldecode($src);
 
 		 	if(strpos($legSrc,'newspost_images/thumb_')!==false)
 			{
-				return;	
+				return null;
 			}
 		}
 		
@@ -885,27 +967,35 @@ class news_shortcodes extends e_shortcode
 
 		$imgParms = array(
 			'class'=>$class,
-			'alt'=>basename($src),
-			'style'=>$style
+			'alt'=>basename($srcPath),
+			'style'=>$style,
+			'placeholder'=>varset($parm['placeholder'])
 		);
 
 
 		$imgTag = $tp->toImage($srcPath,$imgParms);
 
+		if(empty($imgTag))
+		{
+			return null;
+		}
+
 		switch(vartrue($parm['type']))
 		{
 			case 'src':
-				return $src;
-			break;
-
-			case 'tag':
-				return $imgTag; // "<img class='{$class}' src='".$src."' alt='' style='".$style."' {$dimensions} {$srcset} />";
+				return empty($src) ? e_IMAGE_ABS."generic/nomedia.png" : $src;
 			break;
 
 			case 'url':
-			default:
 				return "<a href='".e107::getUrl()->create('news/view/item', $this->news_item)."'>".$imgTag."</a>";
 			break;
+
+			case 'tag':
+			default:
+				return $imgTag; // "<img class='{$class}' src='".$src."' alt='' style='".$style."' {$dimensions} {$srcset} />";
+			break;
+
+
 		}
 	}
 
@@ -920,7 +1010,7 @@ class news_shortcodes extends e_shortcode
 
 
 
-	function sc_newstitlelink($parm = '')
+	function sc_newstitlelink($parm = null)
 	{
 		if(is_string($parm))
 		{
@@ -932,11 +1022,20 @@ class news_shortcodes extends e_shortcode
 		}
 
 		$url = e107::getUrl()->create('news/view/item', $this->news_item);
+
 		if(isset($parms['href']))
 		{
 			return $url;
 		}
-		return "<a style='".(isset($this->param['itemlink']) ? $this->param['itemlink'] : 'null')."' href='{$url}'>".e107::getParser()->toHTML($this->news_item['news_title'], TRUE, "TITLE").'</a>';
+
+		if(isset($parm['link']))
+		{
+			unset($parm['link']);
+		}
+		
+		$title = $this->sc_news_title($parm);
+
+		return "<a style='".(isset($this->param['itemlink']) ? $this->param['itemlink'] : 'null')."' href='{$url}'>".$title.'</a>';
 	}
 
 	function sc_newsurl($parm=null)
@@ -1017,7 +1116,7 @@ class news_shortcodes extends e_shortcode
 	{
 		$news_item = $this->news_item;
 		$param = $this->param;
-		$con = new convert;
+		$con = e107::getDate();
 		$news_item['news_start'] = (isset($news_item['news_start']) && $news_item['news_start'] ? str_replace(' - 00:00:00', '', $con->convert_date($news_item['news_start'], 'long')) : LAN_NEWS_19);
 		$news_item['news_end'] = (isset($news_item['news_end']) && $news_item['news_end'] ? ' to '.str_replace(' - 00:00:00', '', $con->convert_date($news_item['news_end'], 'long')) : '');
 		$info = $news_item['news_render_type'] == 1 ? LAN_NEWS_9 : '';
@@ -1054,6 +1153,8 @@ class news_shortcodes extends e_shortcode
 		{
 			if(trim($val))
 			{
+				//$url = e107::getUrl()->create('news/list/tag',array('tag'=>rawurlencode($val))); // e_BASE."news.php?tag=".$val
+				// will be encoded during create()
 				$url = e107::getUrl()->create('news/list/tag',array('tag'=>$val)); // e_BASE."news.php?tag=".$val
 				$words[] = "<a class='".$class."' href='".$url."'>".$start.$val.$end."</a>";
 			}
@@ -1069,9 +1170,9 @@ class news_shortcodes extends e_shortcode
 			return LAN_NONE;
 		}			
 	}
-	
-	
-	
+
+
+
 	function sc_newsrelated($array=array())
 	{
 		if(!varset($array['types']))
@@ -1087,7 +1188,15 @@ class news_shortcodes extends e_shortcode
 
 	function sc_newsmetadiz($parm=null)
 	{
-  		return e107::getParser()->toHtml($this->news_item['news_meta_description'],true);
+  		$text = e107::getParser()->toHtml($this->news_item['news_meta_description'],true);
+
+		if(!empty($parm['limit']))
+		{
+			$text = e107::getParser()->text_truncate($text, $parm['limit']);
+		}
+
+		return $text;
+
 	}
 
 }

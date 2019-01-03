@@ -627,7 +627,7 @@ if ($action == "uopt")
                <div>
                   <div>
                      <input type='hidden' name='upload_do_edit' value='1'/><p>".
-                     str_replace(array('--SOURCE--', '--DEST--'),array(e_UPLOAD_TEMP_DIR.e_SAVE_FILETYPES,e_ADMIN.e_READ_FILETYPES),DOWLAN_85)
+                     str_replace(array('[x]', '[y]'),array(e_UPLOAD_TEMP_DIR.e_SAVE_FILETYPES,e_ADMIN.e_READ_FILETYPES),DOWLAN_85)
                      ."</p><p>".
                      DOWLAN_72.$source_file."
                   </p></div>
@@ -668,7 +668,7 @@ if ($action == "uopt")
                </div>
             </fieldset>
             <div class='buttons-bar center'>
-               <input class='btn btn-default button' type='submit' name='generate_filetypes_xml' value='".DOWLAN_77."'/>
+               <input class='btn btn-default btn-secondary button' type='submit' name='generate_filetypes_xml' value='".DOWLAN_77."'/>
                </div>
         		</form>
       ";
@@ -721,7 +721,7 @@ if ($action == "uopt")
         	</div>
             </fieldset>
             <div class='buttons-bar center'>
-               <input class='btn btn-default button' type='submit' name='updateuploadoptions' value='".DOWLAN_64."'/>
+               <input class='btn btn-default btn-secondary button' type='submit' name='updateuploadoptions' value='".DOWLAN_64."'/>
             </div>
            </form>
       ";

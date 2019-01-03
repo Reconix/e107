@@ -29,6 +29,8 @@ if(!getperms("1") || !e107::isInstalled('list_new'))
 	e107::redirect('admin');
 	exit ;
 }
+e107::includeLan(e_PLUGIN."list_new/languages/".e_LANGUAGE."_admin_list_new.php");
+
 require_once(e_ADMIN."auth.php");
 require_once(e_HANDLER."form_handler.php");
 $rs = new form;
@@ -62,7 +64,7 @@ if(isset($message))
 //display admin page
 $text = $rc->admin->display();
 
-e107::getRender()->tablerender(LAN_PLUGIN_LISTNEW_NAME, $mes->render(). $text);
+e107::getRender()->tablerender(LAN_PLUGIN_LIST_NEW_NAME, $mes->render(). $text);
 
 /**
  * Display admin menu
@@ -84,22 +86,4 @@ function admin_list_config_adminmenu()
 
 require_once(e_ADMIN."footer.php");
 
-/**
- * Handle page DOM within the page header
- *
- * @return string JS source
- */
-function headerjs()
-{
-	require_once(e_HANDLER.'js_helper.php');
-	$ret = "
-		<script type='text/javascript'>
-			//add required core lan - delete confirm message
-			(".e_jshelper::toString(LAN_JSCONFIRM).").addModLan('core', 'delete_confirm');
-		</script>
-		<script type='text/javascript' src='".e_FILE_ABS."jslib/core/admin.js'></script>
-	";
-
-	return $ret;
-}
 ?>

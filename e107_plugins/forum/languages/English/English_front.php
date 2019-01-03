@@ -21,7 +21,7 @@ vf, vt, etc. in the comments refer to the LAN defined in the previously separate
 vf = viewforum, vt = viewtopic, p = post, etc.
 */
 
-define("e_PAGETITLE", "Forum");
+// define("e_PAGETITLE", "Forum");
 
 // forum.php (forum_template)
 // define("LAN_FORUM_0001", "Forum"); // LAN_46	
@@ -345,6 +345,7 @@ define("LAN_FORUM_8026", "Failed to unstick thread");
 define("LAN_FORUM_8027", "No action selected");
 define("LAN_FORUM_8028", "Return"); 
 define("LAN_FORUM_8029", "New topic created!");
+define("LAN_FORUM_8030", "Couldn't delete post (moderator permission needed)");
 
 /*  THIS WILL BE DELETED ONCE THE REWRITE IS DONE
 ==================================================

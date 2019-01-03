@@ -49,7 +49,8 @@ class news {
 		if(empty($news['news_title']))
 		{
 			$error = true;
-			$emessage->add('Validation error: News title can\'t be empty!', E_MESSAGE_ERROR, $smessages);
+			$message = LAN_ERROR_47;
+			$emessage->add(LAN_ERROR_47, E_MESSAGE_ERROR, $smessages);
 			if(!empty($news['news_sef']))
 			{
 				$news['news_sef'] = eHelper::secureSef($news['news_sef']);
@@ -72,18 +73,21 @@ class news {
 		if(empty($news['news_sef']))
 		{
 			$error = true;
-			$emessage->add('Validation error: News SEF URL value is required field and can\'t be empty!', E_MESSAGE_ERROR, $smessages);
+			$message = LAN_ERROR_48;
+			$emessage->add(LAN_ERROR_48, E_MESSAGE_ERROR, $smessages);
 		}
 		elseif($sql->db_Count('news', '(news_id)', ($news['news_sef'] ? 'news_id<>'.intval($news['news_id']).' AND ' : '')."news_sef='".$tp->toDB($news['news_sef'])."'"))
 		{
 			$error = true;
-			$emessage->add('Validation error: News SEF URL is unique field - current value already in use! Please choose another SEF URL value.', E_MESSAGE_ERROR, $smessages);
+			$message = LAN_ERROR_49;
+			$emessage->add(LAN_ERROR_49, E_MESSAGE_ERROR, $smessages);
 		}
 
 		if(empty($news['news_category']))
 		{
 			$error = true;
-			$emessage->add('Validation error: News category can\'t be empty!', E_MESSAGE_ERROR, $smessages);
+			$message = LAN_ERROR_50;
+			$emessage->add(LAN_ERROR_50, E_MESSAGE_ERROR, $smessages);
 		}
 
 
@@ -272,8 +276,8 @@ class news {
 
 		$tmp = array();
 		$tmp['caticon'] 				= defset('ICONSTYLE');
-		$tmp['commentoffstring'] 		= defset('COMMENTOFFSTRING');
-		$tmp['commentlink'] 			= defset('COMMENTLINK');
+		$tmp['commentoffstring'] 		= defset('COMMENTOFFSTRING', '');
+		$tmp['commentlink'] 			= defset('COMMENTLINK', e107::getParser()->toGlyph('fa-comment'));
 		$tmp['trackbackstring'] 		= defset('TRACKBACKSTRING');
 		$tmp['trackbackbeforestring'] 	= defset('TRACKBACKBEFORESTRING');
 		$tmp['trackbackafterstring'] 	= defset('TRACKBACKAFTERSTRING');
@@ -374,7 +378,7 @@ class news {
 
 		// Retrieve batch sc object, set required vars
 
-		$wrapperKey = (!empty($param['template_key'])) ? 'news/'.$param['template_key'].'/item' : 'news/view/item';
+		$wrapperKey = (!empty($param['template_key'])) ? $param['template_key'].'/item' : 'news/view/item';
 
 		$editable = array(
 			'table' => 'news',
@@ -421,6 +425,137 @@ class news {
 		$original = str_replace('&copy;', '(c)', $original);
 		return htmlspecialchars($original, ENT_COMPAT, CHARSET);
 	}
+
+
+	/**
+	 * Render a news Grid. (currently used in news_grid_menu ) // new v2.1.5
+	 * @param array $parm
+	 * @param string    $parm['caption']        text or constant
+	 * @param integer   $parm['titleLimit']     number of chars fo news title
+	 * @param integer   $parm['summaryLimit']   number of chars for new summary
+	 * @param string    $parm['source']         latest (latest news items) | sticky (news items) | template (assigned to news-grid layout)
+	 * @param integer   $parm['order']          n.news_datestamp DESC
+	 * @param integer   $parm['limit']          10
+	 * @param string   $parm['template']        default | or any key as defined in news_grid_template.php
+	 *
+	 * @return string
+	 */
+	function render_newsgrid($parm=null)
+	{
+		$cacheString = 'nq_news_grid_menu_'.md5(serialize($parm));
+
+		$cached = e107::getCache()->retrieve($cacheString);
+
+		if(false === $cached)
+		{
+			e107::plugLan('news');
+
+			if(is_string($parm))
+			{
+				parse_str($parm, $parms);
+			}
+			else
+			{
+				$parms = $parm;
+
+				e107::getDebug()->log($parms);
+			}
+
+			if(isset($parms['caption'][e_LANGUAGE]))
+			{
+				$parms['caption'] = $parms['caption'][e_LANGUAGE];
+			}
+
+			if(!empty($parms['caption']) && defined($parms['caption']))
+			{
+				$parms['caption'] = constant($parms['caption']);
+			}
+
+
+			$ntree = e107::getObject('e_news_tree');
+
+			if($legacyTemplate  = e107::getTemplate('news', 'news_menu', 'grid')) // BC
+			{
+				$template = $legacyTemplate;
+				$parms['tmpl']      = 'news_menu';
+				$parms['tmpl_key']  = 'grid';
+			}
+			else // New in v2.1.5
+			{
+				$tmpl = !empty($parms['layout']) ? $parms['layout'] : 'col-md-4';
+				$template = e107::getTemplate('news', 'news_grid', $tmpl);
+				$parms['tmpl']      = 'news_grid';
+				$parms['tmpl_key']  = $tmpl;
+
+			}
+
+		//	$gridSize       = vartrue($parms['layout'],'col-md-4');
+
+			$parmSrch       = array(
+								'{NEWSGRID}',
+								'_titleLimit_',
+								'_summaryLimit_'
+							);
+
+			$parmReplace    = array(
+							//	$gridSize,
+							//	vartrue($parms['titleLimit'], 0),
+						//		vartrue($parms['summaryLimit'], 0)
+							);
+
+			$template = str_replace($parmSrch , '', $template); // clean up deprecated elements.
+
+			$render = (empty($parms['caption'])) ? false: true;
+
+
+
+			if(empty($parms['count']))
+			{
+				$parms['count'] = 3;
+			}
+
+			$parms['order']     = 'n.news_datestamp DESC';
+
+
+			$treeparm = array();
+
+			if(!empty($parms['count']))
+			{
+				 $treeparm['db_limit'] = '0, '.intval($parms['count']);
+			}
+
+			if(!empty($parms['limit']))
+			{
+				$treeparm['db_limit'] = '0, '.intval($parms['limit']);
+			}
+
+			if(!empty($parms['order']))
+			{
+				$treeparm['db_order'] = e107::getParser()->toDb($parms['order']);
+			}
+
+			$parms['return'] = true;
+
+			if(varset($parms['source']) == 'template')
+			{
+				$treeparm['db_where']     = 'FIND_IN_SET(6, n.news_render_type)';
+			}
+
+			if(varset($parms['source']) == 'sticky')
+			{
+				$treeparm['db_where']     = 'n.news_sticky=1';
+			}
+
+			$cached = $ntree->loadJoinActive(vartrue($parms['category'], 0), false, $treeparm)->render($template, $parms, $render);
+
+			e107::getCache()->set($cacheString, $cached);
+		}
+
+		return $cached;
+
+	}
+
+
 }
 
 
@@ -432,7 +567,7 @@ class e_news_item extends e_front_model
 {
 	protected $_db_table = 'news';
 	protected $_field_id = 'news_id';
-	protected $_cache_string = 'news_item_';
+	protected $_cache_string = 'news_item_{ID}';
 
 	/**
 	 * Shortcodes - simple field getter (basic formatting)
@@ -528,7 +663,7 @@ class e_news_item extends e_front_model
 		$id = intval($id);
 		$nobody_regexp = "'(^|,)(".str_replace(",", "|", e_UC_NOBODY).")(,|$)'";
 
-	  	$query = "SELECT n.*, u.user_id, u.user_name, u.user_customtitle, nc.category_name, nc.category_sef, nc.category_icon FROM #news AS n
+	  	$query = "SELECT n.*, u.user_id, u.user_name, u.user_customtitle, u.user_image, nc.category_name, nc.category_sef, nc.category_icon FROM #news AS n
 		LEFT JOIN #user AS u ON n.news_author = u.user_id
 		LEFT JOIN #news_category AS nc ON n.news_category = nc.category_id
 		WHERE n.news_id={$id} AND n.news_class REGEXP '".e_CLASS_REGEXP."' AND NOT (n.news_class REGEXP ".$nobody_regexp.")
@@ -637,12 +772,12 @@ class e_news_tree extends e_front_tree_model
 		$db_limit = vartrue($params['db_limit'], '0,10');
 		
 		
-		$query = "SELECT  SQL_CALC_FOUND_ROWS n.*, u.user_id, u.user_name, u.user_customtitle, nc.category_id, nc.category_name, nc.category_sef, nc.category_icon FROM #news AS n
+		$query = "SELECT  SQL_CALC_FOUND_ROWS n.*, u.user_id, u.user_name, u.user_customtitle, u.user_image, nc.category_id, nc.category_name, nc.category_sef, nc.category_icon FROM #news AS n
 			LEFT JOIN #user AS u ON n.news_author = u.user_id
 			LEFT JOIN #news_category AS nc ON n.news_category = nc.category_id
 			{$where}
 			ORDER BY ".$db_order." LIMIT ".$db_limit;
-		
+
 		$this->setParam('db_query', $query);
 		
 		return parent::load($force);
@@ -668,6 +803,8 @@ class e_news_tree extends e_front_tree_model
 		";
 		
 		$params['db_where'] = $where;
+
+		$this->_cache_string = null; // disable sys cache, otherwise we get a new cache file every time the time() changes.
 		
 		return $this->loadJoin($category_id, $force, $params);
 	}
@@ -687,8 +824,17 @@ class e_news_tree extends e_front_tree_model
 			return '';
 		}
 
+		if(is_string($template) || empty($template))
+		{
+			return "<div class='alert alert-danger'>Couldn't find template/layout with the following params: ".print_a($parms,true)."</div>";
+		}
+
 		$ret = array();
 		$tp = e107::getParser();
+		$start = '';
+		$end = '';
+
+		$param = $parms;
 		$param['current_action'] = 'list';
 		// TODO more default parameters
 
@@ -750,6 +896,12 @@ class e_news_tree extends e_front_tree_model
 			if($tablerender)
 			{
 				$caption = vartrue($parms['caption']) ? defset($parms['caption'], $parms['caption']) : LAN_NEWSLATEST_MENU_TITLE; // found in plugins/news/languages/English.php
+
+				if(!empty($parms['caption'][e_LANGUAGE]))
+				{
+					$caption = $parms['caption'][e_LANGUAGE];
+				}
+
 				$mod = true === $tablerender ? 'news_latest_menu' : $tablerender;
 				return e107::getRender()->tablerender($caption, $ret, varset($parms['mode'], $mod), $return);
 			}
@@ -849,6 +1001,12 @@ class e_news_category_item extends e_front_model
 		{
 			return '';
 		}
+
+		if($parm === 'raw')
+		{
+			return (string) $this->cat('news_count');
+		}
+
 		return (string) e107::getParser()->toBadge( $this->cat('news_count'));
 	}
 }
@@ -964,6 +1122,12 @@ class e_news_category_tree extends e_front_tree_model
 			if($tablerender)
 			{
 				$caption = vartrue($parms['caption']) ? defset($parms['caption'], $parms['caption']) : LAN_NEWSCAT_MENU_TITLE; // found in plugins/news/languages/English.php
+
+				if(!empty($parms['caption'][e_LANGUAGE]))
+				{
+					$caption = $parms['caption'][e_LANGUAGE];
+				}
+
 				$mod = true === $tablerender ? 'news_categories_menu' : $tablerender;
 				return e107::getRender()->tablerender($caption, $ret, varset($parms['mode'], $mod), $return);
 			}

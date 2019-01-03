@@ -7,7 +7,7 @@
  */
 if (!defined('e107_INIT')) { exit; }
 
-$cacheString = 'nq_news_latest_menu_'.md5(serialize($parm));
+$cacheString = 'nq_news_latest_menu_'.md5(serialize($parm).USERCLASS_LIST.e_LANGUAGE);
 $cached = e107::getCache()->retrieve($cacheString);
 if(false === $cached)
 {
@@ -39,7 +39,7 @@ if(false === $cached)
 		$parms['tmpl_key'] = 'latest';
 	}
 
-	$template = e107::getTemplate('news', $parms['tmpl'], $parms['tmpl_key']);
+	$template = e107::getTemplate('news', $parms['tmpl'], $parms['tmpl_key'], true, true);
 
 	$treeparm = array();
 	if(vartrue($parms['count'])) $treeparm['db_limit'] = '0, '.intval($parms['count']);

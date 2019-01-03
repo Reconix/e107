@@ -21,10 +21,6 @@ $FORUM_VIEW_START = "
 	<div class='spacer'>
 	<table style='".USER_WIDTH."' class='fborder table' >
 	<tr>
-	<td class='fcaption'>{BREADCRUMB}</td>
-	</tr>
-	{SUBFORUMS}
-	<tr>
 	<td style='width:80%' class='forumheader'>
 	<span class='mediumtext'>{FORUMTITLE}</span></td>
 	</tr>
@@ -165,7 +161,7 @@ if (empty($FORUM_VIEW_END))
 		<div class='spacer'>
 		<table class='fborder table' style='".USER_WIDTH."'>
 		<tr>
-		<td style='vertical-align:middle; width:50%' class='forumheader3'><span class='smalltext'>{MODERATORS}</span></td>
+		<td style='vertical-align:middle; width:50%' class='forumheader3'><span class='smalltext'>{LAN=LAN_FORUM_1009}: {MODERATORS}</span></td>
 		<td style='vertical-align:middle; width:50%' class='forumheader3'><span class='smalltext'>{BROWSERS}</span></td>
 		</tr>
 		</table>
@@ -274,7 +270,7 @@ $FORUM_CRUMB['sitename']['sep'] = " :: ";
 $FORUM_CRUMB['forums']['value'] = "<a class='forumlink' href='{FORUMS_HREF}'>{FORUMS_TITLE}</a>";
 $FORUM_CRUMB['forums']['sep'] = " :: ";
 
-$FORUM_CRUMB['parent']['value'] = "<a class='forumlink' href='{PARENT_HREF}'>{PARENT_TITLE}</a>"; 
+$FORUM_CRUMB['parent']['value'] = "<a class='forumlink' href='{PARENT_HREF}'>{PARENT_TITLE}</a>";
 $FORUM_CRUMB['parent']['sep'] = " :: ";
 
 $FORUM_CRUMB['subparent']['value'] = "<a class='forumlink' href='{SUBPARENT_HREF}'>{SUBPARENT_TITLE}</a>";
@@ -292,7 +288,7 @@ $FORUM_VIEWFORUM_TEMPLATE['caption'] 				= "";
 $FORUM_VIEWFORUM_TEMPLATE['start'] 				= "<div id='forum-viewforum'>";
 $FORUM_VIEWFORUM_TEMPLATE['header'] 			= "<div class=' row-fluid'><div>{BREADCRUMB}</div></div>
 													<div class='row row-fluid'>
-													<div class='col-md-9 span9 pull-left'><h3>{FORUMTITLE}</h3></div>
+													<div class='col-md-9 span9 pull-left'><h3>{FORUMIMAGE:h=60}{FORUMTITLE}</h3></div>
 													<div class='col-md-3 span3 pull-right right' style='padding-top:10px'>{NEWTHREADBUTTONX}</div></div>
 													<table class='table table-hover table-striped table-bordered'>
 													<colgroup>
@@ -307,21 +303,19 @@ $FORUM_VIEWFORUM_TEMPLATE['header'] 			= "<div class=' row-fluid'><div>{BREADCRU
 
 
 $FORUM_VIEWFORUM_TEMPLATE['item'] 				= "<tr>
-													<td>{ICON}</td>
-													<td>
-													<div class='row'>
-														<div class='col-xs-12 col-md-9'>
-														{THREADNAME}
-														<div><small>".LAN_FORUM_1004.": {POSTER} {THREADTIMELAPSE} &nbsp;</small></div>
-														</div><div class='col-xs-12 col-md-3 text-right'> {PAGESX}</div>
-														</div>
-														<div class='row'>
+												    <td>{ICON}</td>
+												    <td>
+												        <div class='row'>
+												            <div class='col-xs-12 col-md-9'>
+												            {THREADNAME}
+												            <div><small>".LAN_FORUM_1004.": {POSTER} {THREADTIMELAPSE} &nbsp;</small></div>
+												            </div><div class='col-xs-12 col-md-3 text-right'> {PAGESX}</div>
+												        </div>
+												    </td>
+												    <td class='text-center'>{REPLIESX}</td><td class='hidden-xs text-center'>{VIEWSX}</td>
+												    <td class='hidden-xs'><small>{LASTPOSTUSER} {LASTPOSTDATE} </small><div class='span2 right pull-right'>{ADMINOPTIONS}</div></td>
+												</tr>\n";
 
-													</td>
-													</div>
-														<td class='text-center'>{REPLIESX}</td><td class='hidden-xs text-center'>{VIEWSX}</td>
-													<td class='hidden-xs'><small>{LASTPOSTUSER} {LASTPOSTDATE} </small><div class='span2 right pull-right'>{ADMINOPTIONS}</div></td>
-													</tr>\n";
 
 $FORUM_VIEWFORUM_TEMPLATE['item-sticky'] 		= $FORUM_VIEWFORUM_TEMPLATE['item'] ; // "<tr><td>{THREADNAME}</td></tr>\n";
 $FORUM_VIEWFORUM_TEMPLATE['item-announce'] 		= $FORUM_VIEWFORUM_TEMPLATE['item'] ; // "<tr><td>{THREADNAME}</td></tr>\n";
@@ -335,7 +329,7 @@ $FORUM_VIEWFORUM_TEMPLATE['sub-header']			= "<tr>
 												</tr>";
 
 $FORUM_VIEWFORUM_TEMPLATE['sub-item']			= "<tr><td>{NEWFLAG}</td>
-												<td><div>{SUB_FORUMTITLE}</div><small>{SUB_DESCRIPTION}</small></td>
+												<td><div>{SUB_FORUMIMAGE:h=50}{SUB_FORUMTITLE}</div><small>{SUB_DESCRIPTION}</small></td>
 												<td class='text-center'>{SUB_REPLIESX}</td>
 												<td class='hidden-xs text-center'>{SUB_THREADSX}</td>
 												<td class='hidden-xs'><small>{SUB_LASTPOSTUSER} {SUB_LASTPOSTDATE}</small></td>
@@ -351,7 +345,7 @@ $FORUM_VIEWFORUM_TEMPLATE['divider-normal']		= "<tr><th colspan='2'>".LAN_FORUM_
 $FORUM_VIEWFORUM_TEMPLATE['divider-important']	= "<tr><th colspan='2'>".LAN_FORUM_1006."</th><th class='text-center'>".LAN_FORUM_0003."</th><th class='hidden-xs text-center'>".LAN_FORUM_1005."</th><th class='hidden-xs'>".LAN_FORUM_0004."</th></tr>";
 $FORUM_VIEWFORUM_TEMPLATE['divider-normal']		= "<tr><th colspan='2'>".LAN_FORUM_1007."</th><th class='text-center' >".LAN_FORUM_0003."</th><th class='hidden-xs text-center'>".LAN_FORUM_1005."</th><th class='hidden-xs'>".LAN_FORUM_0004."</th></tr>";
 
-$SC_WRAPPER['VIEWABLE_BY'] = "<div class='panel panel-default' style='margin-top:10px'><div class='panel-heading'>".LAN_FORUM_8012."</div><div class='panel-body'>{---}</div></div></div>";
+$SC_WRAPPER['VIEWABLE_BY'] = "<div class='panel panel-default' style='margin-top:10px'><div class='panel-heading'>".LAN_FORUM_8012."</div><div class='panel-body'>{---}</div></div>";
 
 $FORUM_VIEWFORUM_TEMPLATE['footer'] 				= "</table>
 												<div class='row row-fluid'>
@@ -393,7 +387,7 @@ $FORUM_VIEWFORUM_TEMPLATE['iconkey'] 			= "
 												</div>
 												";
 
-
+$FORUM_VIEWFORUM_TEMPLATE['forum-crumb'] =  $FORUM_CRUMB;
 
 // $FORUM_VIEWFORUM_WRAPPER['THREADNAME']          = "<span class='label label-info'>{---}</span>";
 

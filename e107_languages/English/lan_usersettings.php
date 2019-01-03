@@ -84,7 +84,7 @@ define("LAN_USET_14", "Login name too long. Please choose another");
 define("LAN_USET_15", "Display name too long. Please choose another");
 define("LAN_USET_16", "Tick box to delete existing photo without uploading another");
 define("LAN_USET_17", "Display name already used. Please choose another");
-define("LAN_USET_18", "User data changed by admin: --ID--, login name: --LOGNAME--");
+define("LAN_USET_18", "User data changed by admin: [x], login name: [y]");
 //define("LAN_USET_19", "Custom Title");			Now LAN_USER_74
 define("LAN_USET_20", "You must also change the user's password if you are changing their login name or email address");
 define("LAN_USET_21", "Please validate the changes by re-entering your password: ");
@@ -145,4 +145,13 @@ define("LAN_CUSTOMTITLE", "Custom title");
 define("LAN_USET_5", "Subscribed to");
 define("LAN_USET_6", "Subscribe to our mailing-list(s) and/or sections of this site.");
 // define("LAN_USET_8", "Signature / Time zone");
-?>
+
+define("LAN_USET_50", "Delete Account");
+define("LAN_USET_51", "Are you sure? This procedure cannot be reversed! Once completed, your account and any personal data that you have entered on this site will be permanently lost and you will no longer be able to login.");
+define("LAN_USET_52", "A confirmation email has been sent to [x]. Please click the link in the email to permanently delete your account.");
+define("LAN_USET_53", "Account Removal Confirmation");
+define("LAN_USET_54", "Confirmation Email Sent");
+define("LAN_USET_55", "Please click the following link to complete the deletion of your account.");
+define("LAN_USET_56", "Your account has been successfully deleted.");
+
+

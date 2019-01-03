@@ -10,12 +10,20 @@ if (!defined('e107_INIT'))  exit;
 
 global $sc_style;
 
-###### Default list item (temporary) - TODO rewrite news ######
-//$NEWS_MENU_TEMPLATE['list']['start']       = '<ul class="nav nav-list news-menu-months">';
-//$NEWS_MENU_TEMPLATE['list']['end']         = '</ul>';
+
+
+$NEWS_TEMPLATE = array();
+
 
 $NEWS_MENU_TEMPLATE['list']['start']       = '<div class="thumbnails">';
 $NEWS_MENU_TEMPLATE['list']['end']         = '</div>';
+
+
+$NEWS_INFO = array(
+	'default' 	=> array('title' => LAN_DEFAULT, 	'description' => 'unused'),
+	'list' 	    => array('title' => LAN_LIST, 		'description' => 'unused'),
+	'2-column'  => array('title' => "2 Column (experimental)",     'description' => 'unused'), //@todo more default listing options.
+);
 
 
 // XXX The ListStyle template offers a listed summary of items with a minimum of 10 items per page. 
@@ -25,6 +33,29 @@ $NEWS_MENU_TEMPLATE['list']['end']         = '</div>';
 // Template/CSS to be reviewed for best bootstrap implementation 
 $NEWS_TEMPLATE['list']['caption']	= '{NEWSCATEGORY}';
 $NEWS_TEMPLATE['list']['start']	= '{SETIMAGE: w=400&h=350&crop=1}';
+/*
+ // (optional)
+$NEWS_TEMPLATE['list']['first'] = '
+		{SETIMAGE: w=800&h=400}
+		<div class="default-item">
+
+          {NEWSIMAGE: item=1}
+			<h2 class="news-title">{NEWS_TITLE: link=1}</h2>
+          <p class="lead">{NEWS_SUMMARY}</p>
+          {NEWSVIDEO: item=1}
+          <div class="text-justify">
+       
+          </div>
+           <div class="text-right">
+			<a href="{NEWS_URL}" class="btn btn-primary">{LAN=LAN_READ_MORE}</a>
+			</div>
+        <hr>
+		
+			</div>
+		{SETIMAGE: w=400&h=350&crop=1}
+';
+*/
+
 $NEWS_TEMPLATE['list']['end']	= '';
 $NEWS_TEMPLATE['list']['item']	= '
 
@@ -80,8 +111,14 @@ $NEWS_TEMPLATE['default']['item'] = '
 ';
 */
 
+
+
+
+
 $NEWS_WRAPPER['default']['item']['NEWSIMAGE: item=1'] = '<span class="news-images-main pull-left col-xs-12 col-sm-6 col-md-6">{---}</span>';
 
+$NEWS_TEMPLATE['default']['caption'] = null; // add a value to user tablerender()
+$NEWS_TEMPLATE['default']['start']	= '<!-- Default News Template -->';
 $NEWS_TEMPLATE['default']['item'] = '
 		{SETIMAGE: w=400&h=400}
 		<div class="default-item">
@@ -110,6 +147,24 @@ $NEWS_TEMPLATE['default']['item'] = '
 		</div>
 ';
 
+$NEWS_TEMPLATE['default']['end']	= '';
+
+$NEWS_TEMPLATE['category']          = $NEWS_TEMPLATE['default'];
+$NEWS_TEMPLATE['category']['start']	= '<!-- Category News Template -->';
+
+/**
+ * @todo (experimental)
+ */
+$NEWS_TEMPLATE['2-column']['caption']  = '{NEWS_CATEGORY_NAME}';
+$NEWS_TEMPLATE['2-column']['start']    = '<div class="row">';
+$NEWS_TEMPLATE['2-column']['item']     = '<div class="item col-md-6">
+											{SETIMAGE: w=400&h=400&crop=1}
+											{NEWSTHUMBNAIL=placeholder}
+	                                            <h3>{NEWS_TITLE}</h3>
+	                                            <p>{NEWS_SUMMARY}</p>
+	                                         	<p class="text-right"><a class="btn btn-primary btn-othernews" href="{NEWSURL}">' . LAN_READ_MORE . '</a></p>
+            							  </div>';
+$NEWS_TEMPLATE['2-column']['end']      = '</div>';
 
 
 ###### Default view item (temporary)  ######
@@ -118,7 +173,9 @@ $NEWS_TEMPLATE['default']['item'] = '
 
 // As displayed by news.php?extend.1
 
+//@XXX SEE news_view_template.php
 
+/*
 $NEWS_WRAPPER['view']['item']['NEWSIMAGE: item=1'] = '<span class="news-images-main pull-left col-xs-12 col-sm-6 col-md-6">{---}</span>';
 
 $NEWS_TEMPLATE['view']['item'] = '
@@ -170,17 +227,11 @@ $NEWS_TEMPLATE['view']['item'] = '
 		</div>
 
 
-
-
 		<hr>
 		
 		<div class="options hidden-print ">
 			<div class="btn-group">{NEWSCOMMENTLINK: glyph=comments&class=btn btn-default}{PRINTICON: class=btn btn-default}{ADMINOPTIONS: class=btn btn-default}{SOCIALSHARE}</div>
 		</div>
-
-
-
-
 
 	</div>
 
@@ -190,7 +241,7 @@ $NEWS_TEMPLATE['view']['item'] = '
 	{NEWSNAVLINK}
 
 ';
-
+*/
 /*
  * 	<hr />
 	<h3>About the Author</h3>
@@ -208,28 +259,8 @@ $NEWS_TEMPLATE['view']['item'] = '
 //$NEWS_MENU_TEMPLATE['view']['separator']   = '<br />';
 
 
-###### news_categories.sc 
-$NEWS_TEMPLATE['category']['body'] = '
-	<div style="padding:5px"><div style="border-bottom:1px inset black; padding-bottom:1px;margin-bottom:5px">
-	{NEWSCATICON}&nbsp;{NEWSCATEGORY}
-	</div>
-	{NEWSCAT_ITEM}
-	</div>
-';
 
-$NEWS_TEMPLATE['category']['item'] = '
-	<div style="width:100%;padding-bottom:2px">
-	<table style="width:100%" cellpadding="0" cellspacing="0" border="0">
-	<tr>
-	<td style="width:2px;vertical-align:top">&#8226;
-	</td>
-	<td style="text-align:left;vertical-align:top;padding-left:3px">
-	{NEWSTITLELINK}
-	<br />
-	</td></tr>
-	</table>
-	</div>
-';
+
 
 ### Related 'start' - Options: Core 'single' shortcodes including {SETIMAGE}
 ### Related 'item' - Options: {RELATED_URL} {RELATED_IMAGE} {RELATED_TITLE} {RELATED_SUMMARY}

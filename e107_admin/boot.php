@@ -28,14 +28,64 @@ if(!empty($_GET['iframe'])) // global iframe support.
 }
 
 // .e-sef-generate routine.
-if(ADMIN && defset('e_ADMIN_UI') && varset($_POST['mode']) == 'sef' && !empty($_POST['source']) && e_AJAX_REQUEST)
+if(e_AJAX_REQUEST && ADMIN && defset('e_ADMIN_UI') && varset($_POST['mode']) == 'sef' && !empty($_POST['source']))
 {
 	$d = array('converted'=> eHelper::title2sef($_POST['source']));
 	echo json_encode($d);
 	exit;
 }
 
-if(ADMIN && e_AJAX_REQUEST && varset($_GET['mode']) == 'core' && ($_GET['type'] == 'feed'))
+if(e_AJAX_REQUEST && getperms('0') &&  varset($_GET['mode']) == 'core' && ($_GET['type'] == 'update'))
+{
+
+		require_once(e_ADMIN.'update_routines.php');
+
+		e107::getSession()->set('core-update-checked',false);
+
+		$status = (update_check() === true) ? true : false;
+
+		e107::getSession()->set('core-update-status',$status);
+
+		echo json_encode($status);
+
+		exit;
+
+}
+
+if(e_AJAX_REQUEST && getperms('0') &&  varset($_GET['mode']) == 'addons' && ($_GET['type'] == 'update'))
+{
+	e107::getSession()->set('addons-update-checked',true);
+
+	$sc = e107::getScBatch('admin');
+
+	$themes = $sc->getUpdateable('theme');
+	$plugins = $sc->getUpdateable('plugin');
+
+	$text = $sc->renderAddonUpdate($plugins);
+	$text .= $sc->renderAddonUpdate($themes);
+
+	if(empty($text))
+	{
+		exit;
+	}
+
+	$ns = e107::getRender();
+
+	$tp = e107::getParser();
+	$ns->setUniqueId('e-addon-updates');
+	$ns->setStyle('warning');
+	$ret = $ns->tablerender($tp->toGlyph('fa-arrow-circle-o-down').LAN_UPDATE_AVAILABLE,$text,'default', true);
+
+	echo $ret;
+
+	e107::getSession()->set('addons-update-status',$ret);
+
+	exit;
+
+}
+
+
+if(e_AJAX_REQUEST &&  ADMIN && varset($_GET['mode']) == 'core' && ($_GET['type'] == 'feed'))
 {
 
 	$limit = 3;
@@ -56,7 +106,7 @@ if(ADMIN && e_AJAX_REQUEST && varset($_GET['mode']) == 'core' && ($_GET['type'] 
 			$text .= '
 			<div class="media">
 			  <div class="media-body">
-			    <h4 class="media-heading"><a href="'.$row['link'].'">'.$row['title'].'</a> <small>— '.$row['pubDate'].'</small></h4>
+			    <h4 class="media-heading"><a target="_blank" href="'.$row['link'].'">'.$row['title'].'</a> <small>— '.$row['pubDate'].'</small></h4>
 			   '.$tp->text_truncate($description,150).'
 			  </div></div>';
 			  $count++;
@@ -103,7 +153,7 @@ if(ADMIN && (e_AJAX_REQUEST || deftrue('e_DEBUG_FEEDS')) && varset($_GET['mode']
 		$rows = e107::getXml()->parseXml($data, 'advanced');
 //	print_a($rows);
 //  exit;
-		$link = ($type == 'plugin') ? e_ADMIN."plugin.php?mode=online" : e_ADMIN."theme.php?mode=online";
+		$link = ($type == 'plugin') ? e_ADMIN."plugin.php?mode=online" : e_ADMIN."theme.php?mode=main&action=online";
 
 		$text = "<div style='margin-top:10px'>";
 
@@ -148,16 +198,25 @@ e107::coreLan('footer', true);
 {
 	$_globalLans = e107::pref('core', 'lan_global_list'); 
 	$_plugins = e107::getPref('plug_installed');
-	if(!deftrue('e_ADMIN_UI') && !empty($_plugins) && !empty($_globalLans) && is_array($_plugins) && (count($_plugins) > 0))
+	$plugDir = e107::getFolder('plugins');
+
+	if(strpos(e_REQUEST_URI,$plugDir) !== false && !deftrue('e_ADMIN_UI') && !empty($_plugins) && !empty($_globalLans) && is_array($_plugins) && (count($_plugins) > 0))
 	{
 		$_plugins = array_keys($_plugins);
 		
 		foreach ($_plugins as $_p) 
 		{
-			if(in_array($_p, $_globalLans) && defset('e_CURRENT_PLUGIN') != $_p) // filter out those with globals unless we are in a plugin folder.
+			if(defset('e_CURRENT_PLUGIN') != $_p)
 			{
-				continue; 	
+				continue;
 			}
+
+			if(in_array($_p, $_globalLans)) // filter out those with globals unless we are in a plugin folder.
+			{
+				continue;
+			}
+			
+			e107::getDb()->db_Mark_Time('[boot.php: Loading LANS for '.$_p.']');
 			e107::loadLanFiles($_p, 'admin');
 		}
 	}
@@ -165,6 +224,7 @@ e107::coreLan('footer', true);
 
 
 // Get Icon constants, theme override (theme/templates/admin_icons_template.php) is allowed
+e107::getDb()->db_Mark_Time('[boot.php: Loading admin_icons]');
 include_once(e107::coreTemplatePath('admin_icons'));
 
 

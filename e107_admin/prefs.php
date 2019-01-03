@@ -10,6 +10,10 @@
  *
  */
 
+if(!empty($_POST) && !isset($_POST['e-token']))
+{
+	$_POST['e-token'] = '';
+}
 require_once ("../class2.php");
 
 if(isset($_POST['newver']))
@@ -51,7 +55,7 @@ $tp = e107::getParser();
 /*	RESET DISPLAY NAMES	*/
 if(isset($_POST['submit_resetdisplaynames']))
 {
-	e107::getDb()->db_Update('user', 'user_name=user_loginname');
+	e107::getDb()->update('user', 'user_name=user_loginname');
 	$mes->addInfo(PRFLAN_157);
 }
 
@@ -91,6 +95,12 @@ if(isset($_POST['updateprefs']))
 		$_POST['disable_emailcheck'] = 0;
 		$mes->addError(PRFLAN_211);
     }
+
+
+	if(!empty($_POST['passwordEncoding']) || !empty($_POST['ssl_enabled']))
+	{
+		$_POST['password_CHAP'] = 0; // disable chap unless using md5 without SSL.
+	}
 
 	// Table of range checking values - min and max for numerics. Only do the important ones
 	$pref_limits = array('loginname_maxlength' => array('min' => 10, 'max' => 100, 'default' => 30),
@@ -155,12 +165,12 @@ if(isset($_POST['updateprefs']))
 				if($value < $pref_limits[$key]['min'])
 				{
 					$value = $pref_limits[$key]['min'];
-					$mes->addWarning(str_replace(array('--FIELD--','--VALUE--'),array($key,$value),PRFLAN_213));
+					$mes->addWarning(str_replace(array('[x]','[y]'),array($key,$value),PRFLAN_213));
 				}
 				if($value > $pref_limits[$key]['max'])
 				{
 					$value = $pref_limits[$key]['max'];
-					$mes->addWarning(str_replace(array('--FIELD--','--VALUE--'),array($key,$value),PRFLAN_212));
+					$mes->addWarning(str_replace(array('[x]','[y]'),array($key,$value),PRFLAN_212));
 				}
 			}
 			else
@@ -309,6 +319,7 @@ $pref['membersonly_exceptions'] = implode("\n",$pref['membersonly_exceptions']);
 $text = "
 <div id='core-prefs'>
 	<form class='admin-menu' method='post' action='".e_SELF."' autocomplete='off'>
+	<input type='hidden' name='e-token' value='".e_TOKEN."' />
 		<fieldset id='core-prefs-main'>
 			<legend>".PRFLAN_1."</legend>
 			<table class='table adminform'>
@@ -374,7 +385,7 @@ if(!empty($pref['sitebutton']) && strpos($pref['sitebutton'],'{')===false && fil
 
 
 
-$text .= $frm->imagepicker('sitebutton',$pref['sitebutton'],'','help='.PRFLAN_225); //todo  use 'LegacyPath' option instead of code above.
+$text .= $frm->imagepicker('sitebutton',$pref['sitebutton'],'','w=200&help='.PRFLAN_225); //todo  use 'LegacyPath' option instead of code above.
 
 $text .= "
 						</td>
@@ -505,14 +516,14 @@ $text .= "<fieldset class='e-hideme' id='core-prefs-email'>
 							<div class='smalltext field-help'>".PRFLAN_274."</div>
 						</td>
 					</tr>
-						<tr>
+
+					<tr>
 						<td><label for='contact-filter'>".PRFLAN_270."</label></td>
 						<td>
 							".$frm->textarea('contact_filter', $pref['contact_filter'], 5, 59, array('size'=>'xxlarge'))."
 							<div class='smalltext field-help'>".PRFLAN_271."</div>
 						</td>
 					</tr>
-
 
 
 
@@ -537,6 +548,39 @@ $text .= "<fieldset class='e-hideme' id='core-prefs-email'>
 			</table>
 			".pref_submit('email')."
 		</fieldset>";
+
+
+// GDPR Settings -----------------------------
+$text .= "
+		<fieldset class='e-hideme' id='core-prefs-gdpr'>
+			<legend>".PRFLAN_277."</legend>
+			<table class='table adminform'>
+				<colgroup>
+					<col class='col-label' />
+					<col class='col-control' />
+				</colgroup>
+				<tbody>
+					<tr>
+						<td><label for='gdpr-privacypolicy'>".PRFLAN_278."</label></td>
+						<td>
+							".$frm->text('gdpr_privacypolicy', $pref['gdpr_privacypolicy'], 200, array('size'=>'xxlarge'))."
+							<div class='smalltext field-help'>".PRFLAN_279."</div>
+						</td>
+					</tr>
+
+					<tr>
+						<td><label for='gdpr-termsandconditions'>".PRFLAN_280."</label></td>
+						<td>
+							".$frm->text('gdpr_termsandconditions', $pref['gdpr_termsandconditions'], 200, array('size'=>'xxlarge'))."
+							<div class='smalltext field-help'>".PRFLAN_279."</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			".pref_submit('display')."
+		</fieldset>
+";
+
 
 
 $text .= "
@@ -632,11 +676,12 @@ $text .= "
 	";
 
 // Date options.
-$ga = new convert();
+$ga = e107::getDate();
 $date1 = $ga->convert_date(time(), "short");
 $date2 = $ga->convert_date(time(), "long");
 $date3 = $ga->convert_date(time(), "forum");
-$date4 = e107::getDate()->convert(time(),"input");
+//$core_pref$date4 = e107::getDate()->convert(time(),"input");
+$date4 = $tp->toDate(time(),"input");
 
 $text .= "
 		<fieldset class='e-hideme' id='core-prefs-date'>
@@ -666,7 +711,7 @@ $text .= "
 						<td>
 							".$frm->text('forumdate', $pref['forumdate'], 50)."
 							<div class='field-help'>".PRFLAN_83.": {$date3}</div>
-							<div class='field-help'>".PRFLAN_25." <a href='http://www.php.net/manual/en/function.strftime.php' rel='external'>".PRFLAN_93."</a></div>
+							<div class='field-help'>".PRFLAN_25." <a target='_blank' href='http://www.php.net/manual/en/function.strftime.php' rel='external'>".PRFLAN_93."</a></div>
 						</td>
 					</tr>";
 					
@@ -994,7 +1039,7 @@ $text .= "
 						<td><label for='use-coppa'>".PRFLAN_45."</label></td>
 						<td>
 							".$frm->radio_switch('use_coppa', $pref['use_coppa'])."
-							<div class='field-help'>".PRFLAN_46." <a href='http://www.ftc.gov/privacy/coppafaqs.shtm' rel='external'>".PRFLAN_94."</a></div>
+							<div class='field-help'>".PRFLAN_46." <a target='_blank' href='http://www.ftc.gov/privacy/coppafaqs.shtm' rel='external'>".PRFLAN_94."</a></div>
 						</td>
 					</tr>";
 
@@ -1075,14 +1120,37 @@ $text .= "
 
 
 /* text render options */
-
+$savePrefs = false;
 if(!isset($pref['post_html']))
 {
 	$pref['post_html'] = '250';
-	save_prefs();
+	$savePrefs = true;
+	//save_prefs();
 }
 
-$text .= "
+// Make sure, the "post_script" setting is set and if not, set it to "No One" (255)
+// This should close a possible security hole...
+if(!isset($pref['post_script']))
+{
+	$pref['post_script'] = '255';
+	$savePrefs = true;
+	//save_prefs();
+}
+else
+{
+	// Make sure, that the pref is one of the allowed userclasses
+	// Close possible security hole
+	if (!array_key_exists($pref['post_script'], $e_userclass->uc_required_class_list('nobody,admin,main,classes,no-excludes', true)))
+	{
+		$pref['post_script'] = 255; //set to userclass "no one" if the old class isn't part of the list of allowed userclasses
+		$savePrefs = true;
+	}
+}
+
+if ($savePrefs) $core_pref->setPref($pref)->save(false, true);
+
+
+	$text .= "
 		<fieldset class='e-hideme' id='core-prefs-textpost'>
 			<legend>".PRFLAN_101."</legend>
 			<table class='table adminform'>
@@ -1143,7 +1211,7 @@ $text .= "
 					<tr>
 						<td><label for='profanity-words'>".PRFLAN_43.":</label></td>
 						<td>
-							".$frm->tags('profanity_words', $pref['profanity_words'])."
+							".$frm->tags('profanity_words', $pref['profanity_words'], 250, array('maxItems'=>40))."
 							<div class='field-help'>".PRFLAN_44."</div>
 						</td>
 					</tr>
@@ -1175,7 +1243,7 @@ $text .= "
 					<tr>
 						<td><label for='post-script'>".PRFLAN_215.":</label></td>
 						<td>
-							".r_userclass('post_script',$pref['post_script'],'off','nobody,member,admin,main,classes')."
+							".$e_userclass->uc_dropdown('post_script',$pref['post_script'],'nobody,admin,main,classes,no-excludes')."
 							<div class='smalltext field-help'>".PRFLAN_216."</div>
 						</td>
 					</tr>
@@ -1269,19 +1337,28 @@ $text .= "
 				</colgroup>
 				<tbody>";
 
-	if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off')     // Only allow if an SSL login has been made.
-	{
+
 		$text .="
 					<tr>
 						<td><label for='ssl-enabled'>".PRFLAN_60."</label></td>
 
-						<td>
-							".$frm->radio_switch('ssl_enabled', $pref['ssl_enabled'])."
-							<div class='field-help'>".PRFLAN_61."</div>
+						<td>";
+
+							if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off')     // Only allow if an SSL login has been made.
+							{
+								$text .= $frm->radio_switch('ssl_enabled', $pref['ssl_enabled']);
+								$text .= "<div class='field-help'>".PRFLAN_61."</div>";
+							}
+							else
+							{
+								$text .= "<div class='label label-primary e-tip' title=\"".PRFLAN_61."\">".PRFLAN_275."</div>";
+							}
+
+						$text .= "
 						</td>
 					</tr>
 			";
-	}
+
 	// Secure Image/ Captcha
 	$secureImage = array('signcode'=>PRFLAN_76, 'logcode'=>PRFLAN_81, "fpwcode"=>PRFLAN_138,'admincode'=>PRFLAN_222);
 	
@@ -1391,7 +1468,7 @@ $text .= "
 
 						if(function_exists('password_verify')) // ie. php 5.5 or higher
 						{
-							$pwdEncodeOpts[3]	 = "PHP Default (Preferred)";
+							$pwdEncodeOpts[3]	 = PRFLAN_276;
 
 						}
 
@@ -1413,7 +1490,10 @@ $text .= "
 	
 					$text .= "
 						<td><label for='password-chap'>".PRFLAN_178."</label></td>
-						<td>".$frm->select('password_CHAP',$CHAP_list,$pref['password_CHAP'] );
+						<td>";
+
+						$CHAPopt = !empty($pref['ssl_enabled']) || !empty($pref['passwordEncoding']) ? array('disabled'=>1) : null;
+						$text .=  $frm->select('password_CHAP',$CHAP_list,$pref['password_CHAP'], $CHAPopt );
 						//."	".$frm->select_open('password_CHAP');
 							
 						//TODO - user tracking session name - visible only if Cookie is enabled (JS)
@@ -1492,7 +1572,7 @@ $text .= "
 					<tr>
 						<td>".PRFLAN_161.":</td>
 						<td>
-							".$frm->radio_switch('comments_disabled', $pref['comments_disabled'], LAN_NO, LAN_YES,array('reverse'=>1))."
+							".$frm->radio_switch('comments_disabled', $pref['comments_disabled'], LAN_YES, LAN_NO, array('inverse'=>1))."
 						</td>
 					</tr>
              		<tr>
@@ -1548,7 +1628,7 @@ $text .= "
 							'asc'	=> PRFLAN_237
 						);
 					
-					$text .= $frm->select('comments_sort',$comment_sort, $pref['comments_moderate'], array('size'=>'xlarge'))."
+					$text .= $frm->select('comments_sort',$comment_sort, $pref['comments_sort'], array('size'=>'xlarge'))."
 						</td>
 					</tr>
 					
@@ -1645,19 +1725,19 @@ $text .= "
 	<table class='table table-striped table-bordered'>
 	<tr><th>".LAN_TYPE."</th><th>".UPLLAN_33."</th>
 	";
-	
+
 	$fl = e107::getFile();
-	$data = $fl->getFiletypeLimits(); 
-	 
+	$data = $fl->getAllowedFileTypes();
+
 	foreach($data as $k=>$v)
 	{
 		$text .= "<tr><td>".$k."</td>
 		<td>".$fl->file_size_encode($v)."</td>
 		</tr>";	
-		
+
 		
 	}
-//	$text .= print_a($data,true); 
+	// $text .= print_a($data,true);
 	
 
 	
@@ -1993,8 +2073,10 @@ function pref_submit($post_id = '')
 
 function prefs_adminmenu()
 {
+		$var['core-prefs-header1']['header'] = LAN_BASIC_OPTIONS;
 	$var['core-prefs-main']['text'] = PRFLAN_1;
 	$var['core-prefs-email']['text'] = PRFLAN_254;
+	$var['core-prefs-gdpr']['text'] = PRFLAN_277;
 	$var['core-prefs-registration']['text'] = PRFLAN_28;
 	$var['core-prefs-signup']['text'] = PRFLAN_19;
 //	$var['core-prefs-sociallogin']['text'] = "Social Options"; // Moved into plugin.
@@ -2002,7 +2084,7 @@ function prefs_adminmenu()
 	$var['core-prefs-comments']['text'] = PRFLAN_210;
 	$var['core-prefs-uploads']['text'] = PRFLAN_255;
 	
-	$var['core-prefs-header1']['header'] = PRFLAN_256;
+	$var['core-prefs-header2']['header'] = PRFLAN_256;
 	
 	$var['core-prefs-display']['text'] = PRFLAN_13;
 	$var['core-prefs-admindisp']['text'] = PRFLAN_77;
@@ -2011,8 +2093,11 @@ function prefs_adminmenu()
 	$var['core-prefs-date']['text'] = PRFLAN_21;	
 	$var['core-prefs-javascript']['text'] = PRFLAN_257;
 	$var['core-prefs-advanced']['text'] = PRFLAN_149;
-	
-	e107::getNav()->admin(LAN_BASIC_OPTIONS.'--id--prev_nav', 'core-prefs-main', $var);
+
+	$icon = e107::getParser()->toIcon('e-prefs-24');
+	$caption = $icon."<span>".LAN_PREFS."</span>";
+
+	e107::getNav()->admin($caption.'--id--prev_nav', 'core-prefs-main', $var);
 }
 
 /**

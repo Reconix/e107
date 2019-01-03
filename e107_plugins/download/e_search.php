@@ -41,15 +41,15 @@ class download_search extends e_search // include plugin-folder in the name.
 			'table'			=> 'download AS d LEFT JOIN #download_category AS c ON d.download_category = c.download_category_id',
 
 			'advanced' 		=> array(
-								'cat'	=> array('type'	=> 'dropdown', 		'text' => LAN_SEARCH_55, 'list'=>$catList),
+								'cat'	=> array('type'	=> 'dropdown', 		'text' => LAN_SEARCH_63, 'list'=>$catList),
 								'date'	=> array('type'	=> 'date', 			'text' => LAN_DATE_POSTED),
 								'author'=> array('type'	=> 'author',		'text' => LAN_SEARCH_61)
 							),
 							
-			'return_fields'	=> array('d.download_id', 'd.download_sef','d.download_category', 'download_category_id', 'd.download_name', 'd.download_description', 'd.download_author', 'd.download_author_website', 'd.download_datestamp', 'd.download_class', 'c.download_category_name', 'c.download_category_class'), 
-			'search_fields'	=> array('d.download_name'=> '1.2', 'd.download_url' => '0.9', 'd.download_description'=>'0.6', 'd.download_author'=>'0.6', 'd.download_author_website'=>'0.4'), // fields and weights. 
+			'return_fields'	=> array('d.download_id', 'd.download_sef','d.download_category', 'c.download_category_id', 'd.download_name', 'd.download_description', 'd.download_author', 'd.download_author_website', 'd.download_datestamp', 'd.download_class', 'c.download_category_name', 'c.download_category_class'),
+			'search_fields'	=> array('d.download_name'=> '1.2', 'd.download_url' => '0.9', 'd.download_description'=>'0.6', 'd.download_author'=>'0.6', 'd.download_author_website'=>'0.4'), // fields and weights.
 			
-			'order'			=> array('download_datestamp' => DESC),
+			'order'			=> array('download_datestamp' => 'DESC'),
 			'refpage'		=> e_PLUGIN_ABS.'download/download.php'
 		);
 
@@ -69,9 +69,9 @@ class download_search extends e_search // include plugin-folder in the name.
 
 		$res = array();
 	
-		$datestamp = $tp -> toDate($row['download_datestamp'], "long");
+		$datestamp = $tp->toDate($row['download_datestamp'], "long");
 		
-		$res['link'] 		= e107::getUrl()->create('download/view/item', array('id'=>$row['download_id'],'name'=>vartrue($row['download_sef'],'--no-sef-set--')));
+		$res['link'] 		= e107::url('download', 'item', $row);
 		$res['pre_title'] 	= $tp->toHtml($row['download_category_name'],false,'TITLE_PLAIN')." | ";
 		$res['title'] 		= $row['download_name'];
 		$res['pre_summary'] = "<div class='smalltext'><a href='download.php'>".LAN_197."</a> -> <a href='download.php?list.".$row['download_category_id']."'>".$row['download_category_name']."</a></div>";
@@ -90,11 +90,11 @@ class download_search extends e_search // include plugin-folder in the name.
 	 * Optional - Advanced Where
 	 * @param $parm - data returned from $_GET (ie. advanced fields included. in this case 'date' and 'author' )
 	 */
-	function where($parm='')
+	function where($parm=array())
 	{
 		$tp = e107::getParser();
 		
-		$qry = "download_active > '0' AND d.download_visible IN (".USERCLASS_LIST.") AND c.download_category_class IN (".USERCLASS_LIST.") AND".$advanced_where;
+		$qry = "download_active > '0' AND d.download_visible IN (".USERCLASS_LIST.") AND c.download_category_class IN (".USERCLASS_LIST.") AND";
 
 		if (isset($parm['cat']) && is_numeric($parm['cat'])) 
 		{

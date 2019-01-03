@@ -487,14 +487,16 @@ class user_class
 			}
 			else
 			{
-				$text .= "\n<optgroup label=\"".UC_LAN_INVERTLABEL."\">\n";
+				$text .= "\n";
+				$text .= '<optgroup label=\''.UC_LAN_INVERTLABEL.'\'>';
+				$text .= "\n";
 			}
 			foreach ($show_classes as $k => $v)
 			{
 				if($k != e_UC_PUBLIC && $k != e_UC_NOBODY && $k != e_UC_READONLY)  // remove everyone, nobody and readonly from list.
 				{
 					$s = ($curval == ('-'.$k) && $curval !== '') ?  "selected='selected'" : '';
-					$text .= "<option class='uc-select-inverted' value='-".$k."' ".$s.">".str_replace("--CLASS--", $v, UC_LAN_INVERT)."</option>\n";
+					$text .= "<option class='uc-select-inverted' value='-".$k."' ".$s.">".str_replace("[x]", $v, UC_LAN_INVERT)."</option>\n";
 				}
 			}
 			$text .= "</optgroup>\n";
@@ -724,7 +726,9 @@ class user_class
 		{
 			if ($notCheckbox)
 			{
-				$ret .= "\n<optgroup label=\"".UC_LAN_INVERTLABEL."\">\n";
+				$ret .= "\n";
+				$ret .= '<optgroup label=\''.UC_LAN_INVERTLABEL.'\'>';
+				$ret .= "\n";
 			}
 			else
 			{
@@ -790,7 +794,7 @@ class user_class
 		$ucString = $this->class_tree[$classIndex]['userclass_name'];
 		if ($classSign == '-')
 		{
-			$ucString = str_replace('--CLASS--', $ucString, UC_LAN_INVERT);
+			$ucString = str_replace('[x]', $ucString, UC_LAN_INVERT);
 		}
 		return "<option value='{$classSign}{$classIndex}'{$sel}{$style}>".$prefix.$ucString."</option>\n";
 	}
@@ -826,7 +830,7 @@ class user_class
 		
 		if ($classSign == '-')
 		{
-			$ucString = str_replace('--CLASS--', $ucString, UC_LAN_INVERT);
+			$ucString = str_replace('[x]', $ucString, UC_LAN_INVERT);
 		}
 		
 		$checked = in_array($classnum, $tmp) ? true : false;
@@ -866,7 +870,7 @@ class user_class
 		
 		if ($classSign == '-')
 		{
-			$ucString = str_replace('--CLASS--', $ucString, UC_LAN_INVERT);
+			$ucString = str_replace('[x]', $ucString, UC_LAN_INVERT);
 		}
 	
 		$description = $ucString.'  ('.$this->class_tree[$classIndex]['userclass_description'].")";
@@ -928,7 +932,7 @@ class user_class
 		{
 			//$val = abs($id);
 			//$name = isset($this->class_tree[$val]['userclass_name']) ? $this->class_tree[$val]['userclass_name'] : $this->fixed_classes[$val];
-			$ucString = str_replace('--CLASS--', $ucString, UC_LAN_INVERT);
+			$ucString = str_replace('[x]', $ucString, UC_LAN_INVERT);
 		}
 		return $ucString;
 	}

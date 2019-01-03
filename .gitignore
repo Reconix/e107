@@ -8,3 +8,11 @@ e107_media/*
 e107_system/*
 /.settings
 e107_core/override
+test/*
+tmp/*
+
+# Ignore Vim swap files
+*.swp
+*.swo
+e107.htaccess
+e107InstallLog.log

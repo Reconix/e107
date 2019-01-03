@@ -103,21 +103,22 @@ if(e_AJAX_REQUEST) // TODO improve security
 	}
 	
 	// Insert Comment and return rendered html. 
-	if(vartrue($_POST['comment'])) // ajax render comment
+	if(!empty($_POST['comment'])) // ajax render comment
 	{
 		$pid 				= intval(varset($_POST['pid'], 0)); // ID of the specific comment being edited (nested comments - replies)
 		$row 				= array();
-		$clean_authorname 	= vartrue($_POST['author_name'],USERNAME);
-		$clean_comment 		= $_POST['comment'];
-		$clean_subject 		= $_POST['subject'];
+		$clean_authorname 	= vartrue(filter_var($_POST['author_name'],FILTER_SANITIZE_STRING),USERNAME);
+		$clean_comment 		= e107::getParser()->toText($_POST['comment']);
+		$clean_subject 		= e107::getParser()->filter($_POST['subject'],'str');
+		$clean_table        = e107::getParser()->filter($_POST['table'],'str');
 		
 		$_SESSION['comment_author_name'] = $clean_authorname;
 		
 		$row['comment_pid'] 		= $pid;
 		$row['comment_item_id']		= intval($_POST['itemid']);
-		$row['comment_type']		= e107::getComment()->getCommentType($tp->toDB($_POST['table'],true));
-		$row['comment_subject'] 	= $tp->toDB($_POST['subject']);
-		$row['comment_comment'] 	= $tp->toDB($_POST['comment']);
+		$row['comment_type']		= e107::getComment()->getCommentType($tp->toDB($clean_table,true));
+		$row['comment_subject'] 	= $tp->toDB($clean_subject);
+		$row['comment_comment'] 	= $tp->toDB($clean_comment);
 		$row['user_image'] 			= USERIMAGE;
 		$row['user_id']				= (USERID) ? USERID : 0;
 		$row['user_name'] 			= USERNAME;
@@ -139,7 +140,12 @@ if(e_AJAX_REQUEST) // TODO improve security
 			$width = ($pid) ? 1 : 0;
 			
 			$ret['html'] = "\n<!-- Appended -->\n<li>";
-			$ret['html'] .= e107::getComment()->render_comment($row,'comments','comment',intval($_POST['itemid']),$width);
+
+			/**
+			 * Fix for issue e107inc/e107#3154 (Comments not refreshing on submission)
+			 * Missing 6th argument ($subject) caused an exception
+			 */
+			$ret['html'] .= e107::getComment()->render_comment($row,'comments','comment',intval($_POST['itemid']),$width, $tp->toDB($clean_subject));
 			$ret['html'] .= "</li>\n<!-- end Appended -->\n";
 			
 			$ret['error'] = false;	

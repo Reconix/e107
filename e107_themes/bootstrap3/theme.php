@@ -20,9 +20,6 @@ define("BOOTSTRAP", 3);
 define("FONTAWESOME", 4);
 define('VIEWPORT', "width=device-width, initial-scale=1.0");
 
-e107::library('load', 'bootstrap');
-e107::library('load', 'fontawesome');
-
 // CDN provider for Bootswatch.
 $cndPref = e107::pref('theme', 'cdn', 'cdnjs');
 $bootswatch = e107::pref('theme', 'bootswatch', false);
@@ -48,14 +45,14 @@ switch($cndPref)
 /* @example prefetch  */
 //e107::link(array('rel'=>'prefetch', 'href'=>THEME.'images/browsers.png'));
 
-e107::js("footer-inline", 	"$('.e-tip').tooltip({container: 'body'})"); // activate bootstrap tooltips. 
+e107::js("footer-inline", 	"$('.e-tip').tooltip({container: 'body'});"); // activate bootstrap tooltips.
 
 // Legacy Stuff.
 define('OTHERNEWS_COLS',false); // no tables, only divs. 
 define('OTHERNEWS_LIMIT', 3); // Limit to 3. 
 define('OTHERNEWS2_COLS',false); // no tables, only divs. 
 define('OTHERNEWS2_LIMIT', 3); // Limit to 3. 
-define('COMMENTLINK', 	e107::getParser()->toGlyph('fa-comment'));
+// define('COMMENTLINK', 	e107::getParser()->toGlyph('fa-comment'));
 define('COMMENTOFFSTRING', '');
 
 define('PRE_EXTENDEDSTRING', '<br />');

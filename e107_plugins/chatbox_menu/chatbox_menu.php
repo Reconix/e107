@@ -179,11 +179,15 @@ if((isset($_POST['chat_submit']) || e_AJAX_REQUEST) && $_POST['cmessage'] != '')
 					}
 					if(!$emessage)
 					{
-						$sql->insert("chatbox", "0, '$nick', '$cmessage', '".time()."', '0' , '$ip' ");
-						$edata_cb = array("cmessage" => $cmessage, "ip" => $ip);
-						$e_event -> trigger("cboxpost", $edata_cb); // deprecated
-						e107::getEvent('user_chatbox_post_created', $edata_cb); 
-						$e107cache->clear("nq_chatbox");
+						$insertId = $sql->insert("chatbox", "0, '{$nick}', '{$cmessage}', '{$datestamp}', '0' , '{$ip}' ");
+						
+						if($insertId)
+						{
+							$edata_cb = array("id" => $insertId, "nick" => $nick, "cmessage" => $cmessage, "datestamp" => $datestamp, "ip" => $ip);
+							$e_event->trigger("cboxpost", $edata_cb); // deprecated
+							e107::getEvent()->trigger('user_chatbox_post_created', $edata_cb);
+							$e107cache->clear("nq_chatbox");
+						}
 					}
 				}
 			}
@@ -242,7 +246,7 @@ else
 	$texta .= "
 	<textarea placeholder=\"".LAN_CHATBOX_100."\" required class='tbox chatbox form-control input-xlarge' id='cmessage' name='cmessage' cols='20' rows='5' style='max-width:97%; ".($cb_width ? "width:".$cb_width.";" : '')." overflow: auto' onselect='storeCaret(this);' onclick='storeCaret(this);' onkeyup='storeCaret(this);'></textarea>
 	<br />
-	<input class='btn btn-default button' type='submit' id='chat_submit' name='chat_submit' value='".CHATBOX_L4."' {$oc}/>
+	<input class='btn btn-default btn-secondary button' type='submit' id='chat_submit' name='chat_submit' value='".CHATBOX_L4."' {$oc}/>
 	";
 	
 	// $texta .= "<input type='reset' name='reset' value='".CHATBOX_L5."' />"; // How often do we see these lately? ;-)
@@ -250,7 +254,7 @@ else
 	if($pref['cb_emote'] && $pref['smiley_activate'])
 	{
 		$texta .= "
-		<input class='btn btn-default button' type='button' style='cursor:pointer' size='30' value='".CHATBOX_L14."' onclick=\"expandit('emote')\" />
+		<input class='btn btn-default btn-secondary button' type='button' style='cursor:pointer' size='30' value='".CHATBOX_L14."' onclick=\"expandit('emote')\" />
 		<div class='well' style='display:none' id='emote'>".r_emote()."</div>\n";
 	}
 

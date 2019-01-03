@@ -105,7 +105,7 @@ class comment_shortcodes extends e_shortcode
 			{
 				if ($thisaction == "comment" && $pref['nested_comments'])
 				{
-					$REPLY = "<a id='e-comment-reply-".$this->var['comment_id']."' class='e-comment-reply btn btn-default btn-mini btn-xs' data-type='".$this->var['comment_type']."' data-target='".e_HTTP."comment.php' href='".e_HTTP."comment.php?reply.".$thistable.".".$this->var['comment_id'].".".$thisid."'>".COMLAN_326."</a>";
+					$REPLY = "<a id='e-comment-reply-".$this->var['comment_id']."' class='e-comment-reply btn btn-default btn-secondary btn-mini btn-xs' data-type='".$this->var['comment_type']."' data-target='".e_HTTP."comment.php' href='".e_HTTP."comment.php?reply.".$thistable.".".$this->var['comment_id'].".".$thisid."'>".COMLAN_326."</a>";
 				}
 			}
 		}
@@ -196,13 +196,13 @@ class comment_shortcodes extends e_shortcode
 
 		// TODO put into a <ul> drop-down format.
 
-		e107::getDebug()->log($this->var);
+	//	e107::getDebug()->log($this->var);
 
-		$text = "<a href='#' data-target='".e_HTTP."comment.php' id='e-comment-delete-".$this->var['comment_id']."'  data-type='".$this->var['comment_type']."' data-itemid='".$this->var['comment_item_id']."' class='e-comment-delete btn btn-default btn-mini btn-xs'>".LAN_DELETE."</a> ";
+		$text = "<a href='#' data-target='".e_HTTP."comment.php' id='e-comment-delete-".$this->var['comment_id']."'  data-type='".$this->var['comment_type']."' data-itemid='".$this->var['comment_item_id']."' class='e-comment-delete btn btn-default btn-secondary btn-mini btn-xs'>".LAN_DELETE."</a> ";
 
 		if($this->var['comment_blocked'] == 2) // pending approval. 
 		{
-			$text .= "<a href='#' data-target='" . e_HTTP . "comment.php' id='e-comment-approve-" . $this->var['comment_id'] . "' class='e-comment-approve btn btn-default btn-mini btn-xs'>" . COMLAN_404 . "</a> ";
+			$text .= "<a href='#' data-target='" . e_HTTP . "comment.php' id='e-comment-approve-" . $this->var['comment_id'] . "' class='e-comment-approve btn btn-default btn-secondary btn-mini btn-xs'>" . COMLAN_404 . "</a> ";
 		}
 		return $text;
 		/*
@@ -217,7 +217,8 @@ class comment_shortcodes extends e_shortcode
 		 * */
 	}
 
-
+  	/* example {COMMENT_BUTTON} */
+  	/* example {COMMENT_BUTTON: class=btn btn-default pull-right} */
 	function sc_comment_button($parm = '')
 	{
 		$pref = e107::getPref('comments_sort');
@@ -228,8 +229,10 @@ class comment_shortcodes extends e_shortcode
 			$value = (varset($this->var['eaction']) == "edit" ? COMLAN_320 : COMLAN_9);
 			$pid = ($this->var['action'] == 'reply') ? $this->var['pid'] : 0;
 
+			$class = "e-comment-submit ";
+			$class .= (!empty($parm['class'])) ? $parm['class'] : 'button btn btn-primary e-comment-submit pull-right';
 			$options = array(
-				'class'       => 'button btn btn-primary e-comment-submit pull-right',
+				'class'       => $class,
 				'data-pid'    => $pid,
 				'data-sort'   => $pref,
 				'data-target' => e_HTTP . 'comment.php',
@@ -239,7 +242,8 @@ class comment_shortcodes extends e_shortcode
 		}
 	}
 
-
+  /* example {AUTHOR_INPUT} */
+  /* example {AUTHOR_INPUT: inputclass=form-control&class=form-group} */
 	function sc_author_input($parm = '')
 	{
 		if($this->mode == 'edit')
@@ -248,8 +252,11 @@ class comment_shortcodes extends e_shortcode
 			{
 				$form = e107::getForm();
 
+				$inputclass = (!empty($parm['inputclass'])) ? $parm['inputclass'] : 'comment author form-control';
+        		$class = (!empty($parm['class'])) ? $parm['class'] : 'form-group';
+
 				$options = array(
-					'class'       => 'comment author form-control',
+					'class'       => $inputclass,
 					'placeholder' => COMLAN_16,
 					'size'        => 61,
 				);
@@ -260,7 +267,7 @@ class comment_shortcodes extends e_shortcode
 					$options['disabled'] = 'disabled';
 				}
 
-				$text = '<div class="form-group">';
+				$text = '<div class="'.$class.'">';
 				$text .= $form->text('author_name', $_SESSION['comment_author_name'], 100, $options);
 				$text .= '</div>';
 
@@ -287,15 +294,19 @@ class comment_shortcodes extends e_shortcode
 		return e107::getRate()->renderLike("comments",$this->var['comment_id'],$curVal);
 	}
 
-
+  /* example {COMMENT_INPUT} */
+  /* example {COMMENT_INPUT: inputclass=form-control&class=form-group} */
 	function sc_comment_input($parm = '')
 	{
+		
+		$inputclass = (!empty($parm['inputclass'])) ? $parm['inputclass'] : 'comment-input form-control';
+    	$class = (!empty($parm['class'])) ? $parm['class'] : 'form-group';
 		$options = array(
-			'class'       => 'comment-input form-control',
+			'class'       => $inputclass,
 			'placeholder' => COMLAN_403,
 		);
 
-		$text = '<div class="form-group">';
+		$text = '<div class="'.$class.'">';
 
 		if($parm == 'bbcode')
 		{
@@ -368,12 +379,12 @@ class comment_shortcodes extends e_shortcode
 			//Searching for '.' is BAD!!! It breaks mod rewritten requests. Why is this needed at all?
 			if (strstr(e_QUERY, "&"))
 			{
-				return "<a data-target='".e_HTTP."comment.php' id='e-comment-edit-".$this->var['comment_id']."' class='btn btn-default btn-mini btn-xs e-comment-edit' href='".e_SELF."?".e_QUERY."&amp;comment=edit&amp;comment_id=".$this->var['comment_id']."'>{$adop_icon}</a>";
+				return "<a data-target='".e_HTTP."comment.php' id='e-comment-edit-".$this->var['comment_id']."' class='btn btn-default btn-secondary btn-mini btn-xs e-comment-edit' href='".e_SELF."?".e_QUERY."&amp;comment=edit&amp;comment_id=".$this->var['comment_id']."'>{$adop_icon}</a>";
 			}
 			else
 			{
 				//		return "<a href='".e_SELF."?".$comment_edit_query.".edit.".$this->var['comment_id']."'><img src='".e_IMAGE."generic/newsedit.png' alt='".COMLAN_318."' title='".COMLAN_318."' style='border: 0;' /></a>";
-				return "<a data-target='".e_HTTP."comment.php' id='e-comment-edit-".$this->var['comment_id']."' class='btn btn-default btn-mini btn-xs e-comment-edit' href='".SITEURL."comment.php?".$comment_edit_query.".edit.".$this->var['comment_id']."#e-comment-form'>".$adop_icon."</a>";
+				return "<a data-target='".e_HTTP."comment.php' id='e-comment-edit-".$this->var['comment_id']."' class='btn btn-default btn-secondary btn-mini btn-xs e-comment-edit' href='".SITEURL."comment.php?".$comment_edit_query.".edit.".$this->var['comment_id']."#e-comment-form'>".$adop_icon."</a>";
 			}
 		}
 		else

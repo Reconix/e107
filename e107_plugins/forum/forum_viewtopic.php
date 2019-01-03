@@ -69,9 +69,27 @@ if(vartrue($_GET['id']) && isset($_GET['dl']))
 	exit;
 }
 
+if (isset($_GET['last']))
+{
+	$_GET['f'] = 'last';
+}
+
+if(isset($_GET['f']) && $_GET['f'] == 'post')
+{
+	$thread->processFunction();
+}
+
+$thread->init();
+
+
+/* Check if use has moderator permissions for this thread */
+$moderatorUserIds = $forum->getModeratorUserIdsByThreadId($thread->threadInfo['thread_id']);
+define('MODERATOR', (USER && in_array(USERID, $moderatorUserIds)));
+
+
 if(e_AJAX_REQUEST)
 {
-    if(varset($_POST['action']) == 'quickreply')
+	if(varset($_POST['action']) == 'quickreply')
 	{
 		$forum->ajaxQuickReply();
 	}
@@ -85,21 +103,11 @@ if(e_AJAX_REQUEST)
 	{
 		$forum->ajaxModerate();
 	}
-
+	else if(varset($_POST['action']) == 'deletepost')
+	{
+		$forum->usersLastPostDeletion();
+	}
 }
-
-		
-if (isset($_GET['last']))
-{
-	$_GET['f'] = 'last';
-}
-
-if(isset($_GET['f']) && $_GET['f'] == 'post')
-{
-	$thread->processFunction();
-}
-
-$thread->init();
 
 
 /*
@@ -142,8 +150,9 @@ if (USER && (USERID != $thread->threadInfo['thread_user'] || $thread->threadInfo
 }
 
 define('e_PAGETITLE', strip_tags($tp->toHTML($thread->threadInfo['thread_name'], true, 'no_hook, emotes_off')).' / '.$tp->toHTML($thread->threadInfo['forum_name'], true, 'no_hook, emotes_off').' / '.LAN_FORUM_1001);
+
 $forum->modArray = $forum->forumGetMods($thread->threadInfo['forum_moderators']);
-define('MODERATOR', (USER && $forum->isModerator(USERID)));
+
 
 e107::getScBatch('view', 'forum')->setScVar('forum', $forum);
 //var_dump(e107::getScBatch('forum', 'forum'));
@@ -164,7 +173,8 @@ if(count($postList))
 {
 	define("META_DESCRIPTION", $tp->text_truncate(
 		str_replace(
-			array('"', "'"), '', strip_tags($tp->toHTML($postList[0]['post_entry']))
+			//array('"', "'"), '', strip_tags($tp->toHTML($postList[0]['post_entry']))
+			array('"', "'"), '', $tp->toText($postList[0]['post_entry'])
 	), 250, '...'));
 }
 
@@ -477,8 +487,11 @@ $i = $thread->page;
 	$mes = e107::getMessage();
 //		$sc->setVars($thread->threadInfo);
 //--->$forend = $tp->simpleParse($FORUMEND, $tVars);
+$sc->wrapper('forum_viewtopic/end'); 
 $forend = $tp->parseTemplate($FORUMEND, true, $sc);
 
+$lastPostDetectionCounter = count($postList);
+$sc->setScVar('thisIsTheLastPost', false);
 
 foreach ($postList as $c => $postInfo)
 {
@@ -487,6 +500,9 @@ foreach ($postList as $c => $postInfo)
 		$postInfo['post_options'] = unserialize($postInfo['post_options']);
 	}
 	$loop_uid = (int)$postInfo['post_user'];
+
+	$lastPostDetectionCounter--;
+	if ($lastPostDetectionCounter == 0) $sc->setScVar('thisIsTheLastPost', true);
 
 //---- Orphan $tnum????
 	$tnum = $i;
@@ -616,8 +632,8 @@ require_once (HEADERF);
 
 if ($forum->prefs->get('enclose'))
 {
-	$forumTitle = empty($FORUMCAPTION) ? e107::pref('forum','title', LAN_PLUGIN_FORUM_NAME) : $tp->parseTemplate($FORUMCAPTION, TRUE, $sc);
-	$ns->tablerender($forumTitle, $mes->render().$forumstring,  array('forum_viewtopic', 'main'));
+	$forumTitle = empty($FORUMCAPTION) ? e107::pref('forum','title', LAN_PLUGIN_FORUM_NAME) : $tp->parseTemplate($FORUMCAPTION, true, $sc);
+	$ns->tablerender($forumTitle, $mes->render().$forumstring,  'forum-viewtopic');
 }
 else
 {
@@ -646,9 +662,12 @@ function showmodoptions()
 	$forum_id = $thread->threadInfo['forum_id'];
 	if ($postInfo['thread_start'])
 	{
+
 		$type = 'Thread';
 		// XXX _URL_ thread name?
-		$ret = "<form method='post' action='" . $e107->url->create('forum/thread/view', array('id' => $postInfo['post_thread']))."' id='frmMod_{$postInfo['post_forum']}_{$postInfo['post_thread']}'>";
+	//	$formUrl = $e107->url->create('forum/thread/view', array('id' => $postInfo['post_thread']));
+		$formUrl = e_REQUEST_URI; // e107::url('forum', 'topic',
+		$ret = "<form method='post' action='" . $formUrl."' id='frmMod_{$postInfo['post_forum']}_{$postInfo['post_thread']}'>";
 		$delId = $postInfo['post_thread'];
 	}
 	else
@@ -674,7 +693,9 @@ function showmodoptions()
 	}
 	else
 	{
-		$ret .= "<a href='" . $e107->url->create('forum/thread/split', array('id' => $postInfo['post_id']))."'>" . defset('IMAGE_admin_split') . '</a>';
+	//	$splitUrl = $e107->url->create('forum/thread/split', array('id' => $postInfo['post_id']));
+		$splitUrl =  e107::url('forum','split', array('thread_id'=>$postInfo['post_thread'], 'post_id'=>$postInfo['post_id']));
+		$ret .= "<a href='" .$splitUrl ."'>" . defset('IMAGE_admin_split') . '</a>';
 
 	}
 	$ret .= "

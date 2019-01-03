@@ -16,13 +16,10 @@ if(!defined('e107_INIT'))
 	exit();
 }
 
-define("SEP", " <span class='fa fa-play e-breadcrumb'></span> ");
+//define("SEP", " <span class='fa fa-play e-breadcrumb'></span> ");
+define("SEP", " <span class='fa fa-angle-double-right e-breadcrumb'></span> ");
 define("BOOTSTRAP", 3);
 define('FONTAWESOME', 4);
-
-e107::library('load', 'bootstrap');
-e107::library('load', 'fontawesome');
-e107::library('load', 'bootstrap.editable');
 
 $adminStyle = e107::pref('core', 'admincss', 'css/bootstrap-dark.min.css');
 e107::css('theme', $adminStyle);
@@ -48,7 +45,7 @@ body.forceColors li a              { color: silver}
 
 div#media-manager div.mce-window-head  { background-color: #373737; !important }
 div#media-manager div.mce-title        { color:white; }
-div#media-manager, html                { color: silver; background-color: #2F2F2F; !important}
+/* div#media-manager, html                { color: silver; background-color: #2F2F2F; !important} */
 ");
 
 /*
@@ -196,7 +193,12 @@ class bootstrap3_admintheme
 
 			case 'core-infopanel':
 			case 'site_info':
-				echo '<div class="panel ' . $panelType[$style] . '">
+				echo '<div class="panel ' . $panelType[$style] . '"';
+				if(!empty($data['uniqueId']))
+				{
+					echo ' id="'.$data['uniqueId'].'" ';
+				}
+				echo ' >
 					  <div class="panel-heading">
 					    <h3 class="panel-title">' . $caption . '</h3>
 					  </div>

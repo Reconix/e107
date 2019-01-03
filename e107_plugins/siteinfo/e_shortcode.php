@@ -45,14 +45,21 @@ class siteinfo_shortcodes // must match the folder name of the plugin.
 		}
 	}
 
+	/**
+	 * YYYY is automatically replaced with the current year.
+	 * @return string
+	 */
 	function sc_sitedisclaimer()
 	{
 		$default = "Proudly powered by <a href='http://e107.org'>e107</a> which is released under the terms of the GNU GPL License.";
 
 		$text = deftrue('SITEDISCLAIMER',$default);
 
+		$text = str_replace("YYYY", date('Y'), $text);
+
 		return e107::getParser()->toHtml($text, true, 'SUMMARY');
 	}
+
 	
 	function sc_siteurl($parm='')
 	{
@@ -86,7 +93,7 @@ class siteinfo_shortcodes // must match the folder name of the plugin.
 		return $this->sc_logo($parm);	
 	}
 
-	function sc_logo($parm = '')
+	function sc_logo($parm = array())
 	{
 		if(is_string($parm))
 		{
@@ -98,7 +105,7 @@ class siteinfo_shortcodes // must match the folder name of the plugin.
 		$logopref = e107::getConfig('core')->get('sitelogo');
 		$logop = $tp->replaceConstants($logopref);
 
-		if($parm == 'login' || isset($parm['login'])) // Login Page. BC fix.
+		if(isset($parm['login'])) // Login Page. BC fix.
 		{
 
 			if(!empty($logopref) && is_readable($logop))

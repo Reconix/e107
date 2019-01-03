@@ -8,7 +8,7 @@
  */
 
 
-if(empty($_POST['content']) && empty($_GET['debug']) && !defined('TINYMCE_DEBUG'))
+if(empty($_POST['content']) && empty($_GET['debug']) && !defined('TINYMCE_DEBUG') && !defined('TINYMCE_UNIT_TEST'))
 {
 	header('Content-Length: 0');
 	exit;
@@ -19,7 +19,8 @@ $_E107['no_menus'] = true;
 $_E107['no_forceuserupdate'] = true;
 $_E107['no_maintenance'] = true;
 
-if(!defined('TINYMCE_DEBUG'))
+define('e_ADMIN_AREA', true);
+if(!defined('TINYMCE_DEBUG') && !defined('TINYMCE_UNIT_TEST'))
 {
 	require_once("../../../../class2.php");
 }
@@ -43,7 +44,7 @@ class e107TinyMceParser
 	{
 		$html = '';
 
-		if(defined('TINYMCE_DEBUG'))
+		if(defined('TINYMCE_DEBUG') || defined('TINYMCE_UNIT_TEST'))
 		{
 			$this->gzipCompression = false;
 		}
@@ -109,9 +110,11 @@ TEMPL;
 
 
 
-	function toHtml($content)
+	public function toHtml($content)
 	{
-		global $pref, $tp; //XXX faster?
+		// global $pref; //XXX faster?
+		$pref = e107::getPref();
+		$tp = e107::getParser();
 		// XXX @Cam possible fix - convert to BB first, see news admin AJAX request/response values for reference why
 		$content = stripslashes($content);
 
@@ -123,19 +126,24 @@ TEMPL;
 
 			//	$content = $tp->replaceConstants($content,'abs');
 
-			if(strstr($content,"[html]") === false) // BC - convert old BB code text to html.
+			if(strpos($content,"[html]") === false) // BC - convert old BB code text to html.
 			{
 				e107::getBB()->clearClass();
 
-				//$content = str_replace('\r\n',"<br />",$content);
-				//$content =  nl2br($content, true);
+				if($tp->isHtml($content) === false) // plain text or BBcode to HTML
+				{
+					$content =  nl2br($content, true);
+				}
+
 				$content = $tp->toHtml($content, true, 'WYSIWYG');
 			}
 
 			$content 		= str_replace("{e_BASE}",e_HTTP,$content); // We want {e_BASE} in the final data going to the DB, but not the editor.
 			$srch 			= array("<!-- bbcode-html-start -->","<!-- bbcode-html-end -->","[html]","[/html]");
 			$content 		= str_replace($srch,"",$content);
-			$content 		= e107::getBB()->parseBBCodes($content); // parse the <bbcode> tag so we see the HTML equivalent while editing!
+			$content 		= $tp->parseBBTags($content,true); // parse the <bbcode> tag so we see the HTML equivalent while editing!
+			$content 		= e107::getBB()->parseBBCodes($content); 
+
 
 			if(!empty($content) && E107_DEBUG_LEVEL > 0)
 			{
@@ -185,26 +193,21 @@ TEMPL;
 	function toBBcode($content)
 	{
 		// echo $_POST['content'];
-		global $pref, $tp;
+	//	global $pref;
+		$pref = e107::getPref();
+	//	$tp = e107::getParser();
+
+			e107::getBB()->setClass($_SESSION['media_category']);
+
 		$content = stripslashes($content);
 
 		if(check_class($pref['post_html'])) // Plain HTML mode.
 		{
 
 			$content = trim($content);
-
-		//	$srch 		= array('src="'.e_HTTP.'thumb.php?','src="/{e_MEDIA_IMAGE}');
-		//	$repl 		= array('src="{e_BASE}thumb.php?','src="{e_BASE}thumb.php?src=e_MEDIA_IMAGE/');
-		//	$content 	= str_replace($srch, $repl, $content);
-
-			// resize the thumbnail to match wysiwyg width/height.
-
-			//    $psrch 		= '/<img[^>]*src="{e_BASE}thumb.php\?src=([\S]*)w=([\d]*)&amp;h=([\d]*)"(.*)width="([\d]*)" height="([\d]*)"/i';
-			//    $prepl 		= '<img src="{e_BASE}thumb.php?src=$1w=$5&amp;h=$6"$4width="$5" height="$6" ';
-
-			//	$content 	= preg_replace($psrch, $prepl, $content);
-			$content = $this->updateImg($content);
-			$content = $tp->parseBBTags($content,true); // replace html with bbcode equivalent
+		//	$content = $this->updateImg($content);
+			$content = e107::getBB()->imgToBBcode($content);
+		//	$content = $tp->parseBBTags($content,true); // replace html with bbcode equivalent
 
 			if(strip_tags($content, '<i>') == '&nbsp;') // Avoid this: [html]<p>&nbsp;</p>[/html]
 			{
@@ -223,70 +226,24 @@ TEMPL;
 
 		$text = str_replace('[html]<p></p>[/html]','',$text); // cleanup.
 
+		e107::getBB()->clearClass();
 		return $text;
 
 	}
 
 
-	/**
-	 * Split a thumb.php url into an array which can be parsed back into the thumbUrl method. .
-	 * @param $src
-	 * @return array
-	 */
-	function thumbUrlDecode($src)
-	{
-		list($url,$qry) = explode("?",$src);
-
-		$ret = array();
-
-		if(strstr($url,"thumb.php") && !empty($qry)) // Regular
-		{
-			parse_str($qry,$val);
-			$ret = $val;
-		}
-		elseif(preg_match('/media\/img\/(a)?([\d]*)x(a)?([\d]*)\/(.*)/',$url,$match)) // SEF
-		{
-			$wKey = $match[1].'w';
-			$hKey = $match[3].'h';
-
-			$ret = array(
-				'src'=> 'e_MEDIA_IMAGE/'.$match[5],
-				$wKey => $match[2],
-				$hKey => $match[4]
-			);
-		}
-		elseif(preg_match('/theme\/img\/(a)?([\d]*)x(a)?([\d]*)\/(.*)/', $url, $match)) // Theme-image SEF Urls
-		{
-			$wKey = $match[1].'w';
-			$hKey = $match[3].'h';
-
-			$ret = array(
-				'src'=> 'e_THEME/'.$match[5],
-				$wKey => $match[2],
-				$hKey => $match[4]
-			);
-
-		}
-		elseif(defined('TINYMCE_DEBUG'))
-		{
-			print_a("thumbUrlDecode: No Matches");
-
-		}
-
-
-		return $ret;
-	}
 
 
 	/**
 	 * Rebuld <img> tags with modified thumbnail size.
+	 * @deprecated @see e107::getBB()->imgToBBcode();
 	 * @param $text
 	 * @return mixed
 	 */
-	function updateImg($text)
+/*	function updateImg($text)
 	{
-
-		$arr = e107::getParser()->getTags($text,'img');
+		$tp = e107::getParser();
+		$arr = $tp->getTags($text,'img');
 
 		$srch = array("?","&");
 		$repl = array("\?","&amp;");
@@ -306,15 +263,18 @@ TEMPL;
 
 			$regexp = '#(<img[^>]*src="'.str_replace($srch, $repl, $img['src']).'"[^>]*>)#';
 
-			$width 	= vartrue($img['width']) 	? ' width="'.$img['width'].'"' : '';
-			$height = vartrue($img['height'])	? ' height="'.$img['height'].'"' : '';
-			$style 	= vartrue($img['style'])	? ' style="'.$img['style'].'"' : '';
-			$class 	= vartrue($img['class'])	? ' class="'.$img['class'].'"' : '';
-			$alt 	= vartrue($img['alt'])		? ' alt="'.$img['alt'].'"' : '';
-			$title 	= vartrue($img['title'])	? ' title="'.$img['title'].'"' : '';
-			$srcset = vartrue($img['srcset'])   ? 'srcset="'.$img['srcset'].'"' : '';
+	//		$width 	= vartrue($img['width']) 	? ' width="'.$img['width'].'"' : '';
+	//		$height = vartrue($img['height'])	? ' height="'.$img['height'].'"' : '';
+	//		$style 	= vartrue($img['style'])	? ' style="'.$img['style'].'"' : '';
+	//		$class 	= vartrue($img['class'])	? ' class="'.$img['class'].'"' : '';
+	//		$alt 	= vartrue($img['alt'])		? ' alt="'.$img['alt'].'"' : '';
+	//		$title 	= vartrue($img['title'])	? ' title="'.$img['title'].'"' : '';
+	//		$srcset = vartrue($img['srcset'])   ? 'srcset="'.$img['srcset'].'"' : '';
 
-			$qr = $this->thumbUrlDecode($img['src']);
+
+
+
+			$qr = $tp->thumbUrlDecode($img['src']);
 
 			if(substr($qr['src'],0,4)!=='http' && empty($qr['w']) && empty($qr['aw']))
 			{
@@ -324,16 +284,50 @@ TEMPL;
 
 			$qr['ebase'] = true;
 
-			$src = e107::getParser()->thumbUrl($qr['src'],$qr);
+		//	$src = e107::getParser()->thumbUrl($qr['src'],$qr);
 
-			$replacement = '<img src="'.$src.'" '.$srcset.$style.$alt.$title.$class.$width.$height.' />';
+		//	$replacement = '<img src="'.$src.'" '.$srcset.$style.$alt.$title.$class.$width.$height.' />';
+
+			unset($img['src'],$img['srcset'],$img['@value'], $img['caption'], $img['alt']);
+
+			if(!empty($img['class']))
+			{
+				$tmp = explode(" ",$img['class']);
+				$cls = array();
+				foreach($tmp as $v)
+				{
+					if($v === 'img-rounded' || $v === 'rounded' || $v === 'bbcode' || $v === 'bbcode-img-news' || $v === 'bbcode-img')
+					{
+						continue;
+					}
+
+					$cls[] = $v;
+
+				}
+
+				if(empty($cls))
+				{
+					unset($img['class']);
+				}
+				else
+				{
+					$img['class'] = implode(" ",$cls);
+				}
+
+			}
+
+			$parms = !empty($img) ? ' '.str_replace('+', ' ', http_build_query($img,null, '&')) : "";
+
+			$code_text = str_replace($tp->getUrlConstants('raw'), $tp->getUrlConstants('sc'), $qr['src']);
+
+			$replacement = '[img'.$parms.']'.$code_text.'[/img]';
 
 			$text = preg_replace($regexp, $replacement, $text);
 
 		}
 
 		return $text;
-	}
+	}*/
 
 
 }

@@ -278,6 +278,107 @@ class core_library
 			'library_path'      => '{e_WEB}lib/jquery-ui',
 		);
 
+
+
+		// ----------------- Bootstrap 4 ---------------------------//
+
+			// Bootstrap (CDN).
+		$libraries['cdn.bootstrap4'] = array(
+			'name'              => 'Bootstrap 4 (CDN)',
+			'vendor_url'        => 'http://getbootstrap.com/',
+			'version_arguments' => array(
+				'file'    => 'dist/js/bootstrap.min.js',
+				'pattern' => '/Bootstrap\s+v(\d\.\d\.\d+)/',
+				'lines'   => 5,
+			),
+			'files'             => array(
+				'js'  => array(
+					'dist/js/bootstrap.bundle.min.js' => array(
+						'zone' => 2,
+						'type' => 'footer',
+					),
+				),
+				'css' => array(
+					'dist/css/bootstrap.min.css' => array(
+						'zone' => 1,
+					),
+				),
+			),
+			'variants'          => array(
+				// 'unminified' version for debugging.
+				/*'dev' => array(
+					'files' => array(
+						'js'  => array(
+							'js/bootstrap.js' => array(
+								'zone' => 2,
+								'type' => 'footer',
+							),
+						),
+						'css' => array(
+							'css/bootstrap.css' => array(
+								'zone' => 2,
+							),
+						),
+					),
+				),*/
+
+
+			),
+			// Override library path to CDN.
+		//	https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.bundle.min.js
+			'library_path'      => 'https://cdn.jsdelivr.net/npm/bootstrap@4.0.0',
+			'path'              => '',
+		);
+
+		// Bootstrap (local).
+		$libraries['bootstrap4'] = array(
+			'name'              => 'Bootstrap 4 (local)',
+			'vendor_url'        => 'http://getbootstrap.com/',
+			'version_arguments' => array(
+				'file'    => 'js/bootstrap.bundle.min.js',
+				'pattern' => '/Bootstrap\s+v(\d\.\d\.\d+)/',
+				'lines'   => 5,
+			),
+			'files'             => array(
+				'js'  => array(
+					'js/bootstrap.bundle.min.js' => array(
+						'zone' => 2,
+						'type' => 'footer',
+					),
+				),
+				'css' => array(
+					'css/bootstrap.min.css' => array(
+						'zone' => 2,
+					),
+				),
+			),
+			'variants'          => array(
+				// 'unminified' version for debugging.
+				'dev' => array(
+					'files' => array(
+						'js'  => array(
+							'js/bootstrap.bundle.js' => array(
+								'zone' => 2,
+								'type' => 'footer',
+							),
+						),
+						'css' => array(
+							'css/bootstrap.css' => array(
+								'zone' => 2,
+							),
+						),
+					),
+				),
+			),
+			'library_path'      => '{e_WEB}lib/bootstrap',
+			'path'              => '4',
+		);
+
+
+		// ----------------------------------------------------- //
+
+
+
 		// Bootstrap (CDN).
 		$libraries['cdn.bootstrap'] = array(
 			'name'              => 'Bootstrap (CDN)',
@@ -317,6 +418,8 @@ class core_library
 						),
 					),
 				),
+
+
 			),
 			// Override library path to CDN.
 			'library_path'      => 'https://cdn.jsdelivr.net/bootstrap',
@@ -610,6 +713,44 @@ class core_library
 			'library_path'      => '{e_WEB}lib/font-awesome',
 			'path'              => '4.7.0',
 		);
+
+
+			// Font-Awesome (local).
+		$libraries['animate.css'] = array(
+			'name'              => 'Animate.css (local)',
+			'vendor_url'        => 'https://daneden.github.io/animate.css/',
+			'version_arguments' => array(
+				'file'    => 'animate.min.css',
+				'pattern' => '/(\d\.\d\.\d+)/',
+				'lines'   => 5,
+			),
+			'files'             => array(
+				'css' => array(
+					'animate.min.css' => array(
+						'zone' => 2,
+					),
+				),
+			),
+		/*	'variants'          => array(
+				// 'unminified' version for debugging.
+				'dev' => array(
+					'files' => array(
+						'css' => array(
+							'css/font-awesome.css' => array(
+								'zone' => 2,
+							),
+						),
+					),
+				),
+			),*/
+			// Override library path.
+			'library_path'      => '{e_WEB}lib/animate.css',
+		//	'path'              => '3.5.2',
+		);
+
+
+
+
 
 		return $libraries;
 	}
@@ -957,7 +1098,8 @@ class e_library_manager
 		if(!isset($loaded[$name]))
 		{
 			$cache = e107::getCache();
-			$cacheID = 'Library_' . e107::getParser()->filter($name, 'file');
+			$cache_context = (defset('e_ADMIN_AREA', false) == true) ? 'AdminArea' : 'UserArea';
+			$cacheID = 'Library_' . $cache_context . '_' . e107::getParser()->filter($name, 'file');
 			$cached = $cache->retrieve($cacheID, false, true, true);
 
 			if($cached)
@@ -1288,7 +1430,7 @@ class e_library_manager
 
 		$library['callbacks'] += array(
 			'info'                  => array(),
-			'pre_detect'            => array(),
+			'pre_detect'            => array('preDetect'),
 			'post_detect'           => array(),
 			'pre_dependencies_load' => array(),
 			'pre_load'              => array('preLoad'),
@@ -1582,7 +1724,8 @@ class e_library_manager
 					}
 					elseif($type == 'css')
 					{
-						e107::css($options['type'], $data, null);
+						e107::getJs()->libraryCSS($data); // load before others.
+					//	e107::css($options['type'], $data, null);
 					}
 					$count++;
 				}
@@ -1848,7 +1991,30 @@ class e_library_manager
 	}
 
 	/**
-	 * Alter library information before loading.
+	 * Alters library information before detecting.
+	 */
+	private function preDetect(&$library)
+	{
+		if(empty($library['machine_name']))
+		{
+			return;
+		}
+
+		// Prevent plugins/themes from altering libraries on Admin UI.
+		if(defset('e_ADMIN_AREA', false) == true)
+		{
+			$coreLibrary = new core_library();
+			$coreLibs = $coreLibrary->config();
+
+			if (isset($coreLibs[$library['machine_name']])) {
+				$coreLib = $coreLibs[$library['machine_name']];
+				$library = array_replace_recursive($coreLib, array_replace_recursive($library, $coreLib));
+			}
+		}
+	}
+
+	/**
+	 * Alters library information before loading.
 	 */
 	private function preLoad(&$library)
 	{
@@ -1857,33 +2023,59 @@ class e_library_manager
 			return;
 		}
 
-		if(defset('e_ADMIN_AREA', false) == true)
+		$excluded = $this->getExcludedLibraries();
+
+		if(empty($excluded))
 		{
-			$coreLibrary = new core_library();
-			$coreLibs = $coreLibrary->config();
+			return;
+		}
 
-			switch($library['machine_name'])
+		// Make sure we have the name without cdn prefix.
+		$basename = str_replace('cdn.', '', $library['machine_name']);
+
+		// If this library (or the CDN version of this library) is excluded
+		// by the theme is currently used.
+		if (in_array($basename, $excluded) || in_array('cdn.' . $basename, $excluded))
+		{
+			unset($library['files']['css']);
+
+			if (!empty($library['variants']))
 			{
-				// Force to use default (original) files on Admin UI.
-				case 'cdn.jquery.ui':
-				case 'jquery.ui':
-					$coreLib = $coreLibs[$library['machine_name']];
-					$library['files'] = $coreLib['files'];
-					$library['variants'] = $coreLib['variants'];
-					break;
-
-				case 'cdn.bootstrap':
-				case 'bootstrap':
-					$coreLib = $coreLibs[$library['machine_name']];
-					$library['files'] = $coreLib['files'];
-					$library['variants'] = $coreLib['variants'];
-
-					// Admin UI uses its own CSS.
-					unset($library['files']['css']);
-					unset($library['variants']['dev']['files']['css']);
-					break;
+				foreach($library['variants'] as &$variant)
+				{
+					if(!empty($variant['files']['css']))
+					{
+						unset($variant['files']['css']);
+					}
+				}
 			}
 		}
+	}
+
+	/**
+	 * Get excluded libraries.
+	 *
+	 * @return array
+	 */
+	public function getExcludedLibraries()
+	{
+		// This static cache is re-used by preLoad() to save memory.
+		static $excludedLibraries;
+
+		if(!isset($excludedLibraries))
+		{
+			$excludedLibraries = array();
+
+			$exclude = e107::getTheme('current', true)->cssAttribute('auto', 'exclude');
+
+			if($exclude)
+			{
+				// Split string into array and remove whitespaces.
+				$excludedLibraries = array_map('trim', explode(',', $exclude));
+			}
+		}
+
+		return $excludedLibraries;
 	}
 
 }

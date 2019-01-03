@@ -57,6 +57,10 @@
 
 		function sc_threadpages()
 		{
+			if(empty($this->var['parms']))
+			{
+				return null;
+			}
 			return e107::getParser()->parseTemplate("{NEXTPREV={$this->var['parms']}}");
 		}
 
@@ -136,6 +140,16 @@
 			return $this->var['forum_crumb'];
 		}
 
+		function sc_forumimage($parms=null)
+		{
+			if(empty($this->var['forum_image'])) return '';
+			if (!empty($parms) && !is_array($parms)) parse_str($parms, $parms);
+			if (empty($parms)) $parms = array();
+			$parms = array_merge(array('class'=>'img-fluid', 'h' => 50), $parms);
+			$text = e107::getParser()->toImage($this->var['forum_image'], $parms);
+			return $text."&nbsp;";
+		}
+
 		function sc_forumtitle()
 		{
 			return $this->var['forum_name'];
@@ -143,7 +157,7 @@
 
 		function sc_moderators()
 		{
-			return $this->var['modUser'];
+			return is_array($this->var['modUser']) ? implode(", ",$this->var['modUser']) : $this->var['modUser'];
 		}
 
 		function sc_browsers()
@@ -285,7 +299,7 @@
 			<form method='get' class='form-inline input-append' action='" . e_BASE . "search.php'>
 			<p>
 			<input class='tbox' type='text' name='q' size='20' value='' maxlength='50' />
-			<button class='btn btn-default button' type='submit' name='s' >" . LAN_SEARCH . "</button>
+			<button class='btn btn-default btn-secondary button' type='submit' name='s' >" . LAN_SEARCH . "</button>
 			<input type='hidden' name='r' value='0' />
 			<input type='hidden' name='ref' value='forum' />
 			</p>
@@ -333,7 +347,7 @@
 			{
 				$text .= "\n<option value='" . e107::url('forum', 'forum', $val, 'full') . "'>" . $val['forum_name'] . "</option>";
 			}
-			$text .= "</select> <input class='btn btn-default button' type='submit' name='fjsubmit' value='" . LAN_GO . "' /></form>";
+			$text .= "</select> <input class='btn btn-default btn-secondary button' type='submit' name='fjsubmit' value='" . LAN_GO . "' /></form>";
 			return $text;
 		}
 
@@ -481,6 +495,16 @@
 		------*/
 
 
+		function sc_sub_forumimage($parms=null)
+		{
+			if(empty($this->var['forum_image'])) return '';
+			if (!empty($parms) && !is_array($parms)) parse_str($parms, $parms);
+			if (empty($parms)) $parms = array();
+			$parms = array_merge(array('class'=>'img-fluid', 'h' => 50), $parms);
+			$text = e107::getParser()->toImage($this->var['forum_image'], $parms);
+			return "<a href='".e107::url('forum', 'forum', $this->var)."'>{$text}</a>&nbsp;";
+		}
+
 		function sc_sub_forumtitle()
 		{
 			$forumName = e107::getParser()->toHTML($this->var['forum_name'], true);
@@ -554,7 +578,10 @@
 			{
 				//	global $gen;
 				$tmp = explode('.', $this->var['forum_lastpost_info']);
-				$lp_thread = "<a href='" . e107::getUrl()->create('forum/thread/last', array('id' => $tmp[1])) . "'>" . IMAGE_post2 . '</a>';
+			//	$lp_url = e107::getUrl()->create('forum/thread/last', array('id' => $tmp[1]));
+				$lp_url = $threadUrl = e107::url('forum','topic',$this->var, array('query'=>array('last'=>1)));
+
+				$lp_thread = "<a href='" . $lp_url . "'>" . IMAGE_post2 . '</a>';
 				$lp_date = $this->gen->convert_date($tmp[0], 'forum');
 
 				/*--
@@ -632,9 +659,15 @@
 		}
 
 
-		function sc_replies()
+		function sc_replies($parm='')
 		{
 			$val = ($this->var['thread_total_replies']) ? $this->var['thread_total_replies'] : '0';
+
+			if($parm === 'raw')
+			{
+				return $val;
+			}
+
 			return e107::getParser()->toBadge($val);
 		}
 
@@ -892,7 +925,14 @@
 		function sc_pages()
 		{
 //	$tVars['PAGES'] = fpages($thread_info, $tVars['REPLIES']);
-			return fpages($this->var, $this->sc_replies());
+			$ret = fpages($this->var, $this->sc_replies('raw'));
+
+			if(!empty($ret))
+			{
+				return LAN_GOPAGE.": ".$ret;
+			}
+
+			return null;
 		}
 
 
@@ -931,18 +971,18 @@
 
 		function sc_adminoptions()
 		{
-			/*--
-				if(!deftrue('BOOTSTRAP'))
-				{
-				return $this->sc_admin_icons;
-			  }
-				if (MODERATOR)
-				{
-					return fadminoptions($this->var);
-			  }
-			  return '';
-			--*/
-			return (!deftrue('BOOTSTRAP') ? $this->sc_admin_icons() : ((MODERATOR) ? fadminoptions($this->var) : ''));
+			if(!deftrue('BOOTSTRAP'))
+			{
+				return $this->sc_admin_icons();
+			}
+			else if (MODERATOR)
+			{
+				return fadminoptions($this->var);
+			}
+			else
+			{
+				return '';
+			}
 		}
 
 

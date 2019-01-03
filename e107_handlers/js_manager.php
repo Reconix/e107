@@ -359,6 +359,21 @@ class e_jsmanager
 	}
 
 	/**
+	 * Add CSS file(s) for inclusion in site header in the 'library' category.
+	 *
+	 * @param string|array $file_path path, shortcodes usage is prefered
+	 * @param string $media any valid media attribute string - http://www.w3schools.com/TAGS/att_link_media.asp
+	 * @return e_jsmanager
+	 */
+	public function libraryCSS($file_path, $media = 'all', $preComment = '', $postComment = '')
+	{
+		$this->addJs('library_css', $file_path, $media, $preComment, $postComment);
+		return $this;
+	}
+
+
+
+	/**
 	 * Add CSS file(s) for inclusion in site header
 	 *
 	 * @param string|array $file_path path, shortcodes usage is prefered
@@ -962,6 +977,14 @@ class e_jsmanager
 				$runtime = true;
 			break;
 
+			case 'library_css':
+				$file_path = $runtime_location.$this->_sep.$tp->createConstants($file_path, 'mix').$this->_sep.$pre.$this->_sep.$post;
+				// 	e107::getDebug()->log($file_path);
+				if(!isset($this->_e_css['library'])) $this->_e_css['library'] = array();
+				$registry = &$this->_e_css['library'];
+				$runtime = true;
+			break;
+
 			case 'inline_css': // no zones, TODO - media?
 				$this->_e_css_src[] = $file_path;
 				return $this;
@@ -1129,6 +1152,11 @@ class e_jsmanager
 				unset($this->_e_css['other']);
 			break;
 
+			case 'library_css':
+				$this->renderFile(varset($this->_e_css['library'], array()), $external, 'Library CSS', $mod, false);
+				unset($this->_e_css['library']);
+			break;
+
 			case 'inline_css':
 				$this->renderInline($this->_e_css_src, 'Inline CSS', 'css');
 				$this->_e_css_src = array();
@@ -1255,7 +1283,8 @@ class e_jsmanager
 					$path = $path[1];
 					if(strpos($path, 'http') !== 0)
 					{
-						$path = $tp->replaceConstants($path, 'abs').'?external=1&amp;'.$this->getCacheId();
+						$path = $tp->replaceConstants($path, 'abs').'?external=1'; // &amp;'.$this->getCacheId();
+						$path = $this->url($path);
 					}
 					
 					echo $pre.'<link rel="stylesheet" media="'.$media.'" type="text/css" href="'.$path.'" />'.$post;
@@ -1274,7 +1303,8 @@ class e_jsmanager
 					if($post) $post = "\n".$post;
 					$path = $path[0];
 					
-					$path = $tp->replaceConstants($path, 'abs').'?external=1&amp;'.$this->getCacheId();
+					$path = $tp->replaceConstants($path, 'abs').'?external=1'; // &amp;'.$this->getCacheId();
+					$path = $this->url($path);
 					echo $pre.'<script type="text/javascript" src="'.$path.'"></script>'.$post;
 					echo "\n";
 					continue;
@@ -1313,7 +1343,8 @@ class e_jsmanager
 
 					$insertID ='';
 
-					if(strpos($path, 'http') !== 0) // local file.
+					// issue #3390 Fix for protocol-less path
+					if(strpos($path, 'http') !== 0 && strpos($path, '//') !== 0) // local file.
 					{
 
 						if($label === 'Theme CSS') // add an id for local theme stylesheets. 
@@ -1325,7 +1356,8 @@ class e_jsmanager
 						{
 							continue;
 						}
-						$path = $tp->replaceConstants($path, 'abs').'?'.$this->getCacheId();
+						$path = $tp->replaceConstants($path, 'abs'); // .'?'.$this->getCacheId();
+						$path = $this->url($path);
 					}
 					elseif($this->isValidUrl($path) === false)
 					{
@@ -1365,7 +1397,8 @@ class e_jsmanager
 							if(!e107::getPref('e_jslib_nocombine')) continue;
 						}
 
-						$path = $tp->replaceConstants($path, 'abs').'?'.$this->getCacheId();
+						$path = $tp->replaceConstants($path, 'abs'); //.'?'.$this->getCacheId();
+						$path = $this->url($path, 'js');
 					}
 
 					if($isExternal === true && $this->isValidUrl($path) == false)
@@ -1394,6 +1427,66 @@ class e_jsmanager
 
 		return $lmodified;
 	}
+
+
+	/**
+	 * Return the URL while checking for staticUrl configuration.
+	 * @param      $path
+	 * @param bool $cacheId
+	 * @return mixed|string
+	 */
+	private function url($path, $cacheId = true)
+	{
+
+		if(/*(e_MOD_REWRITE_STATIC === true || defined('e_HTTP_STATIC')) &&*/ $this->isInAdmin() !== true)
+		{
+
+		/*	$srch = array(
+				e_PLUGIN_ABS,
+				e_THEME_ABS,
+				e_WEB_ABS
+			);
+
+
+			$http = deftrue('e_HTTP_STATIC', e_HTTP);
+
+			$base = (e_MOD_REWRITE_STATIC === true) ? 'static/'.$this->getCacheId().'/' : '';
+
+			$repl = array(
+				$http.$base.e107::getFolder('plugins'),
+				$http.$base.e107::getFolder('themes'),
+				$http.$base.e107::getFolder('web')
+			);
+
+			$folder = str_replace($srch,$repl,$path);
+
+			if(e_MOD_REWRITE_STATIC === true)
+			{
+				return trim($folder);
+			}
+
+			$path = $folder;*/
+
+			$path = e107::getParser()->staticUrl($path);
+		}
+
+
+		if(!defined('e_HTTP_STATIC'))
+		{
+			if(strpos($path,'?')!==false)
+			{
+				$path .= "&amp;".$this->getCacheId();
+			}
+			else
+			{
+				$path .= "?".$this->getCacheId();
+			}
+		}
+
+		return $path;
+
+	}
+
 
 
 	/**
@@ -1454,7 +1547,7 @@ class e_jsmanager
 	 */
 	public function renderCached($type)
 	{
-		if($this->_cache_enabled != true || $this->isInAdmin())
+		if($this->_cache_enabled != true || $this->isInAdmin() || deftrue('e_MENUMANAGER_ACTIVE'))
 		{
 			return false;
 		}
@@ -1488,11 +1581,16 @@ class e_jsmanager
 
 			if($type == 'js')
 			{
-				echo "<script type='text/javascript' src='".e_WEB_ABS."cache/".$fileName."'></script>\n\n";
+				echo "<script type='text/javascript' src='".$this->url(e_WEB_ABS."cache/".$fileName,'js','cache')."'></script>\n\n";
 			}
 			else
 			{
-				echo "<link type='text/css' href='".e_WEB_ABS."cache/".$fileName."' rel='stylesheet' property='stylesheet'  />\n\n";
+				echo "<link type='text/css' href='".$this->url(e_WEB_ABS."cache/".$fileName,'cache')."' rel='stylesheet' property='stylesheet'  />\n\n";
+				if(!empty($this->_cache_list['css_inline']))
+				{
+					echo $this->_cache_list['css_inline'];
+					unset($this->_cache_list['css_inline']);
+				}
 			}
 
 			// Remove from list, anything we have added.
@@ -1537,18 +1635,19 @@ class e_jsmanager
 
 		$basePath = dirname($path)."/";
 
+		$tp = e107::getParser();
+
 		foreach($match[1] as $k=>$v)
 		{
-			if(substr($v,5) == 'data:' || substr($v,4) == 'http')
+			if(strpos($v,'data:') === 0 || strpos($v,'http') === 0)
 			{
 				unset($match[0][$k]);
 				continue;
 			}
 
+			$http = $tp->staticUrl(null, array('full'=>1)); // returns SITEURL or Static URL if enabled.
 			$path = $this->normalizePath($basePath.$v);
-			$dir = "url(".SITEURL.$path.")"; // relative to e_WEB_ABS."cache/";
-
-		//	print_a($dir);
+			$dir = "url(".$http.$path.")";
 
 			$newpath[$k] = $dir;
 		}
@@ -1628,6 +1727,7 @@ class e_jsmanager
 
         /* remove tabs, spaces, newlines, etc. */
     	$minify = str_replace( array("\r\n", "\r", "\n", "\t", '  ', '    ', '    '), '', $minify );
+		$minify = str_replace("}","} ",$minify);
 
         return $minify;
     }
@@ -1715,14 +1815,26 @@ class e_jsmanager
 			break;
 
 			case 'css':
+				$text = '';
 				if($label && E107_DEBUG_LEVEL > 0) 
 				{
-					echo "<!-- [CSSManager] ".$label." -->\n";
+					$text .= "<!-- [CSSManager] ".$label." -->\n";
 				}
-				echo '<style rel="stylesheet" type="text/css" property="stylesheet">';
-				echo implode("\n\n", $content_array);
-				echo '</style>';
-				echo "\n";
+				$text .= '<style rel="stylesheet" type="text/css" property="stylesheet">';
+				$text .= implode("\n\n", $content_array);
+				$text .= '</style>';
+				$text .= "\n";
+
+				if($this->_cache_enabled != true || $this->isInAdmin() || deftrue('e_MENUMANAGER_ACTIVE'))
+				{
+					echo $text;
+				}
+				else
+				{
+					$this->_cache_list['css_inline'] = $text;
+				}
+
+
 			break;
 		}
 	}
