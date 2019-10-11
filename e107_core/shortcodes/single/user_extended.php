@@ -90,7 +90,7 @@
 		{
 		//	$_value = $tp->parseTemplate("{USER_EXTENDED={$parms[0]}.value}");
 			$_value = user_extended_shortcode($parms[0].".value");
-
+			//print_a($parms);
 
 			if($_value)
 			{
@@ -99,10 +99,10 @@
 
 		//		$_text = $tp->parseTemplate("{USER_EXTENDED={$parms[0]}.text}");
 
-				$_text = user_extended_shortcode($parms[0], ".text");
+				$_text = user_extended_shortcode($parms[0].".text");
 
 
-				$_mid = (isset($sc_style['USER_EXTENDED'][$key]['mid']) ? $sc_style['USER_EXTENDED'][$key]['mid'] : '');
+				$_mid = (isset($sc_style['USER_EXTENDED'][$key]['mid']) ? $sc_style['USER_EXTENDED'][$key]['mid'] : ': ');
 				return $__pre.$_text.$_mid.$_value.$__post;
 			}
 			return false;
@@ -169,8 +169,13 @@
 					}
 
 				break;
-
-
+				case EUF_COUNTRY:
+					if(!empty($uVal))
+					{
+						return e107::getForm()->getCountry($uVal);
+					}
+					return false;
+				break; 
 				case EUF_DB_FIELD :		// check for db_lookup type
 					$tmp = explode(',',$ueStruct['user_'.$parms[0]]['user_extended_struct_values']);
 					$sql_ue = new db;			// Use our own DB object to avoid conflicts
@@ -191,6 +196,9 @@
 				case EUF_PREDEFINED :	// Predefined field - have to look up display string in relevant file
 					$ret_data = e107::getUserExt()->user_extended_display_text($ueStruct['user_'.$parms[0]]['user_extended_struct_values'],$uVal);
 					break;
+				case EUF_RICHTEXTAREA :
+					$ret_data = e107::getParser()->toHTML($uVal);
+					break;
 				default :
 					$ret_data = $uVal;
 			}
@@ -204,4 +212,3 @@
 		return FALSE;
 
 	}
-
