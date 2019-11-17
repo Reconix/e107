@@ -42,7 +42,7 @@ class notify
 
 		if(empty($active) && defset('e_PAGE') == 'notify.php')
 		{
-			e107::getMessage()->addDebug('Notify is disabled!');
+			e107::getMessage()->addDebug('All notifications are inactive!');
 			return false;
 		}
 
@@ -216,7 +216,7 @@ class notify
 
 		}
 
-		if(E107_DEBUG_LEVEL > 0 || deftrue('e_DEBUG_NOTIFY'))
+		if((ADMIN || $pref['developer']) && E107_DEBUG_LEVEL > 0 || deftrue('e_DEBUG_NOTIFY'))
 		{
 			$data = array('id'=>$id, 'subject'=>$subject, 'recipients'=> $recipients, 'prefs'=>$this->notify_prefs['event'][$id], 'message'=>$message);
 

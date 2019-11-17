@@ -137,7 +137,7 @@ if(!deftrue('OLD_FORUMADMIN'))
 		protected $fields 		= array (
 			'checkboxes'                =>   array ( 'title' => '', 'type' => null, 'data' => null, 'width' => '5%', 'thclass' => 'center', 'forced' => '1', 'class' => 'center', 'toggle' => 'e-multiselect',  ),
 			'forum_id'                  =>   array ( 'title' => LAN_ID, 'data' => 'int', 'width' => '5%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
-			'forum_name'                =>   array ( 'title' => LAN_TITLE, 'type' => 'method', 'inline'=>true,  'data' => 'str', 'width' => '40%', 'help' => FORLAN_223, 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
+			'forum_name'                =>   array ( 'title' => LAN_TITLE, 'type' => 'method', 'inline'=>true,  'data' => 'str', 'width' => '40%', 'help' => FORLAN_223, 'readParms' => '', 'writeParms' => '', 'validate' => true,'class' => 'left', 'thclass' => 'left',  ),
 			'forum_sef'                 =>   array ( 'title' => LAN_SEFURL, 'type' => 'text', 'batch'=>true, 'inline'=>true, 'noedit'=>false, 'data' => 'str', 'width' => 'auto', 'help' => 'Leave blank to auto-generate it from the title above.', 'readParms' => '', 'writeParms' => 'sef=forum_name&size=xxlarge', 'class' => 'left', 'thclass' => 'left',  ),
 			'forum_description'         =>   array ( 'title' => LAN_DESCRIPTION, 'type' => 'textarea', 'data' => 'str', 'width' => '30%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 			'forum_image'               =>   array ( 'title' => LAN_IMAGE, 'type' => 'image', 'batch'=>false, 'inline'=>false, 'noedit'=>false, 'data' => 'str', 'width' => 'auto', 'help' => 'Image that will be displayed using {FORUMIMAGE}', 'readParms' => '', 'writeParms' => 'media=forum&max=1', 'class' => 'center', 'thclass' => 'center',  ),
@@ -1105,12 +1105,12 @@ if(!deftrue('OLD_FORUMADMIN'))
 			if($attributes['mode'] == 'read')
 			{
 
-				$topic = $this->getController()->getListModel()->get('gen_chardata');
+				$topic = $this->getController()->getListModel()->get('gen_ip');
 				$topidId = $this->getController()->getListModel()->get('gen_intdata');
 				$text = "<div class='btn-group'>";
 				$text .= "<a class='e-modal btn btn-default'  data-modal-caption='Topic: ".$topic."'  href='".e_SELF."?mode=post&action=list&id=". $topidId."' rel='external'>".ADMIN_VIEW_ICON."</a>";
 
-				$text .= $this->renderValue('options',$value,array('readParms'=>'edit=0'));
+				$text .= $this->renderValue('options',$value,array('readParms'=>'edit=0'), $id);
 				$text .= "</div>";
 				return $text;
 			}

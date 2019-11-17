@@ -141,6 +141,27 @@ class banlist_ui extends e_admin_ui
 			$this->fields['banlist_ip']['title']= BANLAN_5;
 		}
 
+		//
+
+		/**
+		 * Custom filter for banlist_ip filter search.
+		 * @param string $srch
+		 */
+		function handleListBanlistIpFilter($srch)
+		{
+			$ret = array(
+				"banlist_ip = '".$srch."'"
+			);
+
+			if($ip6 = e107::getIPHandler()->ipEncode($srch,true))
+			{
+				$ip = str_replace('x', '', $ip6);
+				$ret[] = "banlist_ip LIKE '%".$ip."%'";
+			}
+
+			return implode(" OR ",$ret);
+		}
+
 		
 		// optional
 		public function init()
@@ -172,7 +193,7 @@ class banlist_ui extends e_admin_ui
 		}
 
 
-		public function beforeCreate($new_data, $old_data, $id)
+		public function beforeCreate($new_data, $old_data)
 		{
 			$new_data['banlist_admin'] = ADMINID;
 
@@ -870,7 +891,7 @@ class banlist_form_ui extends e_admin_form_ui
 			}
 		}
 
-		public function afterDelete($data)
+		public function afterDelete($deleted_data, $id, $deleted_check)
 		{
 			//	$sql2->db_Delete('banlist', "banlist_ip='{$banIP}'");
 		}

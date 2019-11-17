@@ -377,6 +377,8 @@ class download
 
 		$metaImage                      = $tp->thumbUrl($row['download_image'], array('w'=>500), null, true);
 		$metaDescription                = $tp->toHTML($row['download_description'],true);
+		$metaDescription 				= preg_replace('/\v(?:[\v\h]+)/', '', $metaDescription); // remove all line-breaks and excess whitespace
+		$metaDescription 				= $tp->text_truncate($metaDescription, 290); // + '...'
 
 		e107::meta('description',       $tp->toText($metaDescription));
 		e107::meta('keywords',          $row['download_keywords']);
@@ -899,33 +901,42 @@ class download
 	 */
 	private function renderReport()
 	{
-		$sql = e107::getDb();
-		$tp = e107::getParser();
-		$ns = e107::getRender();
-		$frm = e107::getForm();
-		$pref = e107::getPref();
+		$sql 	= e107::getDb();
+		$tp 	= e107::getParser();
+		$ns 	= e107::getRender();
+		$frm 	= e107::getForm();
+		$pref 	= e107::getPref();
+		$mes 	= e107::getMessage();
 						
 		$dlrow = $this->rows;
-		
-	//	extract($dlrow);
+	
+		// Check if user is allowed to make reports, and if user is allowed to view the actual download item
+		if(!check_class($dlrow['download_class']) || !check_class($pref['download_reportbroken']))
+		{	
+			$mes->addError(LAN_dl_79);
+			return $ns->tablerender(LAN_PLUGIN_DOWNLOAD_NAME, $mes->render(), 'download-report', true);
+		}
 
-		$download_name = $tp->toDB($dlrow['download_name']);
-		$download_id = (int) $dlrow['download_id'];
+		$download_name 	= $tp->toDB($dlrow['download_name']);
+		$download_sef 	= $dlrow['download_sef'];
+		$download_id 	= (int) $dlrow['download_id'];
 
-				$breadcrumb 	= array();
-			$breadcrumb[]	= array('text' => LAN_PLUGIN_DOWNLOAD_NAME,			'url' => e107::url('download','index', $dlrow));
-			$breadcrumb[]	= array('text' => $dlrow['download_category_name'],	'url' => e107::url('download','category', $dlrow)); // e_SELF."?action=list&id=".$dlrow['download_category_id']);
-			$breadcrumb[]	= array('text' => $dlrow['download_name'],			'url' => e107::url('download','item', $dlrow)); //e_SELF."?action=view&id=".$dlrow['download_id']);
-			$breadcrumb[]	= array('text' => LAN_dl_45,						'url' => null);
+		$breadcrumb 	= array();
+		$breadcrumb[]	= array('text' => LAN_PLUGIN_DOWNLOAD_NAME,			'url' => e107::url('download','index', $dlrow));
+		$breadcrumb[]	= array('text' => $dlrow['download_category_name'],	'url' => e107::url('download','category', $dlrow)); 
+		$breadcrumb[]	= array('text' => $dlrow['download_name'],			'url' => e107::url('download','item', $dlrow)); 
+		$breadcrumb[]	= array('text' => LAN_dl_45,						'url' => null);
 
 		e107::breadcrumb($breadcrumb);
 	
 		if (isset($_POST['report_download'])) 
 		{
 			$report_add = $tp->toDB($_POST['report_add']);
-
-			$user = USER ? USERNAME : LAN_GUEST;
-	
+			$user 		= USER ? USERNAME : LAN_GUEST;
+			$ip 		= e107::getIPHandler()->getIP(false); 
+		
+			// Replaced by e_notify 
+			/*
 			if ($pref['download_email']) 
 			{    // this needs to be moved into the NOTIFY, with an event.
 				require_once(e_HANDLER."mail.php");
@@ -933,27 +944,31 @@ class download
 				$report = LAN_dl_58." ".SITENAME.":\n".(substr(SITEURL, -1) == "/" ? SITEURL : SITEURL."/")."download.php?view.".$download_id."\n
 				".LAN_dl_59." ".$user."\n".$report_add;
 				sendemail(SITEADMINEMAIL, $subject, $report);
-			}
-	
+			}*/
+
+			$brokendownload_data = array(
+				'download_id' 	=> $download_id,
+				'download_sef'  => $download_sef,
+				'download_name' => $download_name, 
+				'report_add' 	=> $report_add,
+				'user'			=> $user,
+				'ip'			=> $ip, 
+			);
+
+			e107::getEvent()->trigger('user_download_brokendownload_reported', $brokendownload_data);
+
 			$sql->insert('generic', "0, 'Broken Download', ".time().",'".USERID."', '{$download_name}', {$download_id}, '{$report_add}'");
 	
-
 
 			$text = $frm->breadcrumb($breadcrumb);
 	
 			$text .= "<div class='alert alert-success'>".LAN_dl_48."</div>
 			<a class='btn btn-primary' href='".e107::url('download','item', $dlrow)."'>".LAN_dl_49."</a>";
 
-	   
 			return $ns->tablerender(LAN_PLUGIN_DOWNLOAD_NAME, $text, 'download-report', true);
 		}
 		else 
 		{
-
-		//	require_once(HEADERF);
-		
-
-		
 			$text = $frm->breadcrumb($breadcrumb);
 
 
