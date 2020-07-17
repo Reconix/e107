@@ -257,7 +257,7 @@ class news {
 			$result = call_user_func($override_newsitem, $news, $mode, $n_restrict, $NEWS_TEMPLATE, $param);
 			if ($result == 'return')
 			{
-				return;
+				return null;
 			}
 		}
 
@@ -519,8 +519,7 @@ class news {
 				$parms['count'] = 3;
 			}
 
-			$parms['order']     = 'n.news_datestamp DESC';
-
+			$parms['order']  = empty($parms['order']) ? 'n.news_datestamp DESC' : $parms['order'];
 
 			$treeparm = array();
 
@@ -1100,18 +1099,18 @@ class e_news_category_tree extends e_front_tree_model
 		if(e_PAGE == 'news.php')
 		{
 			$tmp = explode('.', e_QUERY);
-			if(vartrue($tmp[1])) $active = $tmp[1];	
+			if(!empty($tmp[1])) $active = $tmp[1];
 		}
 		$bullet = defined('BULLET') ? THEME_ABS.'images/'.BULLET : THEME_ABS.'images/bullet2.gif';
-		$obj = new e_vars(array('bullet' => $bullet));
+		$obj = new e_vars(array('BULLET' => $bullet));
 
 		/** @var e_tree_model $cat */
 		foreach ($this->getTree() as $cat)
 		{
-			$obj->active = '';
+			$obj->ACTIVE = '';
 			if($active && $active == $cat->getId())
 			{
-				$obj->active = ' active';
+				$obj->ACTIVE = ' active';
 			}
 
 			$ret[] = $cat->toHTML($template['item'], $parsesc, $obj);

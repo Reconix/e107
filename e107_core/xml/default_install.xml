@@ -140,7 +140,6 @@
         <core name="failed_login_limit">10</core>
 		<core name="filter_script">0</core>
 		<core name="flood_hits">100</core>
-		<core name="flood_protect">1</core>
 		<core name="flood_time">30</core>
 		<core name="flood_timeout">5</core>
 		<core name="forumdate">%a %b %d %Y, %I:%M%p</core>
@@ -233,7 +232,7 @@
 
 )]]></core>
 		<core name="post_html">254</core>
-		<core name="post_script">254</core>
+		<core name="post_script">255</core>
 		<core name="filter_script">1</core>
 		<core name="html_abuse">1</core>
 		<core name="pageCookieExpire">84600</core>	
@@ -254,6 +253,7 @@
 		<core name="search_highlight">1</core>
 		<core name="search_restrict">0</core>
 		<core name="session_lifetime">86400</core>
+		<core name="session_save_method">db</core>
 		<core name="shortdate">%d %b %Y : %H:%M</core>
 		<core name="signcode">0</core>
 		<core name="signup_disallow_text"></core>
@@ -402,7 +402,7 @@ City, State, Country
 		<core name="user_reg">1</core>
 		<core name="user_reg_secureveri">1</core>
 		<core name="user_reg_veri">1</core>
-		<core name="user_tracking">cookie</core>
+		<core name="user_tracking">session</core>
 		<core name="version">2.2.0</core>
 		<core name="wm_enclose">1</core>
 		<core name="wmessage_sc">0</core>
@@ -423,6 +423,14 @@ City, State, Country
 		  'pinterest' => '',
 		  'vimeo' => '',
 		)]]></core>
+		<core name="avatar_upload">0</core>
+		<core name="photo_upload">0</core>
+		<core name="profile_rate">0</core>
+		<core name="profile_comments">0</core>
+		<core name="force_userupdate">0</core>
+		<core name="del_unv">0</core>
+		<core name="del_accu">1</core>
+		<core name="signature_access">253</core>		
 		<emote name="alien!png">!alien</emote>
 		<emote name="amazed!png">!amazed</emote>
 		<emote name="angry!png">!grr !angry</emote>

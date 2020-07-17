@@ -194,8 +194,9 @@ class usersettings_shortcodes extends e_shortcode
 		$options = array(
 			'size'     => 40,
 			'title'    => '',
-			'required' => true,
 		);
+
+		if (e107::getPref('disable_emailcheck') == 0) $options['required'] = true;
 
 		if(!empty($sc->var['user_email']) && !empty($sc->var['user_xup'])) // social login active.
 		{
@@ -212,7 +213,7 @@ class usersettings_shortcodes extends e_shortcode
 		if($parm == 'radio')
 		{
 			$options['enabled'] = array('title' => LAN_USER_84);
-			return "<div class='radio'>".e107::getForm()->radio_switch("hideemail", $this->var['user_hideemail'],LAN_YES,LAN_NO,$options)."</div>";		
+			return "<div class='radio'>".e107::getForm()->radio_switch("hideemail", $this->var['user_hideemail'],LAN_YES,LAN_NO,$options)."</div>";
 		}
 	}
 	
@@ -328,7 +329,7 @@ class usersettings_shortcodes extends e_shortcode
 		
 		if (e107::getPref('photo_upload') && FILE_UPLOADS)
 		{
-			$text .= "<div class='checkbox'>";
+			$text .= "<div class='checkbox form-check'>";
 			$text .= e107::getForm()->checkbox('user_delete_photo', 1, false, LAN_USET_16);
 			$text .= "</div>";	
 		
@@ -600,13 +601,21 @@ class usersettings_shortcodes extends e_shortcode
 		{
 			return null;
 		}
+		
+		$pref = e107::getPref();
+		if($pref['del_accu'] == 1)
+		{
+			$confirm    = defset("LAN_USET_51", "Are you sure? This procedure cannot be reversed! Once completed all personal data that you have entered on this site will be permanently lost and you will no longer be able to login.");
+			$label      = defset('LAN_USET_50', "Delete All Account Information");
 
-		$confirm    = defset("LAN_USET_51", "Are you sure? This procedure cannot be reversed! Once completed all personal data that you have entered on this site will be permanently lost and you will no longer be able to login.");
-		$label      = defset('LAN_USET_50', "Delete All Account Information");
+			$parm['confirm'] = $confirm;
 
-		$parm['confirm'] = $confirm;
-
-		return e107::getForm()->button('delete_account',1, 'delete', $label, $parm);
+			return e107::getForm()->button('delete_account',1, 'delete', $label, $parm);
+		}
+		else
+		{
+			return null;
+		}
 
 	}
 

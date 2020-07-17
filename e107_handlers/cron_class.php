@@ -54,6 +54,14 @@ class _system_cron
 			{
 				$mes->addDebug("Removed install.php");	
 			}
+
+			if(!deftrue('e_DEVELOPER')) // Leave development files intact if developer mode is active.
+			{
+				$fl->removeDir(e_BASE.'e107_tests');
+				$fl->removeDir(e_BASE.'.github');
+				unlink(e_BASE."composer.json");
+				unlink(e_BASE."composer.lock");
+			}
 		}
 		else
 		{
@@ -62,6 +70,7 @@ class _system_cron
 		
 		$fl->chmod(e_BASE."cron.php",0755);
 		$fl->chmod(e_HANDLER."bounce_handler.php",0755);
+		e107::getCache()->clearAll('system');
 	}
 
 

@@ -539,8 +539,11 @@ class e_parse extends e_parser
 			}
 			else // caused double-encoding of '&'
 			{
-				//$data = str_replace('<','&lt;',$data);
-				//$data = str_replace('>','&gt;',$data);
+			//	$data = str_replace('&amp;','&',$data);
+		//		$data = str_replace('<','&lt;',$data);
+		//		$data = str_replace('>','&gt;',$data);
+			//	$data = str_replace('&','&amp;',$data);
+
 			}
 
 
@@ -1274,10 +1277,10 @@ class e_parse extends e_parser
 		$intag = FALSE;
 		while($curlen < $len && $curlen < strlen($text))
 		{
-			switch($text {$pos} )
+			switch($text [$pos] )
 			{
 				case "<":
-					if($text {$pos + 1} == "/")
+					if($text [$pos + 1] == "/")
 					{
 						$closing_tag = TRUE;
 					}
@@ -1288,7 +1291,7 @@ class e_parse extends e_parser
 
 
 				case ">":
-					if($text {$pos - 1} == "/")
+					if($text [$pos - 1] == "/")
 					{
 						$closing_tag = TRUE;
 					}
@@ -1303,7 +1306,7 @@ class e_parse extends e_parser
 
 
 				case "&":
-					if($text {$pos + 1} == "#")
+					if($text [$pos + 1] == "#")
 					{
 						$end = strpos(substr($text, $pos, 7), ";");
 						if($end !== FALSE)
@@ -1602,6 +1605,12 @@ class e_parse extends e_parser
 		{
 			$opts['nobreak'] = true;
 			$text = trim($text);
+
+			if(strpos($text,'[center]') === 0) // quick bc fix TODO Find a better solution. [center][/center] containing HTML.
+            {
+		    	$text = str_replace("[center]","<div style='text-align:center'>",$text);
+		        $text = str_replace("[/center]","</div>",$text);
+            }
 		}
 
 		$fromadmin = $opts['fromadmin'];
@@ -2117,7 +2126,36 @@ class e_parse extends e_parser
 	}
 
 
+	/**
+	 * @param $mixed
+	 * @return array|false|string
+	 */
+	public function toUTF8($mixed)
+	{
 
+		if(is_array($mixed))
+		{
+			foreach($mixed as $k => $v)
+			{
+				unset($mixed[$k]);
+				$mixed[$this->toUTF8($k)] = $this->toUTF8($v);
+			}
+		}
+		elseif(is_object($mixed))
+		{
+			$objVars = get_object_vars($mixed);
+			foreach($objVars as $key => $value)
+			{
+				$mixed->$key = $this->toUTF8($value);
+			}
+		}
+		elseif(is_string($mixed))
+		{
+			return iconv('UTF-8', 'UTF-8//IGNORE', utf8_encode($mixed));
+		}
+
+		return $mixed;
+	}
 
 
 	function toASCII($text)
@@ -2179,7 +2217,9 @@ class e_parse extends e_parser
 			'Ā' => 'A', 'Č' => 'C', 'Ē' => 'E', 'Ģ' => 'G', 'Ī' => 'i', 'Ķ' => 'k', 'Ļ' => 'L', 'Ņ' => 'N',
 			'Š' => 'S', 'Ū' => 'u', 'Ž' => 'Z',
 			'ā' => 'a', 'č' => 'c', 'ē' => 'e', 'ģ' => 'g', 'ī' => 'i', 'ķ' => 'k', 'ļ' => 'l', 'ņ' => 'n',
-			'š' => 's', 'ū' => 'u', 'ž' => 'z'
+			'š' => 's', 'ū' => 'u', 'ž' => 'z',
+
+			'ľ' => 'l', 'ŕ'=>'r',
 		);
 
 		return str_replace(array_keys($char_map), $char_map, $text);
@@ -2463,6 +2503,8 @@ class e_parse extends e_parser
 		if($this->isHtml($text) === true) // strip any html.
 		{
 			$text = $this->toHTML($text,true);
+			$text = str_replace("\n","",$text); // clean-out line-breaks.
+			$text = str_ireplace( array("<br>","<br />","<br/>"), "\n", $text);
 			$text = strip_tags($text);
 		}
 
@@ -2914,7 +2956,7 @@ class e_parse extends e_parser
 	 */
 	function thumbUrlDecode($src)
 	{
-		list($url,$qry) = explode("?",$src);
+		list($url,$qry) = array_pad(explode("?",$src), 2, null);
 
 		$ret = array();
 
@@ -2961,12 +3003,13 @@ class e_parse extends e_parser
 	/**
 	 * Experimental: Generate a Thumb URL for use in the img srcset attribute.
 	 * @param string $src eg. {e_MEDIA_IMAGE}myimage.jpg
-	 * @param int|str $width - desired size in px or '2x' or '3x' or null for all or array (
+	 * @param int|string|array $width - desired size in px or '2x' or '3x' or null for all or array (
 	 * @return string
 	 */
 	function thumbSrcSet($src='', $width=null)
 	{
 		$multiply = null;
+		$encode = false;
 
 		if(is_array($width))
 		{
@@ -2999,15 +3042,21 @@ class e_parse extends e_parser
 		}
 		elseif($multiply === '2x' || $multiply === '3x' || $multiply === '4x')
 		{
+			$multiInt = (int) $multiply;
 
 			if(empty($parm['w']) && isset($parm['h']))
 			{
-				$parm['h'] = ($parm['h'] * $multiply) ;
-				return $this->thumbUrl($src, $parm)." ".$parm['h']."h ".$multiply;
+				$parm['h'] = ($parm['h'] * $multiInt) ;
+				return $this->thumbUrl($src, $parm)." ".$multiply;
 			}
 
-			$width = (!empty($parm['w']) || !empty($parm['h'])) ? (intval($parm['w']) * $multiply) : (intval($this->thumbWidth) * $multiply);
-			$height = (!empty($parm['h']) || !empty($parm['w'])) ? (intval($parm['h']) * $multiply) : (intval($this->thumbHeight) * $multiply);
+			if(isset($parm['w']) && !isset($parm['h'])) // if w set, assume h value of 0 is set.
+			{
+				$parm['h'] = 0;
+			}
+
+			$width = !empty($parm['w']) ? (intval($parm['w']) * $multiInt) : (intval($this->thumbWidth) * $multiInt);
+			$height = isset($parm['h']) ? (intval($parm['h']) * $multiInt) : (intval($this->thumbHeight) * $multiInt);
 
 		}
 		else
@@ -3049,8 +3098,11 @@ class e_parse extends e_parser
 			return $this->thumbUrl($src, $parms);
 		}
 
-		return $this->thumbUrl($src, $parms)." ".$width."w";
+		$ret = $this->thumbUrl($src, $parms);
 
+		$ret .= ($multiply) ? " ".$multiply : " ".$width."w";
+
+        return $ret;
 
 	}
 
@@ -3775,21 +3827,22 @@ class e_parser
     protected $nodesToDisableSC     = array();
     protected $pathList             = array();
     protected $allowedAttributes    = array(
-                                    'default'   => array('id', 'style', 'class'),
-                                    'img'       => array('id', 'src', 'style', 'class', 'alt', 'title', 'width', 'height'),
-                                    'a'         => array('id', 'href', 'style', 'class', 'title', 'target'),
+                                    'default'   => array('id', 'style', 'class', 'title', 'lang', 'accesskey'),
+                                    'img'       => array('src', 'alt', 'width', 'height'),
+                                    'a'         => array('href', 'target', 'rel'),
                                     'script'	=> array('type', 'src', 'language', 'async'),
-                                    'iframe'	=> array('id', 'src', 'frameborder', 'class', 'width', 'height', 'style'),
-	                                'input'     => array('type','name','value','class','style'),
+                                    'iframe'	=> array('src', 'frameborder', 'width', 'height'),
+	                                'input'     => array('type','name','value'),
 	                                'form'      => array('action','method','target'),
 	                                'audio'     => array('src','controls', 'autoplay', 'loop', 'muted', 'preload' ),
 	                                'video'     => array('autoplay', 'controls', 'height', 'loop', 'muted', 'poster', 'preload', 'src', 'width'),
-	                                'td'        => array('id', 'style', 'class', 'colspan', 'rowspan'),
-	                                'th'        => array('id', 'style', 'class', 'colspan', 'rowspan'),
-	                                'col'       => array('id', 'span', 'class','style'),
-		                            'embed'     => array('id', 'src', 'style', 'class', 'wmode', 'type', 'title', 'width', 'height'),
+	                                'td'        => array('colspan', 'rowspan'),
+	                                'th'        => array('colspan', 'rowspan'),
+	                                'col'       => array('span'),
+		                            'embed'     => array('src', 'wmode', 'type', 'width', 'height'),
 									'x-bbcode'  => array('alt'),
 									'label'		=> array('for'),
+									'source'    => array('media', 'sizes', 'src', 'srcset', 'type'),
 
                                   );
 
@@ -3801,11 +3854,16 @@ class e_parser
 
     protected $allowedTags        = array('html', 'body','div','a','img','table','tr', 'td', 'th', 'tbody', 'thead', 'colgroup', 'b',
                                         'i', 'pre','code', 'strong', 'u', 'em','ul', 'ol', 'li','img','h1','h2','h3','h4','h5','h6','p',
-                                        'div','pre','section','article', 'blockquote','hgroup','aside','figure','figcaption', 'abbr','span', 'audio', 'video', 'br',
+                                        'div','pre','section','article', 'blockquote','hgroup','aside','figure','figcaption', 'abbr','span', 'audio', 'video', 'source', 'br',
                                         'small', 'caption', 'noscript', 'hr', 'section', 'iframe', 'sub', 'sup', 'cite', 'x-bbcode', 'label'
                                    );
     protected $scriptTags 		= array('script','applet','form','input','button', 'embed', 'object', 'ins', 'select','textarea'); //allowed when $pref['post_script'] is enabled.
-	
+
+    protected $scriptAttributes = array('onclick', 'onchange', 'onblur', 'onload', 'onfocus', 'onkeydown', 'onkeypress', 'onkeyup',
+                                        'ondblclick', 'onmousedown', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel',
+                                        'onwheel', 'oncopy', 'oncut', 'onpaste'
+                                    );
+
 	protected $blockTags		= array('pre','div','h1','h2','h3','h4','h5','h6','blockquote'); // element includes its own line-break. 
 
 
@@ -3818,19 +3876,42 @@ class e_parser
     {
 
 		$this->init();
+		$this->compileAttributeDefaults();
+
          /*
         $meths = get_class_methods('DomDocument');
         sort($meths);
         print_a($meths);
         */        
-    }  
+    }
+
+    /**
+     * Merge default 'global' attributes into assigned tags.
+     */
+    private function compileAttributeDefaults()
+    {
+        foreach($this->allowedAttributes as $tag=>$array)
+        {
+            if($tag === 'default')
+            {
+                continue;
+            }
+
+            foreach($this->allowedAttributes['default'] as $def)
+            {
+                $this->allowedAttributes[$tag][] = $def;
+            }
+
+        }
+
+    }
 
     /**
      * Used by e_parse to start
      */
     function init()
     {
-        $this->domObj = new DOMDocument();
+        $this->domObj = new DOMDocument('1.0', 'utf-8');
 
 		if(defined('FONTAWESOME'))
 		{
@@ -3886,7 +3967,11 @@ class e_parser
 	public function getAllowedTags()
 	{
 		return $this->allowedTags;
+	}
 
+    public function getAllowedAttributes()
+	{
+		return $this->allowedAttributes;
 	}
 
 
@@ -3894,6 +3979,11 @@ class e_parser
 	{
 		return $this->scriptAccess;
 	}
+
+	public function getRemoved()
+    {
+        return $this->removedList;
+    }
 
 	/**
      * Set Allowed Attributes. 
@@ -4272,7 +4362,20 @@ class e_parser
 
 	/**
 	 * Render an avatar based on supplied user data or current user when missing. 
-	 * @param @array  - user data from e107_user. 
+	 * @param array $userData  - user data from e107_user. ie. user_image, user_id etc.
+	 * @param array $options
+	 * @param int $options['w'] - image width in px
+	 * @param int $options['h'] - image height in px
+	 * @param int|bool $options['crop'] = enables cropping when true
+	 * @param string $options['shape'] - (optional) rounded|circle|thumbnail
+	 * @param string $options['id'] - 'id' attribute will be added to tag.
+	 * @param string $options['class'] - override default 'class' attribute in tag.
+	 * @param string $options['alt'] - override default 'alt' attribute in tag.
+	 * @param bool $options['base64'] - use embedded base64 for image src.
+	 * @param bool $options['hd'] - double the resolution of the image. Useful for retina displays.
+	 * @param string $options['type'] - when set to 'url' returns the URL value instead of the tag.
+	 * @param string $options['style'] - sets the style attribute.
+     * @param string $options['mode'] - 'full' url mode. 
 	 * @return string <img> tag of avatar.
 	 */
 	public function toAvatar($userData=null, $options=array())
@@ -4283,10 +4386,22 @@ class e_parser
 		$crop       = !empty($options['crop']) ? $options['crop'] : $tp->thumbCrop;
 		$linkStart  = '';
 		$linkEnd    =  '';
+		$full       = !empty($options['base64']) ? true : false;
+
+		if(!empty($options['mode']) && $options['mode'] === 'full')
+		{
+			$full = true;
+		}
 
 		if(!empty($options['h']))
 		{
 			$height = intval($options['h']);
+		}
+
+		if(!empty($options['hd'])) // Fix resolution on Retina display.
+		{
+			$width = $width * 2;
+			$height = $height * 2;
 		}
 
 
@@ -4302,37 +4417,65 @@ class e_parser
 		
 		$image = (!empty($userData['user_image'])) ? varset($userData['user_image']) : null;
 
-		$genericImg = $tp->thumbUrl(e_IMAGE."generic/blank_avatar.jpg","w=".$width."&h=".$height,true);
+		$genericFile = e_IMAGE."generic/blank_avatar.jpg";
+		$genericImg = $tp->thumbUrl($genericFile,"w=".$width."&h=".$height,true, $full);
 		
 		if (!empty($image)) 
 		{
 			
-			if(strpos($image,"://")!==false) // Remove Image
+			if(strpos($image,"://")!==false) // Remote Image
 			{
-				$img = $image;	
+				$url = $image;	
 			}
 			elseif(substr($image,0,8) == "-upload-")
 			{
 				
-				$image = substr($image,8); // strip the -upload- from the beginning. 
-				$img = (file_exists(e_AVATAR_UPLOAD.$image))  ? $tp->thumbUrl(e_AVATAR_UPLOAD.$image,"w=".$width."&h=".$height."&crop=".$crop) : $genericImg;
+				$image = substr($image,8); // strip the -upload- from the beginning.
+				if(file_exists(e_AVATAR_UPLOAD.$image))
+				{
+					$file  = e_AVATAR_UPLOAD.$image;
+					$url = $tp->thumbUrl($file,"w=".$width."&h=".$height."&crop=".$crop, false, $full);
+				}
+				else
+				{
+					$file = $genericFile;
+					$url = $genericImg;
+				}
 			}
 			elseif(file_exists(e_AVATAR_DEFAULT.$image))  // User-Uplaoded Image
 			{
-				$img =	$tp->thumbUrl(e_AVATAR_DEFAULT.$image,"w=".$width."&h=".$height."&crop=".$crop);
+				$file = e_AVATAR_DEFAULT.$image;
+				$url =	$tp->thumbUrl($file,"w=".$width."&h=".$height."&crop=".$crop, false, $full);
 			}
 			else // Image Missing. 
 			{
-				
-				$img = $genericImg;
+				$url = $genericImg;
+				$file = $genericFile;
 			}
 		}
 		else // No image provided - so send generic. 
 		{
-			$img = $genericImg;
+			$url = $genericImg;
+			$file = $genericFile;
 		}
 
-		if(($img == $genericImg) && !empty($userData['user_id'] ) && (($userData['user_id'] == USERID)) && !empty($options['link']))
+		if(!empty($options['base64'])) // embed image data into URL.
+		{
+			$content = e107::getFile()->getRemoteContent($url); // returns false during unit tests, works otherwise.  
+			if(!empty($content))
+			{
+				$ext = strtolower(pathinfo($file,PATHINFO_EXTENSION));
+				$url = 'data:image/'.$ext.';base64,'.base64_encode($content);
+			}
+		}
+
+		if(!empty($options['hd'])) // Fix resolution on Retina display.
+		{
+			$width = $width / 2;
+			$height = ($height / 2);
+		}
+
+		if(($url == $genericImg) && !empty($userData['user_id'] ) && (($userData['user_id'] == USERID)) && !empty($options['link']))
 		{
 			$linkStart = "<a class='e-tip' title=\"".LAN_EDIT."\" href='".e107::getUrl()->create('user/myprofile/edit')."'>";
 			$linkEnd = "</a>";
@@ -4344,9 +4487,13 @@ class e_parser
 
 		if(!empty($options['type']) && $options['type'] === 'url')
 		{
-			return $img;
+			return $url;
 		}
 
+		if(!empty($options['alt']))
+		{
+			$title =  $tp->toAttribute($options['alt']);
+		}
 
 		$heightInsert = empty($height) ? '' : "height='".$height."'";
 		$id = (!empty($options['id'])) ? "id='".$options['id']."' " : "";
@@ -4354,11 +4501,12 @@ class e_parser
 		$classOnline = (!empty($userData['user_currentvisit']) && intval($userData['user_currentvisit']) > (time() - 300)) ? " user-avatar-online" : '';
 
 		$class = !empty($options['class']) ? $options['class'] : $shape." user-avatar";
+		$style = !empty($options['style']) ? " style='".$options['style']."'" : '';
 
 		$text = $linkStart;
-		$text .= "<img ".$id."class='".$class.$classOnline."' alt=\"".$title."\" src='".$img."'  width='".$width."' ".$heightInsert." />";
+		$text .= "<img ".$id."class='".$class.$classOnline."' alt=\"".$title."\" src='".$url."'  width='".$width."' ".$heightInsert.$style." />";
 		$text .= $linkEnd;
-	//	return $img;
+	//	return $url;
 		return $text;
 		
 	}
@@ -4445,9 +4593,9 @@ class e_parser
 
 
 	/**
-	 * Render an <img> tag.
+	 * Render an img tag.
 	 * @param string $file
-	 * @param array $parm  legacy|w|h|alt|class|id|crop
+	 * @param array $parm  keys: legacy|w|h|alt|class|id|crop|loading
 	 * @param array $parm['legacy'] Usually a legacy path like {e_FILE}
 	 * @return string
 	 * @example $tp->toImage('welcome.png', array('legacy'=>{e_IMAGE}newspost_images/','w'=>200));
@@ -4557,8 +4705,9 @@ class e_parser
 		$srcset = (!empty($parm['srcset'])) ? "srcset=\"".$parm['srcset']."\" " : "";
 		$width  = (!empty($parm['w']))      ? "width=\"".intval($parm['w'])."\" " : "";
 		$height = (!empty($parm['h']))      ? "height=\"".intval($parm['h'])."\" " : "";
+		$loading = !empty($parm['loading']) ? "loading=\"".$parm['loading']."\" " : ""; // eg. lazy, eager, auto
 
-		return "<img {$id}class='{$class}' src='".$path."' alt=\"".$alt."\" ".$srcset.$width.$height.$style." />";
+		return "<img {$id}class='{$class}' src='".$path."' alt=\"".$alt."\" ".$srcset.$width.$height.$style.$loading." />";
 
 	}
 
@@ -4737,7 +4886,10 @@ class e_parser
 
 		$mime = varset($parm['mime'], 'audio/mpeg');
 
-		$text = '<audio controls style="max-width:100%">
+		$autoplay = !empty($parm['autoplay']) ? "autoplay " : "";
+		$controls = !empty($parm['controls']) ? "controls" : "";
+
+		$text = '<audio controls style="max-width:100%" '.$autoplay.$controls.'>
 					<source src="'.$file.'" type="'.$mime .'">
 					  Your browser does not support the audio tag.
 				</audio>';
@@ -5134,6 +5286,7 @@ return;
 
 		$sql = e107::getDb();
 		$tp = e107::getParser();
+		$dbg = e107::getDebug(); 
         
       //  $html = $this->getXss();
                    
@@ -5144,20 +5297,20 @@ return;
         echo "<h2>Standard v2 Parser</h2>";
         echo "<h3>\$tp->dataFilter()</h3>";
         // echo $tp->dataFilter($html); // Remove Comment for a real mess! 
-        $sql->db_Mark_Time('------ Start Parser Test -------');
+       $dbg->logTime('------ Start Parser Test -------');
         print_a($tp->dataFilter($html));
-        $sql->db_Mark_Time('tp->dataFilter');
+       $dbg->logTime('tp->dataFilter');
          
         echo "<h3>\$tp->toHTML()</h3>";
         // echo $tp->dataFilter($html); // Remove Comment for a real mess! 
         print_a($tp->toHTML($html));
-        $sql->db_Mark_Time('tp->toHtml');     
+       $dbg->logTime('tp->toHtml');     
         
         echo "<h3>\$tp->toDB()</h3>";
         // echo $tp->dataFilter($html); // Remove Comment for a real mess!
         $todb = $tp->toDB($html);
         print_a( $todb);
-        $sql->db_Mark_Time('tp->toDB');
+       $dbg->logTime('tp->toDB');
 
 	    echo "<h3>\$tp->toForm() with toDB input.</h3>";
        print_a( $tp->toForm($todb));
@@ -5166,8 +5319,8 @@ return;
         echo "<h3>Processed</h3>";
         $cleaned = $this->cleanHtml($html, true);  // false = don't check html pref.
         print_a($cleaned);
-        $sql->db_Mark_Time('new Parser');    
-      //  $sql->db_Mark_Time('------ End Parser Test -------');
+       $dbg->logTime('new Parser');    
+      // $dbg->logTime('------ End Parser Test -------');
         echo "<h3>Processed &amp; Rendered</h3>";
         echo $cleaned;
         
@@ -5221,6 +5374,10 @@ return;
 			return preg_replace('/[^\w\d_\.-]/',"-",$text);
 		}
 
+		if($type === 'version')
+		{
+			return preg_replace('/[^\d_\.]/',"",$text);
+		}
 
 		if($validate == false)
 		{
@@ -5254,6 +5411,24 @@ return;
 	}
 
 
+    private function grantScriptAccess()
+    {
+         $this->allowedTags = array_merge($this->allowedTags, $this->scriptTags);
+
+        foreach($this->allowedAttributes as $tag => $att)
+        {
+            foreach($this->scriptAttributes as $new)
+            {
+                $this->allowedAttributes[$tag][] = $new;
+            }
+        }
+
+
+        return null;
+    }
+
+
+
     /**
      * Process and clean HTML from user input.
      * TODO Html5 tag support.
@@ -5265,12 +5440,24 @@ return;
     {
         if(empty($html)){ return ''; }
 
-		$html = str_replace('&nbsp;', '@nbsp;', $html); // prevent replacement of &nbsp; with spaces.
+        if($this->isHtml($html) === false)
+        {
+            	$html = str_replace('<','&lt;',$html);
+				$html = str_replace('>','&gt;',$html);
+        }
+
+		$html = str_replace('&nbsp;', '__E_PARSER_CLEAN_HTML_NON_BREAKING_SPACE__', $html); // prevent replacement of &nbsp; with spaces.
+		// Workaround for https://bugs.php.net/bug.php?id=76285
+		//  Part 1 of 2
+        $html = str_replace("\r", "", $html); // clean out windows line-breaks.
+		$html = str_replace("\n", "__E_PARSER_CLEAN_HTML_LINE_BREAK__", $html);
+        $html = str_replace("{", "__E_PARSER_CLEAN_HTML_CURLY_OPEN__", $html);
+        $html = str_replace("}", "__E_PARSER_CLEAN_HTML_CURLY_CLOSED__", $html);
 
 
         if(strpos($html, "<body")===false) // HTML Fragment
 		{
-       		$html = '<?xml version="1.0" encoding="utf-8"?><!DOCTYPE html><html><head><meta charset="utf-8"></head><body>'.$html.'</body></html>'; 
+       		$html = '<body>'.$html.'</body>';
 		}
 		else  // Full HTML page. 
 		{
@@ -5285,36 +5472,29 @@ return;
 			$this->init();	
 		}
 
+
 		if($this->scriptAccess === false)
 		{
-	        $this->scriptAccess = e107::getConfig()->get('post_script', e_UC_MAINADMIN); // Pref to Allow <script> tags11;
+	        $this->scriptAccess = e107::getConfig()->get('post_script', e_UC_NOBODY); // Pref to Allow <script> tags11;
 		}
 
 		if(check_class($this->scriptAccess))
         {
-            $this->allowedTags = array_merge($this->allowedTags, $this->scriptTags);
+            $this->grantScriptAccess();
         }
 
 		
         // Set it up for processing.
-	//    libxml_use_internal_errors(true); // hides errors.
         $doc  = $this->domObj;
 	    libxml_use_internal_errors(true);
-    //    @$doc->loadHTML($html);
 	    if(function_exists('mb_convert_encoding'))
 	    {
 			$html = mb_convert_encoding($html, 'HTML-ENTITIES', "UTF-8");
 	    }
 
-		@$doc->loadHTML($html);
+		@$doc->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 
-		// $doc->encoding = 'UTF-8';
-
-     //   $doc->resolveExternals = true;
-        
-    //    $tmp = $doc->getElementsByTagName('*');   
-    
-       	$this->nodesToConvert 	= array(); // required. 
+       	$this->nodesToConvert 	= array(); // required.
 		$this->nodesToDelete 	= array(); // required. 
 		$this->removedList		= array();
 
@@ -5352,7 +5532,8 @@ return;
                 $name = $attr->nodeName;
                 $value = $attr->nodeValue;
 
-                $allow = varset($this->allowedAttributes[$tag], $this->allowedAttributes['default']);
+                $allow = isset($this->allowedAttributes[$tag]) ? $this->allowedAttributes[$tag] : $this->allowedAttributes['default'];
+
                 $removeAttributes = array();
 
                 if(!in_array($name, $allow))
@@ -5422,19 +5603,18 @@ return;
 		    {
 		        $value = preg_replace('/^<pre[^>]*>/', '', $value);
 		        $value = str_replace("</pre>", "", $value);
-		        $value = str_replace('<br></br>', PHP_EOL, $value);
-
+		        $value = str_replace('<br></br>', "__E_PARSER_CLEAN_HTML_LINE_BREAK__", $value);
 		    }
-
-		    if($node->nodeName === 'code')
+            elseif($node->nodeName === 'code')
 		    {
 		        $value = preg_replace('/^<code[^>]*>/', '', $value);
 		        $value = str_replace("</code>", "", $value);
-		        $value = str_replace("<br></br>", PHP_EOL, $value);
+		        $value = str_replace("<br></br>", "__E_PARSER_CLEAN_HTML_LINE_BREAK__", $value);
 		    }
 
-		    $value = str_replace('{', '{{{', $value); // temporarily change {e_XXX} to {{{e_XXX}}}
-		    $value = str_replace('}', '}}}', $value); // temporarily change {e_XXX} to {{{e_XXX}}}
+		   $value = str_replace('__E_PARSER_CLEAN_HTML_CURLY_OPEN__', '{{{', $value); // temporarily change {e_XXX} to {{{e_XXX}}}
+		   $value = str_replace('__E_PARSER_CLEAN_HTML_CURLY_CLOSED__', '}}}', $value); // temporarily change {e_XXX} to {{{e_XXX}}}
+
 
 		    $newNode = $doc->createElement($node->nodeName);
 		    $newNode->nodeValue = $value;
@@ -5483,20 +5663,22 @@ return;
         }
 		*/
 
-        $cleaned = $doc->saveHTML($doc->documentElement); // $doc->documentElement fixes utf-8/entities issue. @see http://stackoverflow.com/questions/8218230/php-domdocument-loadhtml-not-encoding-utf-8-correctly
+		$cleaned = $doc->saveHTML($doc->documentElement); // $doc->documentElement fixes utf-8/entities issue. @see http://stackoverflow.com/questions/8218230/php-domdocument-loadhtml-not-encoding-utf-8-correctly
+		// Workaround for https://bugs.php.net/bug.php?id=76285
+		//  Part 2 of 2
+		$cleaned = str_replace("\n", "", $cleaned);
+		$cleaned = str_replace("__E_PARSER_CLEAN_HTML_LINE_BREAK__", "\n", $cleaned);
 
-		$cleaned = str_replace('@nbsp;', '&nbsp;',  $cleaned); // prevent replacement of &nbsp; with spaces. - convert back.
-
+		$cleaned = str_replace('__E_PARSER_CLEAN_HTML_NON_BREAKING_SPACE__', '&nbsp;',  $cleaned); // prevent replacement of &nbsp; with spaces. - convert back.
 
 		$cleaned = str_replace('{{{','&#123;', $cleaned); // convert shortcode temporary triple-curly braces back to entities.
-         $cleaned = str_replace('}}}','&#125;', $cleaned); // convert shortcode temporary triple-curly braces back to entities.
+		$cleaned = str_replace('}}}','&#125;', $cleaned); // convert shortcode temporary triple-curly braces back to entities.
 
-        $cleaned = str_replace(array('<body>','</body>','<html>','</html>','<!DOCTYPE html>','<meta charset="UTF-8">','<?xml version="1.0" encoding="utf-8"?>'),'',$cleaned); // filter out tags. 
+        $cleaned = str_replace("__E_PARSER_CLEAN_HTML_CURLY_OPEN__","{", $cleaned);
+        $cleaned = str_replace("__E_PARSER_CLEAN_HTML_CURLY_CLOSED__","}", $cleaned);
 
+		$cleaned = str_replace(array('<body>','</body>'),'', $cleaned); // filter out tags.
 
-
-     //   $cleaned = html_entity_decode($cleaned, ENT_QUOTES, 'UTF-8');
-        
         return trim($cleaned);
     }
 

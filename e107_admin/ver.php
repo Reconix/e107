@@ -12,4 +12,3 @@ if (!defined('e107_INIT')) { exit; }
 
 $e107info['e107_version'] = "2.3.0 (git)";
 
-?>

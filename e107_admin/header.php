@@ -26,7 +26,7 @@ if(!defined('USER_AREA'))
 	define("USER_AREA", FALSE);
 }
 
-e107::getDb()->db_Mark_Time('(Header Top)');
+e107::getDebug()->logTime('(Header Top)');
 
 
 if(!deftrue('e_MENUMANAGER_ACTIVE'))
@@ -363,18 +363,28 @@ e107::getJs()->renderJs('header_inline', 3);
 echo "<!-- *META* -->\n";
 
 // --- Load plugin Meta files and eplug_ before others --------
-if (vartrue($pref['e_meta_list']))
+
+/** @var array $incompatibleMeta - plugins that may cause jQuery conflicts etc if loaded.  */
+$incompatibleMeta = array('aa_jquery', 'fancybox', 'lightwindow', 'e107slider' );
+
+if (!empty($pref['e_meta_list']))
 {
 	foreach ($pref['e_meta_list'] as $val)
 	{
+	    if(in_array($val,$incompatibleMeta))
+        {
+            continue;
+        }
+
 		if (is_readable(e_PLUGIN.$val."/e_meta.php"))
 		{
-			echo "<!-- $val meta -->\n";
+			echo "\n\n<!-- $val meta -->\n";
 			require_once (e_PLUGIN.$val."/e_meta.php");
 		}
 	}
 }
 
+unset($incompatibleMeta);
 
 
 if (!USER && ($pref['user_tracking'] == "session") && varset($pref['password_CHAP'],0))
@@ -451,7 +461,10 @@ if(deftrue('e_MENUMANAGER_ACTIVE'))
 }
 else
 {
-	$body_onload .= " id=\"admin-".str_replace(".php","",e_PAGE)."\" ";
+	$bodyID = deftrue("e_CURRENT_PLUGIN") ? e_CURRENT_PLUGIN : str_replace(".php","",e_PAGE);
+	$bodyID .= (!empty($_GET['mode']) && !empty($_GET['action'])) ? "-".$_GET['mode'].'-'.$_GET['action'] : '';
+	$body_onload .= " id=\"admin-".e107::getForm()->name2id($bodyID)."\" ";
+	unset($bodyID);
 }
 
 //
@@ -556,7 +569,7 @@ function getAlert()
 // Header included notification, from this point header includes are not possible
 define('HEADER_INIT', TRUE);
 
-e107::getDb()->db_Mark_Time("End Head, Start Body");
+e107::getDebug()->logTime("End Head, Start Body");
 
 //
 // K: (The rest is ignored for popups, which have no menus)
@@ -594,7 +607,7 @@ if ($e107_popup != 1)
 	// (legacy?) function admin_purge_related moved to boot.php
 
 
-	e107::getDb()->db_Mark_Time('Parse Admin Header');
+	e107::getDebug()->logTime('Parse Admin Header');
 		
 	//NEW - Iframe mod
 	if (!deftrue('e_IFRAME'))
@@ -607,7 +620,7 @@ if ($e107_popup != 1)
 		e107::css("inline","body { padding:0px } "); // default padding for iFrame-only. 
 	}
 
-	e107::getDb()->db_Mark_Time('(End: Parse Admin Header)');
+	e107::getDebug()->logTime('(End: Parse Admin Header)');
 }
 
 // XXX - we don't need this (use e107::getMessage()) - find out what's using it and remove it

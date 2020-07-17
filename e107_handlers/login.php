@@ -103,7 +103,7 @@ class userlogin
 			$result = false;
 			foreach ($authMethod as $method)
 			{
-				if ($method == 'e107')
+				if ($method == 'e107' OR $method == 'e107db')
 				{
 					if ($this->lookupUser($username, $forceLogin))
 					{
@@ -145,7 +145,7 @@ class userlogin
 									$authorized = true;
 								break;
 								case LOGIN_TRY_OTHER:
-									continue;
+									continue 2;
 								break;
 							}
 						}
@@ -174,13 +174,13 @@ class userlogin
 		{
 			if (!$this->lookupUser($username, $forceLogin))
 			{
-				return $this->invalidLogin($username,LOGIN_BAD_USERNAME);		// User doesn't exist
+				return false;		// User doesn't exist
 			}
 		}
 
 		if ($authorized !== true && $this->checkUserPassword($username, $userpass, $response, $forceLogin) !== true)
 		{
-			return $this->invalidLogin($username,LOGIN_BAD_PW);
+			return false;
 		}
 
 
@@ -476,7 +476,7 @@ class userlogin
 			  	$auditLog = array(
 					'type'              => (($this->lookEmail) ? 'email' : 'userlogin'),
 					'login_name'        => $login_name,
-					'userpass'          => $userpass,
+				//	'userpass'          => $userpass,
 					'pwdHash'           => $this->userData['user_password']
 				);
 

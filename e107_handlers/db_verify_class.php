@@ -130,11 +130,13 @@ class db_verify
 	 */
 	private function diffStructurePermissive($expected, $actual)
 	{
+		$expected['default'] = isset($expected['default']) ? $expected['default'] : '';
+		$actual['default']   = isset($actual['default'])   ? $actual['default']   : '';
+
 		if($expected['type'] === 'JSON') // Fix for JSON alias MySQL 5.7+
 		{
 			$expected['type'] = 'LONGTEXT';
 		}
-
 
 		// Permit actual text types that default to null even when
 		// expected does not explicitly default to null
@@ -150,6 +152,16 @@ class db_verify
 		{
 			$expected['default'] = preg_replace("/DEFAULT '(\d*\.?\d*)'/i", 'DEFAULT $1', $expected['default']);
 			$actual['default']   = preg_replace("/DEFAULT '(\d*\.?\d*)'/i", 'DEFAULT $1', $actual['default']  );
+		}
+
+		/**
+		 * Display width specification for integer data types was deprecated in MySQL 8.0.17
+		 * @see https://dev.mysql.com/doc/relnotes/mysql/8.0/en/news-8-0-19.html
+		 */
+		if(1 === preg_match('/([A-Z]*INT)/i', $expected['type']))
+		{
+			$expected['value'] = '';
+			$actual['value'] = '';
 		}
 
 		// Correct difference on CREATE TABLE statement between MariaDB and MySQL
@@ -410,7 +422,7 @@ class db_verify
 			{
 				$this->{$results}[$tbl][$key]['_status'] = 'ok';
 
-				if(!is_array($sqlData[$type][$key]))
+				if(!isset($sqlData[$type][$key]) || !is_array($sqlData[$type][$key]))
 				{
 					$this->errors[$tbl]['_status'] = 'error'; // table status
 					$this->{$results}[$tbl][$key]['_status'] = "missing_$type"; // type status
@@ -950,9 +962,9 @@ class db_verify
 		foreach($tmp as $line)
 		{
 			$line = trim($line);
-			$newline[] = preg_replace("/^([^`A-Z\s][a-z_]*)/","`$1`", $line);				
+			$newline[] = preg_replace("/^([^`A-Z\s][a-z_]*[0-9]?)/","`$1`", $line);
 		}
-		
+
 		$data = implode("\n",$newline);
 		// --------------------
 		
@@ -964,6 +976,7 @@ class db_verify
 		if(e_DEBUG)
 		{
 		//	e107::getMessage()->addDebug("Regex: ".print_a($data,true));
+		 //   echo $regex;
 		//	e107::getMessage()->addDebug("Regex: ".$regex);
 
 		}
@@ -1755,4 +1768,4 @@ function table_list()
 */
 
 
-?>
+

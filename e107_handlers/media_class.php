@@ -1168,6 +1168,11 @@ class e_media
 	{
 		$type = pathinfo($mediaURL,PATHINFO_EXTENSION);
 
+		if($type == 'glyph')
+		{
+			return 'glyph';
+		}
+
 		foreach($this->mimeExtensions as $key=>$exts)
 		{
 			if(!in_array($type, $exts))
@@ -1195,6 +1200,7 @@ class e_media
 
 		$width = vartrue($options['w'], 220);
 		$height = vartrue($options['h'], 190);
+		$crop = vartrue($options['crop'], 0);
 		$preview = '';
 
 		switch($type)
@@ -1211,7 +1217,7 @@ class e_media
 				break;
 
 			case "image":
-				$preview = $tp->toImage($default, array('w'=>$width, 'h'=>$height, 'class'=>'image-selector img-responsive img-fluid', 'legacy'=>varset($options['legacyPath'])));
+				$preview = $tp->toImage($default, array('w'=>$width, 'h'=>$height, 'crop'=>$crop, 'class'=>'image-selector img-responsive img-fluid', 'legacy'=>varset($options['legacyPath'])));
 			//	$previewURL = $tp->thumbUrl($default, array('w'=>800));
 				break;
 
@@ -1722,7 +1728,7 @@ class e_media
 	
 			$data_src = $this->mediaSelectNav($parm['category'], $parm['tagid'], $parm);
 			$carouselID = 'media-carousel-'.$parm['action'];
-			$searchToolttip = (empty($parm['searchTooltip'])) ? "Enter some text to filter results" : $parm['searchTooltip'];
+			$searchToolttip = (empty($parm['searchTooltip'])) ? IMALAN_186 : $parm['searchTooltip'];
 			//$text = "<form class='form-search' action='".e_SELF."?".e_QUERY."' id='core-plugin-list-form' method='get'>";
 					
 			$text = '';
@@ -2048,13 +2054,13 @@ class e_media
 		$chunks = isset($_REQUEST["chunks"]) ? intval($_REQUEST["chunks"]) : 0;
 		$fileName = isset($_REQUEST["name"]) ? $_REQUEST["name"] : '';
 
-		// Clean the fileName for security reasons
-		$fileName = preg_replace('/[^\w\._]+/', '_', $fileName);
-
 		if(!empty($_FILES['file']['name']) && $_FILES['file']['name'] !== 'blob' ) // dropzone support v2.1.9
 		{
 			$fileName = $_FILES['file']['name'];
 		}
+
+		// Clean the fileName for security reasons
+		$fileName = preg_replace('/[^\w\._]+/', '_', $fileName);
 
 		//	$array = array("jsonrpc" => "2.0", "error" => array('code'=>$_FILES['file']['error'], 'message'=>'Failed to move file'), "id" => "id",  'data'=>$_FILES );
 
@@ -2225,9 +2231,15 @@ class e_media
 
 
 		$convertToJpeg = e107::getPref('convert_to_jpeg', 0);
+
+		if(!empty($_REQUEST['convert']) && $_REQUEST['convert'] === 'jpg')
+		{
+			$convertToJpeg = true;
+		}
+
 		$fileSize = filesize($filePath);
 
-		if(varset($_GET['for']) !== '_icon' && !empty($convertToJpeg))
+		if(varset($_REQUEST['for']) !== '_icon' && !empty($convertToJpeg))
 		{
 			if($jpegFile = e107::getMedia()->convertImageToJpeg($filePath, true))
 			{
@@ -2238,10 +2250,28 @@ class e_media
 
 		}
 
-		if(!empty($_GET['for'])) // leave in upload directory if no category given.
+		if(!empty($_REQUEST['resize']))
 		{
-			$uploadPath = varset($_GET['path'],null);
-			$for = e107::getParser()->filter($_GET['for']);
+			$thumb = e107::getThumb($filePath);
+			$w = (int) $_REQUEST['resize']['w'];
+			$h = (int) $_REQUEST['resize']['h'];
+			$thumb->adaptiveResize($w,$h)->save($filePath);
+		}
+
+		if(!empty($_REQUEST['rename']))
+		{
+			$newPath = $targetDir.basename($_REQUEST['rename']);
+			if(!rename($filePath, $newPath))
+			{
+				return '{"jsonrpc" : "2.0", "error" : {"code": 105, "message": "Unable to rename '.$filePath.' to '.$newPath.'"}, "id" : "id"}';
+			}
+			$fileName = basename($newPath);
+		}
+
+		if(!empty($_REQUEST['for'])) // leave in upload directory if no category given.
+		{
+			$uploadPath = varset($_REQUEST['path'],null);
+			$for = e107::getParser()->filter($_REQUEST['for']);
 			$for = str_replace(array('+','^'),'', $for);
 
 			$result = e107::getMedia()->importFile($fileName, $for, array('path'=>$uploadPath));
@@ -2255,7 +2285,23 @@ class e_media
 		$this->ajaxUploadLog($filePath,$fileName,$fileSize,$result);
 
 
-		$preview = $this->previewTag($result);
+
+		// file_put_contents(e_LOG."mediatmp.log", print_r($previewArr,true));
+
+		$opts = array();
+
+		// set correct size for preview image.
+		if(isset($_REQUEST['w']))
+		{
+			$opts['w'] = (int) $_REQUEST['w'];
+		}
+
+		if(isset($_REQUEST['h']))
+		{
+			$opts['h'] = (int) $_REQUEST['h'];
+		}
+
+		$preview = $this->previewTag($result,$opts);
 		$array = array("jsonrpc" => "2.0", "result" => $result, "id" => "id", 'preview' => $preview, 'data'=>$_FILES );
 
 		return json_encode($array);

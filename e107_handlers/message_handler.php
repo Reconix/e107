@@ -540,7 +540,7 @@ class eMessage
 		
 		foreach ($typesArray as $type)
 		{
-			if(E_MESSAGE_DEBUG === $type && !deftrue('E107_DEBUG_LEVEL'))
+			if(E_MESSAGE_DEBUG === $type && (!deftrue('E107_DEBUG_LEVEL') || !ADMIN))
 			{
 				continue;
 			}
@@ -591,8 +591,8 @@ class eMessage
 		$icon = !empty(self::$_customIcon[$type]) ? "s-message-empty fa fa-2x ".self::$_customIcon[$type] : "s-message-".$type;
 
 		
-		$text = "<div class='s-message alert alert-block fade in {$type} {$bclass}'>";
-		$text .= (self::$_close[$type] === true) ? "<a class='close' data-dismiss='alert'>×</a>" : "";
+		$text = "<div class='s-message alert alert-block alert-dismissible fade in show {$type} {$bclass}' role='alert'>";
+		$text .= (self::$_close[$type] === true) ? "<a class='close' data-dismiss='alert' aria-label='".LAN_CLOSE."'>×</a>" : "";
 		$text .= "<i class='s-message-icon ".$icon."'></i>
 				<h4 class='s-message-title'>".self::getTitle($type, $mstack)."</h4>
 				<div class='s-message-body'>

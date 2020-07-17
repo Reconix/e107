@@ -187,12 +187,13 @@ class e107
 		'e_admin_request'                => '{e_HANDLER}admin_ui.php',
 		'e_admin_response'               => '{e_HANDLER}admin_ui.php',
 		'e_admin_ui'                     => '{e_HANDLER}admin_ui.php',
-		'e_ajax_class'                   => '{e_HANDLER}e_ajax_class.php',
+		'e_ajax' => '{e_HANDLER}e_ajax_class.php',
 		'e_array'                        => '{e_HANDLER}core_functions.php', // Old ArrayStorage.
 		'e_bbcode'                       => '{e_HANDLER}bbcode_handler.php',
 		'e_bb_base'                      => '{e_HANDLER}bbcode_handler.php',
 		'e_customfields'                 => '{e_HANDLER}e_customfields_class.php',
 		'e_file'                         => '{e_HANDLER}file_class.php',
+		'e_file_inspector_json_phar'     => '{e_HANDLER}e_file_inspector_json_phar.php',
 		'e_form'                         => '{e_HANDLER}form_handler.php',
 		'e_jshelper'                     => '{e_HANDLER}js_helper.php',
 		'e_media'                        => '{e_HANDLER}media_class.php',
@@ -216,6 +217,7 @@ class e107
 		'e_user_model'                   => '{e_HANDLER}user_model.php',
 		'e_user'                         => '{e_HANDLER}user_model.php',
 		'e_user_extended_structure_tree' => '{e_HANDLER}user_model.php',
+		'e_user_provider'                => '{e_HANDLER}user_handler.php',
 		'e_userperms'                    => '{e_HANDLER}user_handler.php',
 		'e_validator'                    => '{e_HANDLER}validator_class.php',
 		'e_vars'                         => '{e_HANDLER}model_class.php',
@@ -236,7 +238,6 @@ class e107
 		'eUrl'                           => '{e_HANDLER}e107Url.php',
 		'eUrlConfig'                     => '{e_HANDLER}application.php',
 		'eUrlRule'                       => '{e_HANDLER}application.php',
-		'Hybrid_Auth'                    => '{e_HANDLER}hybridauth/Hybrid/Auth.php',
 		'language'                       => '{e_HANDLER}language_class.php',
 		'news'                           => '{e_HANDLER}news_class.php',
 		'notify'                         => '{e_HANDLER}notify_class.php',
@@ -282,9 +283,25 @@ class e107
 	 */
 	protected function __construct()
 	{
+	  /*  if(defined('e_PDO') && e_PDO === false) // TODO
+        {
+            self::$_known_handlers['db'] = '{e_HANDLER}mysql_class.php';
+        }*/
 		// FIXME registered shutdown functions not executed after the $page output in footer - investigate
 		// Currently manually called in front-end/admin footer
 		//register_shutdown_function(array($this, 'destruct'));
+	}
+
+	private static function die_http_400()
+	{
+		header('HTTP/1.0 400 Bad Request', true, 400);
+		header('Content-Type: text/plain');
+		if (deftrue('e_DEBUG'))
+		{
+			echo "Bad Request: ";
+			debug_print_backtrace(0, 1);
+		}
+		exit();
 	}
 
 	/**
@@ -331,7 +348,7 @@ class e107
 	 * @param $e107_paths
 	 * @param $e107_root_path
 	 * @param array $e107_config_override
-	 * @return e107
+	 * @return object|boolean e107
 	 */
 	public function initInstall($e107_paths, $e107_root_path, $e107_config_override = array())
 	{
@@ -423,12 +440,12 @@ class e107
 
 		if(!is_dir(e_SYSTEM))
 		{
-			mkdir(e_SYSTEM, 0755);
+			mkdir(e_SYSTEM, 0755, true);
 		}
 
 		if(!is_dir(e_CACHE_IMAGE))
 		{
-			mkdir(e_CACHE_IMAGE, 0755);
+			mkdir(e_CACHE_IMAGE, 0755, true);
 		}
 
 		// Prepare essential directories.
@@ -926,9 +943,9 @@ class e107
 
 		if($path && is_string($path) && !class_exists($class_name, false))
 		{
-			global $e107_debug, $_E107;
+			global $_E107;
 
-			if(($e107_debug || !empty($_E107['debug']) || (defined('e_DEBUG') && e_DEBUG === true) ))
+			if((!empty($_E107['debug']) || (defined('e_DEBUG') && e_DEBUG === true) ))
 			{
 				require_once($path);
 			}
@@ -1346,7 +1363,7 @@ class e107
 	 * $instance_id
 	 *
 	 * @param string $instance_id
-	 * @return e_db_mysql
+	 * @return e_db
 	 */
 	public static function getDb($instance_id = '')
 	{
@@ -1451,6 +1468,27 @@ class e107
 	public static function getEmail($overrides=null)
 	{
 		return self::getSingleton('e107Email', true, null, $overrides);
+	}
+
+
+	/**
+	 * Retrieves PhpThumbFactory object
+	 *
+	 * @param $src
+	 * @return bool|GdThumb
+	 */
+	public static function getThumb($src)
+	{
+		require_once(e_HANDLER.'phpthumb/ThumbLib.inc.php');
+		try
+		{
+			return PhpThumbFactory::create($src);
+		}
+		catch (Exception $e)
+		{
+			return false;
+		}
+
 	}
 
 
@@ -1566,6 +1604,40 @@ class e107
 			return self::getSingleton('e_file', true);
 		}
 		return self::getObject('e_file', null, true);
+	}
+
+	/**
+	 * Create a new file inspector object
+	 *
+	 * Note: Only the core file inspector is supported right now.
+	 *
+	 * @return e_file_inspector
+	 */
+    public static function getFileInspector($type = 'core')
+    {
+        $fileInspectorPath = realpath(e_SYSTEM_BASE . "core_image.phar");
+        /** @var e_file_inspector $fileInspector */
+        $fileInspector = self::getObject('e_file_inspector_json_phar', $fileInspectorPath);
+
+        try
+        {
+            $fileInspector->loadDatabase();
+        }
+        catch (Exception $e)
+        {
+            // TODO: LAN
+            self::getMessage()->addWarning(
+                "The core integrity image is corrupt. " .
+                "File Inspector will be inoperative. " .
+                "Resolve this issue by uploading a good copy of the core image to " .
+                escapeshellarg($fileInspectorPath) . ". " .
+                "If uploading with FTP, use binary transfer mode. " .
+                "Error message: " .
+                $e->getMessage()
+            );
+        }
+
+        return $fileInspector;
 	}
 
 	/**
@@ -1693,22 +1765,33 @@ class e107
 	}
 
 	/**
-	 * Retrieve HybridAuth object
+	 * Create a new Hybridauth object based on the provided configuration
 	 *
-	 * @return object
+	 * @return Hybridauth\Hybridauth
+	 * @throws \Hybridauth\Exception\InvalidArgumentException if Hybridauth rejects the provided config
+	 * @throws ReflectionException if this method is unintentionally broken
+	 * @deprecated v2.3.0 Use the e_user_provider interfaces instead (e107::getUserProvider()).
+	 *                    It's the e107 wrapper around Hybridauth.
+	 * @see e_user_provider for social login features.
+	 * @see e107::getUser() for getting a user object that may or may not have a social login.
 	 */
 	public static function getHybridAuth($config = null)
 	{
-		if(null === $config)
-		{
-			$config = array(
-				'base_url' => self::getUrl()->create('system/xup/endpoint', array(), array('full' => true)),
-				'providers' => self::getPref('social_login', array()),
-				'debug_mode' => false,
-				'debug_file' => ''
-			);
-		}
-		return new Hybrid_Auth($config);
+		$e_user_provider = new e_user_provider(null, $config);
+		$reflection = new ReflectionClass('e_user_provider');
+		$reflection_property = $reflection->getProperty('hybridauth');
+		$reflection_property->setAccessible(true);
+		return $reflection_property->getValue($e_user_provider);
+	}
+
+	/**
+	 * Create a new social login handler
+	 * @param string|null $providerName
+	 * @return e_user_provider
+	 */
+	public static function getUserProvider($providerName = null)
+	{
+		return self::getObject('e_user_provider', $providerName);
 	}
 
 	/**
@@ -1963,11 +2046,11 @@ class e107
 	/**
 	 * Retrieve ajax singleton object
 	 *
-	 * @return e_ajax_class
+	 * @return e_ajax
 	 */
 	public static function getAjax()
 	{
-		return self::getSingleton('e_ajax_class', true);
+		return self::getSingleton('e_ajax', true);
 	}
 
 	/**
@@ -2565,7 +2648,7 @@ class e107
 					}
 					else
 					{
-						return array();
+						continue;
 					}
 
 					if($mode === 'alias')
@@ -2691,8 +2774,9 @@ class e107
 		$override_path 				= $override ? $curTheme.'templates/'.$id.'_template.php' : null;
 		$legacy_override_path 		= $override ? $curTheme.$id.'_template.php' : null;
 
-		$legacy_core_path 			= e_THEME.'templates/'.$id.'_template.php';
-		$core_path 					= e_CORE.'templates/'.$id.'_template.php';
+		$core_path 					= e_CORE.'templates/'.$id.'_template.php'; // default
+		$core_path_legacy 			= e_CORE.'templates/legacy/'.$id.'_template.php';
+		$core_path_bs4				= e_CORE.'templates/bootstrap4/'.$id.'_template.php';
 
 		if($override_path && is_readable($override_path)) // v2 override template.
 		{
@@ -2702,10 +2786,14 @@ class e107
 		{
 			return $legacy_override_path;
 		}
-		elseif(is_readable($legacy_core_path)) //v1 core template.
+		elseif(THEME_LEGACY === true && is_readable($core_path_legacy)) //v1 core template.
 		{
-		//	return $legacy_core_path; // just asking for trouble.
+			return $core_path_legacy;
 		}
+		elseif(defset('BOOTSTRAP') === 4 && is_readable($core_path_bs4))
+        {
+            return $core_path_bs4;
+        }
 
 		return $core_path;
 	}
@@ -2821,7 +2909,7 @@ class e107
 	 */
 	public static function getTemplate($plug_name, $id = null, $key = null, $override = true, $merge = false, $info = false)
 	{
-		if(null === $plug_name)
+		if(!$plug_name)
 		{
 			return self::getCoreTemplate($id, $key, $override, $merge, $info);
 		}
@@ -2836,6 +2924,15 @@ class e107
 		{
 			self::getMessage()->addDebug( "Attempting to load Template File: ".$path );
 		}
+
+		/**
+		 * "front" and "global" LANs might not be loaded come self::_getTemplate(),
+		 * so the following calls to self::plugLan() fix that.
+		 */
+		self::plugLan($plug_name, null, true);
+		self::plugLan($plug_name, null, false);
+		self::plugLan($plug_name, 'global', true);
+		self::plugLan($plug_name, 'global', false);
 
 		$id = str_replace('/', '_', $id);
 		$ret = self::_getTemplate($id, $key, $reg_path, $path, $info);
@@ -3145,6 +3242,11 @@ class e107
 	 */
 	public static function coreLan($fname, $admin = false)
 	{
+		if ($admin)
+		{
+			e107::includeLan(e_LANGUAGEDIR.e_LANGUAGE.'/admin/lan_admin.php');
+		}
+
 		$cstring  = 'corelan/'.e_LANGUAGE.'_'.$fname.($admin ? '_admin' : '_front');
 		if(self::getRegistry($cstring)) return;
 
@@ -3391,29 +3493,35 @@ class e107
 	}
 
 	/**
-	 * Static (easy) sef-url creation method (works with e_url.php @see /index.php)
+	 * Generate a plugin's search engine-friendly URL with HTML special characters escaped
+	 *
+	 * Can be spliced directly into HTML code like <a href="…"></a>
+	 *
+	 * Output is generated based on the plugin's e_url.php configuration
 	 *
 	 * @param string    $plugin - plugin folder name
 	 * @param string    $key assigned in e_url.php configuration.
 	 * @param array     $row Array of variables in url config.
-	 * @param array     $options  (optional) An associative array of additional options, with the following elements:
-	 * @param string    $options['mode']  abs | full
-	 * @param array     $options['query']  An array of query key/value-pairs (without any URL-encoding) to append to the URL.
-	 * @param string    $options['fragment'] A fragment identifier (named anchor) to append to the URL. Do not include the leading '#' character.
-	 * @param bool      $options['legacy'] When true legacy urls will be generated regardless of mod-rewrite status.
-	 * @return string
+	 * @param array     $options = [ // (optional) An associative array of additional options
+	 * 	'mode' => 'abs | full', // @see e_parse::replaceConstants()
+	 * 	'query' => [], // An array of query key/value-pairs (without any URL encoding) to append to the URL
+	 * 	'fragment' => '', // A fragment identifier (named anchor) to append to the URL. Do not include the leading '#' character
+	 * 	'legacy' => false, // When true, legacy URLs will be generated regardless of mod_rewrite status
+	 * 	]
+	 * @return string   The SEF URL with HTML special characters escaped
+	 *                  (equivalent to the htmlspecialchars() output)
 	 */
-	public static function url($plugin='', $key=null, $row=array(), $options = array())
+	public static function url($plugin = '', $key = null, $row = array(), $options = array())
 	{
 
 		/* backward compat - core keys. ie. news/xxx/xxx user/xxx/xxx etc, */
-		$legacy = array('news','page','search','user','download','gallery');
+		$legacy = array('news', 'page', 'search', 'user', 'download', 'gallery');
 
-		if(strpos($plugin,'/')!==false)
+		if (strpos($plugin, '/') !== false)
 		{
-			$tmp = explode("/",$plugin,2);
+			$tmp = explode("/", $plugin, 2);
 
-			if(in_array($tmp[0], $legacy))
+			if (in_array($tmp[0], $legacy))
 			{
 				return self::getUrl()->create($plugin, $key, $row);
 			}
@@ -3424,10 +3532,10 @@ class e107
 			$key = $tmp[1];
 		}
 
-		if(!$tmp = self::getRegistry('core/e107/addons/e_url'))
+		if (!$tmp = self::getRegistry('core/e107/addons/e_url'))
 		{
 			$tmp = self::getUrlConfig();
-			self::setRegistry('core/e107/addons/e_url',$tmp);
+			self::setRegistry('core/e107/addons/e_url', $tmp);
 		}
 
 		$tp = self::getParser();
@@ -3437,7 +3545,7 @@ class e107
 		$rootNamespace = self::getPref('url_main_module');
 
 
-		if(is_string($options)) // backwards compat.
+		if (is_string($options)) // backwards compat.
 		{
 			$options = array(
 				'mode' => $options,
@@ -3446,159 +3554,135 @@ class e107
 
 		// Merge in defaults.
 		$options += array(
-			'mode'     => 'abs',
+			'mode' => 'abs',
 			'fragment' => '',
-			'query'    => array(),
+			'query' => array(),
 		);
 
-		if(isset($options['fragment']) && $options['fragment'] !== '')
+		if (isset($options['fragment']) && $options['fragment'] !== '')
 		{
 			$options['fragment'] = '#' . $options['fragment'];
 		}
 
-		if(!empty($tmp[$plugin][$key]['sef']))
+		if (!empty($plugin) && empty($tmp[$plugin][$key]['sef']))
 		{
-			if(!empty($tmp[$plugin][$key]['alias']))
+			self::getMessage()->addDebug("e_url.php in <b>" . e_PLUGIN . $plugin . "</b> is missing the key: <b>" . $key . "</b>. Or, you may need to <a href='" . e_ADMIN . "db.php?mode=plugin_scan'>scan your plugin directories</a> to register e_url.php");
+			return false;
+		}
+
+		if (!empty($tmp[$plugin][$key]['alias']))
+		{
+			$alias = (!empty($pref[e_LAN][$plugin][$key])) ? $pref[e_LAN][$plugin][$key] : $tmp[$plugin][$key]['alias'];
+
+			if (!empty($rootNamespace) && $rootNamespace === $plugin)
 			{
-				$alias = (!empty($pref[e_LAN][$plugin][$key])) ? $pref[e_LAN][$plugin][$key] : $tmp[$plugin][$key]['alias'];
-
-				if(!empty($rootNamespace) && $rootNamespace === $plugin)
-				{
-					$replaceAlias = array('{alias}\/','{alias}/');
-					$tmp[$plugin][$key]['sef'] = str_replace($replaceAlias, '', $tmp[$plugin][$key]['sef']);
-				}
-				else
-				{
-					$tmp[$plugin][$key]['sef'] = str_replace('{alias}', $alias, $tmp[$plugin][$key]['sef']);
-				}
-
+				$replaceAlias = array('{alias}\/', '{alias}/');
+				$tmp[$plugin][$key]['sef'] = str_replace($replaceAlias, '', $tmp[$plugin][$key]['sef']);
+			}
+			else
+			{
+				$tmp[$plugin][$key]['sef'] = str_replace('{alias}', $alias, $tmp[$plugin][$key]['sef']);
 			}
 
+		}
 
-			preg_match_all('#{([a-z_]*)}#', $tmp[$plugin][$key]['sef'],$matches);
 
-			$active = true;
+		preg_match_all('#{([a-z_]*)}#', $tmp[$plugin][$key]['sef'], $matches);
 
-			foreach($matches[1] as $k=>$v) // check if a field value is missing, if so, revent to legacy url.
+		$active = true;
+
+		foreach ($matches[1] as $k => $v) // check if a field value is missing, if so, revert to legacy url.
+		{
+			if (!isset($row[$v]))
 			{
-				if(!isset($row[$v]))
-				{
-					self::getMessage()->addDebug("Missing value for ".$v." in ".$plugin."/e_url.php - '".$key."'");
-					$active = false;
-					break;
-				}
-			}
-
-			if(empty($sefActive[$plugin])) // SEF disabled.
-			{
-				self::getDebug()->log('SEF URL for <b>'.$plugin.'</b> disabled.');
+				self::getMessage()->addDebug("Missing value for " . $v . " in " . $plugin . "/e_url.php - '" . $key . "'");
 				$active = false;
+				break;
+			}
+		}
+
+		if (empty($sefActive[$plugin])) // SEF disabled.
+		{
+			self::getDebug()->log('SEF URL for <b>' . $plugin . '</b> disabled.');
+			$active = false;
+		}
+
+		if (deftrue('e_MOD_REWRITE') && ($active == true) && empty($options['legacy']))  // Search-Engine-Friendly URLs active.
+		{
+			$rawUrl = $tp->simpleParse($tmp[$plugin][$key]['sef'], $row);
+
+			if ($options['mode'] === 'full')
+			{
+				$sefUrl = SITEURL . $rawUrl;
+			}
+			elseif ($options['mode'] === 'raw')
+			{
+				$sefUrl = $rawUrl;
+			}
+			else
+			{
+				$sefUrl = e_HTTP . $rawUrl;
+			}
+		}
+		else // Legacy URL.
+		{
+
+			$srch = array();
+			$repl = array();
+
+			foreach ($matches[0] as $k => $val)
+			{
+				$srch[] = '$' . ($k + 1);
+				$repl[] = $val;
 			}
 
+			$template = isset($tmp[$plugin][$key]['legacy']) ? $tmp[$plugin][$key]['legacy'] : $tmp[$plugin][$key]['redirect'];
+
+			$urlTemplate = str_replace($srch, $repl, $template);
+			$urlTemplate = $tp->replaceConstants($urlTemplate, $options['mode']);
+			$legacyUrl = $tp->simpleParse($urlTemplate, $row);
+
+			$legacyUrl = preg_replace('/&?\$[\d]/i', "", $legacyUrl); // remove any left-over $x (including prefix of '&')
 
 
-			if(deftrue('e_MOD_REWRITE') && ($active == true) && empty($options['legacy']))  // Search-Engine-Friendly URLs active.
+			// Avoid duplicate query keys. eg. URL has ?id=x and $options['query']['id'] exists.
+			// @see forum/e_url.php - topic/redirect and forum/view_shortcodes.php sc_post_url()
+			list($legacyUrl, $tmp) = array_pad(explode("?", $legacyUrl), 2, null);
+
+			if (!empty($tmp))
 			{
-				$rawUrl = $tp->simpleParse($tmp[$plugin][$key]['sef'], $row);
-
-				if($options['mode'] === 'full')
+				if (strpos($tmp, '=') === false)
 				{
-					$sefUrl = SITEURL.$rawUrl;
-				}
-				elseif($options['mode'] === 'raw')
-				{
-					$sefUrl = $rawUrl;
+					// required for legacy urls of type "request.php?download.43"
+					// @see: issue #3275
+					$legacyUrl .= '?' . $tmp;
+					$options['query'] = null;
 				}
 				else
 				{
-					$sefUrl = e_HTTP.$rawUrl;
-				}
 
-				// Append the query.
-				if (is_array($options['query']) && !empty($options['query'])) {
-					$sefUrl .= (strpos($sefUrl, '?') !== FALSE ? '&' : '?') . self::httpBuildQuery($options['query']);
-				}
+					parse_str($tmp, $qry);
 
-				return $sefUrl . $options['fragment'];
-			}
-			else // Legacy URL.
-			{
-
-				$srch = array();
-				$repl = array();
-
-				foreach($matches[0] as $k=>$val)
-				{
-					$srch[] = '$'.($k+1);
-					$repl[] = $val;
-				}
-
-				$template = isset($tmp[$plugin][$key]['legacy']) ? $tmp[$plugin][$key]['legacy'] : $tmp[$plugin][$key]['redirect'];
-
-				$urlTemplate = str_replace($srch,$repl, $template);
-				$urlTemplate = $tp->replaceConstants($urlTemplate, $options['mode']);
-				$legacyUrl = $tp->simpleParse($urlTemplate, $row);
-
-				$legacyUrl = preg_replace('/&?\$[\d]/i', "", $legacyUrl); // remove any left-over $x (including prefix of '&')
-
-
-				// Avoid duplicate query keys. eg. URL has ?id=x and $options['query']['id'] exists.
-				// @see forum/e_url.php - topic/redirect and forum/view_shortcodes.php sc_post_url()
-				list($legacyUrl,$tmp) = explode("?",$legacyUrl);
-
-				if(!empty($tmp))
-				{
-					if (strpos($tmp, '=') === false)
+					foreach ($qry as $k => $v)
 					{
-						// required for legacy urls of type "request.php?download.43"
-						// @see: issue #3275
-						$legacyUrl .= '?' . $tmp;
-						$options['query'] = null;
-					}
-					else
-					{
-
-						parse_str($tmp,$qry);
-
-						foreach($qry as $k=>$v)
+						if (!isset($options['query'][$k])) // $options['query'] overrides any in the original URL.
 						{
-							if(!isset($options['query'][$k])) // $options['query'] overrides any in the original URL.
-							{
-								$options['query'][$k] = $v;
-							}
+							$options['query'][$k] = $v;
 						}
-
 					}
+
 				}
-
-				// Append the query.
-				if (is_array($options['query']) && !empty($options['query']))
-				{
-
-					$legacyUrl .= (strpos($legacyUrl, '?') !== FALSE ? '&' : '?') . self::httpBuildQuery($options['query']);
-				}
-
-				return $legacyUrl . $options['fragment'];
 			}
-
-
+			$sefUrl = $legacyUrl;
 		}
 
-		if(!empty($plugin))
+		// Append the query.
+		if (is_array($options['query']) && !empty($options['query']))
 		{
-			self::getMessage()->addDebug("e_url.php in <b>".e_PLUGIN.$plugin."</b> is missing the key: <b>".$key."</b>. Or, you may need to <a href='".e_ADMIN."db.php?mode=plugin_scan'>scan your plugin directories</a> to register e_url.php");
-		}
-		return false;
-
-		/*
-		elseif(varset($tmp[$plugin][$key]['redirect']))
-		{
-			return self::getParser()->replaceConstants($tmp[$plugin][$key]['redirect'],'full');
+			$sefUrl .= (strpos($sefUrl, '?') !== FALSE ? '&' : '?') . self::httpBuildQuery($options['query']);
 		}
 
-		return;
-		*/
-
+		return htmlspecialchars($sefUrl . $options['fragment'], ENT_QUOTES, 'UTF-8');
 	}
 
 
@@ -3643,7 +3727,7 @@ class e107
 	 * rawurlencode() (instead of urlencode()) all query parameters.
 	 * @param array $query The query parameter array to be processed, e.g. $_GET.
 	 * @param string $parent Internal use only. Used to build the $query array key for nested items.
-	 * @return array A rawurlencoded string which can be used as or appended to the URL query string.
+	 * @return string A rawurlencoded string which can be used as or appended to the URL query string.
 	 */
 	public static function httpBuildQuery(array $query, $parent = '')
 	{
@@ -3681,8 +3765,17 @@ class e107
 			return null;
 		}
 
-		require_once(e_HANDLER."jsshrink/Minifier.php");
-		return JShrink\Minifier::minify($js,$options);
+	//	require_once(e_HANDLER."jsshrink/Minifier.php");
+		try
+		{
+			$minified = JShrink\Minifier::minify($js,$options);
+		}
+		catch(Exception $e)
+		{
+			$minified = $js;
+		}
+
+		return $minified;
 	}
 
 
@@ -3870,7 +3963,12 @@ class e107
 		if(isset($GLOBALS['_E107']) && is_array($GLOBALS['_E107'])) $this->_E107 = & $GLOBALS['_E107'];
 
 		// remove ajax_used=1 from query string to avoid SELF problems, ajax should always be detected via e_AJAX_REQUEST constant
-		$_SERVER['QUERY_STRING'] = trim(str_replace(array('ajax_used=1', '&&'), array('', '&'), $_SERVER['QUERY_STRING']), '&');
+		$_SERVER['QUERY_STRING'] = trim(
+			str_replace(
+				array('ajax_used=1', '&&'),
+				array('', '&'),
+				(isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '')
+			), '&');
 
 		/* PathInfo doesn't break anything, URLs should be always absolute. Disabling the below forever.
 		// e107 uses relative url's, which are broken by "pretty" URL's. So for now we don't support / after .php
@@ -3938,57 +4036,32 @@ class e107
 			$regex = "/(base64_decode|chr|php_uname|fwrite|fopen|fputs|passthru|popen|proc_open|shell_exec|exec|proc_nice|proc_terminate|proc_get_status|proc_close|pfsockopen|apache_child_terminate|posix_kill|posix_mkfifo|posix_setpgid|posix_setsid|posix_setuid|phpinfo) *?\((.*) ?\;?/i";
 			if(preg_match($regex,$input))
 			{
-				header('HTTP/1.0 400 Bad Request', true, 400);
-				if(deftrue('e_DEBUG'))
-				{
-					echo "Bad Request: ".__METHOD__." : ". __LINE__;
-				}
-				exit();
+				self::die_http_400();
 			}
 
 			// Check for XSS JS
 			$regex = "/(document\.location|document\.write|document\.cookie)/i";
 			if(preg_match($regex,$input))
 			{
-				header('HTTP/1.0 400 Bad Request', true, 400);
-				if(deftrue('e_DEBUG'))
-				{
-					echo "Bad Request: ".__METHOD__." : ". __LINE__;
-				}
-				exit();
+				self::die_http_400();
 			}
 
 
 			// Suspicious HTML.
 			if(strpos($input, '<body/onload')!==false)
 			{
-				header('HTTP/1.0 400 Bad Request', true, 400);
-				if(deftrue('e_DEBUG'))
-				{
-					echo "Bad Request: ".__METHOD__." : ". __LINE__;
-				}
-				exit();
+				self::die_http_400();
 			}
 
 			if(preg_match("/system\((.*);.*\)/i",$input))
 			{
-				header('HTTP/1.0 400 Bad Request', true, 400);
-				if(deftrue('e_DEBUG'))
-				{
-					echo "Bad Request: ".__METHOD__." : ". __LINE__;
-				}
-				exit();
+				self::die_http_400();
 			}
 
 			$regex = "/(wget |curl -o |lwp-download|onmouse)/i";
 			if(preg_match($regex,$input))
 			{
-				header('HTTP/1.0 400 Bad Request', true, 400);
-				if(deftrue('e_DEBUG'))
-				{
-					echo "Bad Request: ".__METHOD__." : ". __LINE__;
-				}
-				exit();
+				self::die_http_400();
 			}
 
 		}
@@ -3997,12 +4070,7 @@ class e107
 		{
 			if(stripos($input, "<script")!==false || stripos($input, "%3Cscript")!==false)
 			{
-				header('HTTP/1.0 400 Bad Request', true, 400);
-				if(deftrue('e_DEBUG'))
-				{
-					echo "Bad Request: ".__METHOD__." : ". __LINE__;
-				}
-				exit();
+				self::die_http_400();
 			}
 
 		}
@@ -4017,37 +4085,12 @@ class e107
 				|| stripos($input,"%3cscript")!==FALSE
 				))
 			{
-
-				header('HTTP/1.0 400 Bad Request', true, 400);
-				if(deftrue('e_DEBUG'))
-				{
-					echo "Bad Request: ".__METHOD__." : ". __LINE__;
-				}
-				exit();
-			}
-
-			if(($key == "QUERY_STRING") && empty($_GET['hauth_done']) && empty($_GET['hauth.done']) && ( // exception for hybridAuth.
-				strpos(strtolower($input),"=http")!==FALSE
-				|| strpos(strtolower($input),strtolower("http%3A%2F%2F"))!==FALSE
-				))
-			{
-
-				header('HTTP/1.0 400 Bad Request', true, 400);
-				if(deftrue('e_DEBUG'))
-				{
-					echo "Bad Request: ".__METHOD__." : ". __LINE__;
-				}
-				exit();
+				self::die_http_400();
 			}
 
 			if(($key == "HTTP_USER_AGENT") && strpos($input,"libwww-perl")!==FALSE)
 			{
-				header('HTTP/1.0 400 Bad Request', true, 400);
-				if(deftrue('e_DEBUG'))
-				{
-					echo "Bad Request: ".__METHOD__." : ". __LINE__;
-				}
-				exit();
+				self::die_http_400();
 			}
 
 
@@ -4055,12 +4098,7 @@ class e107
 
 		if(strpos(str_replace('.', '', $input), '22250738585072011') !== FALSE) // php-bug 53632
 		{
-			header('HTTP/1.0 400 Bad Request', true, 400);
-			if(deftrue('e_DEBUG'))
-			{
-				echo "Bad Request: ".__METHOD__." : ". __LINE__;
-			}
-			exit();
+			self::die_http_400();
 		}
 
 		if($base64 != true)
@@ -4118,13 +4156,16 @@ class e107
 		$subdomain = false;
 
 		// Define the domain name and subdomain name.
-		if(is_numeric(str_replace(".","",$_SERVER['HTTP_HOST'])))
+		if (is_numeric(str_replace(".", "",
+			(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '')
+		)))
 		{
 			$domain = false;
 			$subdomain = false;
 		}
 		else
 		{
+			$_SERVER['SERVER_NAME'] = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
 			$host = !empty($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
 			$domain = preg_replace('/^www\.|:\d*$/', '', $host); // remove www. and port numbers.
 
@@ -4200,9 +4241,12 @@ class e107
 	{
 		// ssl_enabled pref not needed anymore, scheme is auto-detected
 		$this->HTTP_SCHEME = 'http';
-		if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443)
+		if (
+			(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') ||
+			(!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)
+		)
 		{
-			$this->HTTP_SCHEME =  'https';
+			$this->HTTP_SCHEME = 'https';
 		}
 
 		$path = ""; $i = 0;
@@ -4250,6 +4294,7 @@ class e107
 
 
 		$this->relative_base_path = (!self::isCli()) ? $path : e_ROOT;
+		$_SERVER['HTTP_HOST'] = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
 		$this->http_path =  filter_var("http://{$_SERVER['HTTP_HOST']}{$this->server_path}", FILTER_SANITIZE_URL);
 		$this->https_path = filter_var("https://{$_SERVER['HTTP_HOST']}{$this->server_path}", FILTER_SANITIZE_URL);
 
@@ -4277,11 +4322,11 @@ class e107
 		}
 
 		//BC temporary fixes
-		if (!isset($this->e107_dirs['UPLOADS_SERVER']) && $this->e107_dirs['UPLOADS_DIRECTORY']{0} == "/")
+		if (!isset($this->e107_dirs['UPLOADS_SERVER']) && $this->e107_dirs['UPLOADS_DIRECTORY'][0] == "/")
 		{
 			$this->e107_dirs['UPLOADS_SERVER'] = $this->e107_dirs['UPLOADS_DIRECTORY'];
 		}
-		if (!isset($this->e107_dirs['DOWNLOADS_SERVER']) && $this->e107_dirs['DOWNLOADS_DIRECTORY']{0} == "/")
+		if (!isset($this->e107_dirs['DOWNLOADS_SERVER']) && $this->e107_dirs['DOWNLOADS_DIRECTORY'][0] == "/")
 		{
 			$this->e107_dirs['DOWNLOADS_SERVER'] = $this->e107_dirs['DOWNLOADS_DIRECTORY'];
 		}
@@ -4536,6 +4581,7 @@ class e107
 		$isPluginDir = strpos($_self,'/'.$PLUGINS_DIRECTORY) !== FALSE;		// True if we're in a plugin
 		$e107Path = str_replace($this->base_path, '', $_self);				// Knock off the initial bits
 		$curPage = basename($_SERVER['SCRIPT_FILENAME']);
+		$_SERVER['REQUEST_URI'] = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
 
 		if	(
 			 (!$isPluginDir && strpos($e107Path, $ADMIN_DIRECTORY) === 0 ) 									// Core admin directory
@@ -4617,7 +4663,7 @@ class e107
 	public function set_request($no_cbrace = true)
 	{
 
-		$inArray = array("'", ';', '/**/', '/UNION/', '/SELECT/', 'AS ');
+		$inArray = array("'", '/**/', '/UNION/', '/SELECT/', 'AS ');
 		if (strpos($_SERVER['PHP_SELF'], 'trackback') === false)
 		{
 			foreach($inArray as $res)
@@ -5106,7 +5152,7 @@ class e107
 			break;
 		}
 
-		$this->{$name} = $ret;
+		$this->$name = $ret;
 		return $ret;
 	}
 
@@ -5225,7 +5271,12 @@ class e107
 
 e107::autoload_register(array(e107::class, 'autoload'));
 
-
+// Forward compatibility with e107 v3 Composer autoloading
+$vendor_autoload_file = __DIR__."/vendor/autoload.php";
+if (file_exists($vendor_autoload_file))
+{
+	include_once($vendor_autoload_file);
+}
 
 /**
  * Interface e_admin_addon_interface @move to separate addons file?

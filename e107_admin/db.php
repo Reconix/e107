@@ -326,13 +326,16 @@ class system_tools
 	// Developer Mode ONly.. No LANS required. 
 	private function githubSync()
 	{
-
 		$frm = e107::getForm();
 		$mes = e107::getMessage();
+		$pref = e107::pref();
 
-		//	$message = DBLAN_70;
-		//	$message .= "<br /><a class='e-ajax btn btn-success' data-loading-text='".DBLAN_71."' href='#backupstatus' data-src='".e_SELF."?mode=backup' >".LAN_CREATE."</a>";
-
+		if(empty($pref['developer']))
+		{
+			e107::getMessage()->addError("Developer mode has to be enabled in order to use this functionality!");
+			e107::getRender()->tablerender(DBLAN_10.SEP.DBLAN_112, $mes->render());
+			return;
+		}
 
 		// Check for minimum required PHP version, and display warning instead of sync button to avoid broken functionality after syncing
 		// MIN_PHP_VERSION constant only defined in install.php, thus hardcoded here
@@ -340,7 +343,7 @@ class system_tools
 		
 		if(version_compare(PHP_VERSION, $min_php_version, "<"))
 		{
-			$mes->addWarning("The minimum required PHP version is <strong>".$min_php_version."</strong>. You are using PHP version <strong>".PHP_VERSION."</strong>. <br /> Syncing with Github has been disabled to avoid broken fuctionality."); // No nee to translate, developer mode only
+			$mes->addWarning("The minimum required PHP version is <strong>".$min_php_version."</strong>. You are using PHP version <strong>".PHP_VERSION."</strong>. <br /> Syncing with Github has been disabled to avoid broken fuctionality."); // No need to translate, developer mode only
 		}
 		else 
 		{
@@ -352,7 +355,6 @@ class system_tools
 			$mes->addInfo($message);
 		} 
 		
-		//	$text = "<div id='backupstatus' style='margin-top:20px'></div>";
 
 		e107::getRender()->tablerender(DBLAN_10.SEP.DBLAN_112, $mes->render());
 	}
@@ -392,6 +394,8 @@ class system_tools
 		}
 
 		e107::getRender()->tablerender(DBLAN_10.SEP.DBLAN_112, e107::getMessage()->render());
+
+		e107::getCache()->clearAll('system');
 
 	}
 
@@ -1571,9 +1575,14 @@ class system_tools
 
 		$plg->buildAddonPrefLists();
 
+		$plgClass = e107::getPlugin();
+
+
 		foreach($plg->getDetected() as $folder)
 		{
 			$plg->load($folder);
+			$plgClass->plugFolder = $folder;
+			$plgClass->XmlLanguageFiles('refresh');
 
 			$name   = $plg->getName();
 			$addons = $plg->getAddons();

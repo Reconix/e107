@@ -61,7 +61,7 @@ class comment
 				
 		global $COMMENTSTYLE;
 			
-		if (!$COMMENTSTYLE)
+		if (empty($COMMENTSTYLE) || !deftrue('THEME_LEGACY')) // v2.x
 		{		
 			require(e107::coreTemplatePath('comment'));	 // using require_once() could cause an empty template if the template is already loaded, for example, by the comment-menu al
 		}
@@ -313,7 +313,7 @@ class comment
 		else
 		{ // Comment entry not allowed - point to signup link
 			$userReg = intval(e107::pref('core','user_reg'));
-			$socialLogin = e107::pref('core','social_login_active');
+			$socialLogin = e107::getUserProvider()->isSocialLoginEnabled();
 
 			$text = "<div class='comments-form-login'>";
 

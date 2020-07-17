@@ -103,7 +103,7 @@ class alt_login
 
 			if (MAGIC_QUOTES_GPC == FALSE)
 			{
-				$username = mysql_real_escape_string($username);
+				$username = e107::getParser()->toDB($username);
 			}
 			$username = preg_replace("/\sOR\s|\=|\#/", "", $username);
 			$username = substr($username, 0, e107::getPref('loginname_maxlength'));
@@ -153,9 +153,9 @@ class alt_login
 			{
 				$qry = "SELECT * FROM `#user` WHERE ".$ulogin->getLookupQuery($username, FALSE);
 			}
-			if($aa_sql -> db_Select_gen($qry))
+			if($aa_sql->gen($qry))
 			{ // Existing user - get current data, see if any changes
-				$row = $aa_sql->db_Fetch();
+				$row = $aa_sql->fetch();
 				foreach ($db_vals as $k => $v)
 				{
 					if ($row[$k] == $v) unset($db_vals[$k]);
@@ -209,7 +209,7 @@ class alt_login
 				$userMethods->userClassUpdate($db_vals, 'userall');
 				$newUser = array();
 				$newUser['data'] = $db_vals;
-				$userMethods->addNonDefaulted($newUser);
+				$userMethods->addNonDefaulted($newUser['data']); 
 				validatorClass::addFieldTypes($userMethods->userVettingInfo,$newUser);
 				
 				$newID = $aa_sql->insert('user',$newUser);
@@ -251,6 +251,7 @@ class alt_login
 					$this->loginResult = LOGIN_ABORT;
 					return;
 				case AUTH_BADPASSWORD:
+				case AUTH_NOUSER:
 					if(varset(e107::getPref('auth_badpassword'), TRUE))
 					{
 						$this->loginResult = LOGIN_TRY_OTHER;

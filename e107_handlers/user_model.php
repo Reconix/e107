@@ -266,7 +266,7 @@ class e_user_model extends e_admin_model
 
 	final public function isBot()
 	{
-		$userAgent = $_SERVER['HTTP_USER_AGENT'];
+		$userAgent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
 
 		if(empty($userAgent))
 		{
@@ -811,7 +811,8 @@ class e_user_model extends e_admin_model
 	{
 		if($this->get('user_xup'))
 		{
-			return array_shift(explode('_', $this->get('user_xup')));
+			$provider = explode('_', $this->get('user_xup'));
+			return array_shift($provider);
 		}
 		return null;
 	}
@@ -1497,12 +1498,13 @@ class e_user extends e_user_model
 	private $_parent_config = null;
 	
 	/**
-	 * @var Hybrid_Provider_Model
+	 * @var e_user_provider|null
 	 */
 	protected $_provider;
 
 	public function __construct()
 	{
+		parent::__construct();
 		$this->setSessionData() // retrieve data from current session
 			->load() // load current user from DB
 			->setEditor($this); // reference to self
@@ -1531,7 +1533,7 @@ class e_user extends e_user_model
 	
 	/**
 	 * Init external user login/signup provider
-	 * @return e_system_user
+	 * @return e_user
 	 */
 	public function initProvider()
 	{
@@ -1540,15 +1542,15 @@ class e_user extends e_user_model
 		if($this->get('user_xup'))
 		{
 			$providerId = $this->getProviderName();
-			require_once(e_HANDLER.'user_handler.php');
-			$this->_provider = new e_user_provider($providerId);
-			$this->_provider->init();
+			$this->_provider = e107::getUserProvider($providerId);
 		}
+
+		return $this;
 	}
 	
 	/**
 	 * Get external user provider
-	 * @return Hybrid_Provider_Model
+	 * @return e_user_provider|null
 	 */
 	public function getProvider()
 	{
@@ -1608,7 +1610,7 @@ class e_user extends e_user_model
 	 */
 	final public function loginProvider($xup)
 	{
-		if(!e107::getPref('social_login_active', false))  return false;
+		if(!e107::getUserProvider()->isSocialLoginEnabled())  return false;
 		
 		if($this->isUser()) return true;
 		
@@ -1719,101 +1721,6 @@ class e_user extends e_user_model
 		$this->_destroyAsSession();
 		return $this;
 	}
-	
-	public function tryProviderSession($deniedAs)
-	{
-		// don't allow if main admin browse front-end or there is already user session
-		if((!$deniedAs && $this->getSessionDataAs()) || null !== $this->_session_data || !e107::getPref('social_login_active', false)) return $this;
-		
-		try
-		{
-			// detect all currently connected providers
-			$hybrid = e107::getHybridAuth(); // init the auth class
-			$connected = Hybrid_Auth::getConnectedProviders();
-		}
-		catch(Exception $e)
-		{
-			e107::getMessage()->addError('['.$e->getCode().']'.$e->getMessage(), 'default', true);
-			$session = e107::getSession();
-			$session->set('HAuthError', true);
-			$connected = false;
-		}
-		// no active session found 
-		if(!$connected) return $this;
-		
-		// query DB
-		$sql = e107::getDb();
-		$where = array();
-		$userdata = array();
-
-		foreach ($connected as $providerId) 
-		{
-			$adapter = Hybrid_Auth::getAdapter($providerId);
-			
-			if(!$adapter->getUserProfile()->identifier) continue;
-
-			$profile = $adapter->getUserProfile();
-
-			$userdata['user_name']  = $sql->escape($profile->displayName);
-			$userdata['user_image'] = $profile->photoURL; // avatar
-			$userdata['user_email'] = $profile->email;
-
-			$id = $providerId.'_'.$profile->identifier;
-			$where[] = "user_xup='".$sql->escape($id)."'";
-		}
-
-
-		$where = implode(' OR ', $where);
-		if($sql->select('user', 'user_id, user_name, user_email, user_image, user_password, user_xup', $where))
-		{
-
-			$user = $sql->fetch();
-			e107::getUserSession()->makeUserCookie($user);
-			$this->setSessionData();
-
-			$spref = e107::pref('social');
-
-			// Update display name or avatar image if they have changed.
-			if(( empty($user['user_email']) && !empty($userdata['user_email']) ) || !empty($spref['xup_login_update_username']) || !empty($spref['xup_login_update_avatar']) || ($userdata['user_name'] != $user['user_name']) || ($userdata['user_image'] != $user['user_image']))
-			{
-				$updateQry = array();
-
-				if(!empty($spref['xup_login_update_username']))
-				{
-					$updateQry['user_name'] = $userdata['user_name'];
-				}
-
-				if(!empty($spref['xup_login_update_avatar']))
-				{
-					$updateQry['user_image'] = $userdata['user_image'];
-				}
-
-				if(empty($user['user_email']))
-				{
-					$updateQry['user_email'] = $userdata['user_email'];
-				}
-
-				$updateQry['WHERE'] = "user_id=".$user['user_id']." LIMIT 1";
-
-				if($sql->update('user', $updateQry) !==false)
-				{
-					$updatedProfile = array_replace($user, $userdata);
-					e107::getEvent()->trigger('user_xup_updated', $updatedProfile);
-					e107::getLog()->add('User Profile Updated', $userdata, E_LOG_INFORMATIVE, "XUP_LOGIN", LOG_TO_ADMIN, array('user_id'=>$user['user_id'],'user_name'=>$user['user_name'], 'user_email'=>$userdata['user_email']));
-				}
-				else
-				{
-					e107::getLog()->add('User Profile Update Failed', $userdata, E_LOG_WARNING, "XUP_LOGIN", LOG_TO_ADMIN, array('user_id'=>$user['user_id'],'user_name'=>$user['user_name'], 'user_email'=>$userdata['user_email']));
-				}
-			}
-
-			unset($user['user_password']);
-			e107::getLog()->user_audit(USER_AUDIT_LOGIN,'', $user['user_id'], $user['user_name']);
-			// e107::getLog()->add('XUP Login', $user, E_LOG_INFORMATIVE, "LOGIN", LOG_TO_ROLLING, array('user_id'=>$user['user_id'],'user_name'=>$user['user_name']));
-		}
-		
-		return $this;
-	}
 
 	/**
 	 * TODO load user data by cookie/session data
@@ -1833,9 +1740,6 @@ class e_user extends e_user_model
 			return $this;
 		}
 		
-		// NEW - new external user login provider feature
-		$this->tryProviderSession($denyAs);
-
 		// We have active session
 		if(null !== $this->_session_data)
 		{
@@ -1873,7 +1777,7 @@ class e_user extends e_user_model
 				$this->_initConstants();
 				
 				// init any available external user provider
-				if(e107::getPref('social_login_active', false)) $this->initProvider();
+				if(e107::getUserProvider()->isSocialLoginEnabled()) $this->initProvider();
 				
 				return $this;
 			}

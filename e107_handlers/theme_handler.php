@@ -57,6 +57,8 @@ class e_theme
 
 	function __construct($options=array())
 	{
+		$options['force'] = isset($options['force']) ? $options['force'] : false;
+
 		if(!empty($options['themedir']))
 		{
 			$this->_current = $options['themedir'];
@@ -79,7 +81,7 @@ class e_theme
 
 	/**
 	 * Load theme layout from html files
-	 * Required theme.html file in the theme root directory.
+	 * Requires theme.html file in the theme root directory.
 	 * @param string $key layout name
 	 * @return array|bool
 	 */
@@ -827,7 +829,7 @@ class e_theme
 		$vars['name'] 			= varset($vars['@attributes']['name']);
 		$vars['version'] 		= varset($vars['@attributes']['version']);
 		$vars['date'] 			= varset($vars['@attributes']['date']);
-		$vars['compatibility'] 	= varset($vars['@attributes']['compatibility']);
+		$vars['compatibility'] 	= !empty($vars['@attributes']['compatibility']) ? $tp->filter($vars['@attributes']['compatibility'], 'version') : '';
 		$vars['releaseUrl'] 	= varset($vars['@attributes']['releaseUrl']);
 		$vars['email'] 			= varset($vars['author']['@attributes']['email']);
 		$vars['website'] 		= varset($vars['author']['@attributes']['url']);
@@ -970,18 +972,13 @@ class e_theme
 			unset($vars['glyphicons']);
 		}
 
-		if($path == "landingzero" )
-		{
-
-		//	e107::getMessage()->addDebug("<h2>".$path."</h2>");
-		//	e107::getMessage()->addDebug(print_a($vars,true));
-		//	$mes->addDebug("<hr />");
-		}
 
 		if($path == "bootstrap3" )
 		{
-	//		print_a($vars);
-		//	echo "<table class='table'><tr><td>".print_a($vars,true)."</td><td>".print_a($adv,true)."</td></tr></table>";
+            //	e107::getMessage()->addDebug("<h2>".$path."</h2>");
+            //	e107::getMessage()->addDebug(print_a($vars,true));
+            //	print_a($vars);
+            //	echo "<table class='table'><tr><td>".print_a($vars,true)."</td><td>".print_a($adv,true)."</td></tr></table>";
 		}
 
 
@@ -1868,13 +1865,23 @@ class themeHandler
 			$theme['compatibility'] = '2.0';
 		}
 
+		$version = e107::getParser()->filter(e_VERSION,'version');
+
+		$compatLabel = TPVLAN_77;
+		$compatLabelType = 'warning';
+
+		if(version_compare($theme['compatibility'],$version, '<=') === false)
+		{
+			$compatLabelType = 'danger';
+			$compatLabel = defset('TPVLAN_97', "This theme requires a newer version of e107.");
+		}
 
 		global $pref;
 		$author 		= !empty($theme['email']) ? "<a href='mailto:".$theme['email']."' title='".$theme['email']."'>".$theme['author']."</a>" : $theme['author'];
 		$website 		= !empty($theme['website']) ? "<a href='".$theme['website']."' rel='external'>".$theme['website']."</a>" : "";
 //		$preview 		= "<a href='".SITEURL."news.php?themepreview.".$theme['id']."' title='".TPVLAN_9."' >".($theme['preview'] ? "<img src='".$theme['preview']."' style='border: 1px solid #000;width:200px' alt='' />" : "<img src='".e_IMAGE_ABS."admin_images/nopreview.png' title='".TPVLAN_12."' alt='' />")."</a>";
 		$description 	= vartrue($theme['description'],'');
-		$compat			= (version_compare(1.9,$theme['compatibility'],'<')) ? "<span class='label label-warning'>".$theme['compatibility']."</span><span class='text-warning'> ".TPVLAN_77."</span>": vartrue($theme['compatibility'],'1.0');
+		$compat			= (version_compare(1.9,$theme['compatibility'],'<')) ? "<span class='label label-".$compatLabelType."'>".$theme['compatibility']."</span><span class='text-".$compatLabelType."'> ".$compatLabel."</span>": vartrue($theme['compatibility'],'1.0');
 		$price 			= (!empty($theme['price'])) ? "<span class='label label-primary'><i class='icon-shopping-cart icon-white'></i> ".$theme['price']."</span>" : "<span class='label label-success'>".TPVLAN_76."</span>";
 
 		$text = e107::getForm()->open('theme-info','post');
@@ -2044,6 +2051,12 @@ class themeHandler
 			if(class_exists('theme_config')) // new v2.1.4 theme_config is the class name.
 			{
 				$this->themeConfigObj = new theme_config();
+
+				if(!$this->themeConfigObj instanceof e_theme_config)
+				{
+				    // debug - no need to translate.
+                    e107::getMessage()->addWarning("class <b>theme_config</b> is missing 'implements e_theme_config'");
+                }
 
 				if(class_exists('theme_config_form')) // new v2.1.7
 				{
@@ -3281,11 +3294,12 @@ interface e_theme_config
 
 /**
  * Interface e_theme_render
+ * @see e107_themes/bootstrap3/theme.php
  * @see e107_themes/bootstrap3/admin_theme.php
  */
 interface e_theme_render
 {
-	public function tablestyle($caption, $text, $mode, $data);
+	public function tablestyle($caption, $text, $mode='', $data=array());
 
 }
 

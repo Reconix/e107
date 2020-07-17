@@ -125,10 +125,10 @@ if (!$dont_check_update)
 //	$dbupdate['218_to_219'] = array('master'=>false, 'title'=> e107::getParser()->lanVars($LAN_UPDATE_4, array('2.1.8','2.1.9')), 'message'=> null, 'hide_when_complete'=>true);
 
 //	$dbupdate['217_to_218'] = array('master'=>false, 'title'=> e107::getParser()->lanVars($LAN_UPDATE_4, array('2.1.7','2.1.8')), 'message'=> null, 'hide_when_complete'=>true);
-
-	$dbupdate['20x_to_220'] = array('master'=>false, 'title'=> e107::getParser()->lanVars($LAN_UPDATE_4, array('2.x','2.2.0')), 'message'=> null, 'hide_when_complete'=>false);
-	
 	$dbupdate['706_to_800'] = array('master'=>true, 'title'=> e107::getParser()->lanVars($LAN_UPDATE_4, array('1.x','2.0')), 'message'=> LAN_UPDATE_29, 'hide_when_complete'=>true);
+
+	$dbupdate['20x_to_220'] = array('master'=>true, 'title'=> e107::getParser()->lanVars($LAN_UPDATE_4, array('2.x','2.2.0')), 'message'=> null, 'hide_when_complete'=>false);
+	
 
 
 	// always run these last.
@@ -186,10 +186,7 @@ class e107Update
 		$tp = e107::getParser();
 		$sql = e107::getDb();
 
-
-	//	foreach($this->core as $func => $data)
-	//	{
-			if(function_exists('update_'.$func)) // Legacy Method. 
+			if(function_exists('update_'.$func)) // Legacy Method.
 			{
 				$installed = call_user_func("update_".$func);
 				//?! (LAN_UPDATE == $_POST[$func])
@@ -210,6 +207,10 @@ class e107Update
 						{
 							 $mes->add($message, E_MESSAGE_SUCCESS);
 							 e107::getCache()->clear_sys('Update_core');
+							 $search = ['[',']'];
+							 $replace = ["<a class='alert-link' href='".e_ADMIN."fileinspector.php'>", "</a>"];
+							 $fileInspectorMessage = LAN_UPDATE_58; // running file-inspector is recommended..
+							 $mes->addInfo(str_replace($search,$replace, $fileInspectorMessage));
 						}
 					}
 				}	
@@ -219,7 +220,7 @@ class e107Update
 				$mes->addDebug("could not run 'update_".$func);
 			}
 
-		//}
+
 		
 	}
 	
@@ -401,7 +402,7 @@ function update_check()
 			if(function_exists('update_' . $func))
 			{
 
-				$sql->db_Mark_Time('Check Core Update_' . $func . ' ');
+				e107::getDebug()->logTime('Check Core Update_' . $func . ' ');
 				if(!call_user_func('update_' . $func, false))
 				{
 					$dbUpdatesPref[$func] = 0;
@@ -766,7 +767,7 @@ function update_706_to_800($type='')
 				);
 
 	// List of DB tables not required (includes a few from 0.6xx)
-	$obs_tables = array('flood',  'stat_info', 'stat_counter', 'stat_last', 'session', 'preset', 'tinymce');
+	$obs_tables = array('flood',  'stat_info', 'stat_counter', 'stat_last',  'preset', 'tinymce');
 
 
 	// List of DB tables newly required  (defined in core_sql.php) (The existing dblog table gets renamed)
@@ -1411,7 +1412,7 @@ function update_706_to_800($type='')
 				'mail_body' => $row['gen_chardata'],
 				'mail_content_status' => MAIL_STATUS_SAVED
 			);
-			$mailHandler->mailtoDb($mailRecord, TRUE);
+			$mailHandler->mailToDb($mailRecord, TRUE);
 			$mailHandler->saveEmail($mailRecord, TRUE);
 			$sql2->delete('generic', 'gen_id='.intval($row['gen_id']));		// Delete as we go in case operation fails part way through
 			$i++;
@@ -1437,8 +1438,8 @@ function update_706_to_800($type='')
 		e107::getConfig()->save(false,true,false);
 
 	  	$ep = e107::getPlugin();
-		$ep->update_plugins_table($mode); // scan for e_xxx changes and save to plugin table.
-		$ep->save_addon_prefs($mode); // generate global e_xxx_list prefs from plugin table.
+		$ep->update_plugins_table(); // scan for e_xxx changes and save to plugin table.
+		$ep->save_addon_prefs(); // generate global e_xxx_list prefs from plugin table.
 	}
 	
 	 	
@@ -1935,7 +1936,7 @@ function update_70x_to_706($type='')
 	  {
 		$mesg = LAN_UPDATE_12." : <a href='".e_ADMIN."db.php?plugin'>".ADLAN_145."</a>.";
         //$ns -> tablerender(LAN_ERROR,$mes);
-        $emessage->add($mesg, E_MESSAGE_ERROR);
+        e107::getMessage()->add($mesg, E_MESSAGE_ERROR);
        	catch_error($sql);
 	  }
 	}
@@ -2084,7 +2085,7 @@ function addIndexToTable($target, $indexSpec, $just_check, &$updateMessages, $op
 
 /**	Check for database access errors
  *	@param reference $target - pointer to db object
- *	@return none
+ *	@return null
  */
 function catch_error(&$target)
 {
@@ -2094,7 +2095,7 @@ function catch_error(&$target)
 		$tmp = $target->getLastErrorText();
 		echo $tmp." [ ".basename(__FILE__)." on line ".$tmp2[0]['line']."] <br />";
 	}
-	return;
+	return null;
 }
 
 

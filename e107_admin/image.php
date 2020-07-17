@@ -485,11 +485,11 @@ class media_form_ui extends e_admin_form_ui
 		     return FALSE;
 		    // return $this;
 		}
-		if($WM) // TODO Add watermark prefs for alpha and position. 
+	/*	if($WM) // TODO Add watermark prefs for alpha and position.
 		{
 			$thumb->resize($img_import_w,$img_import_h)->addWatermark($watermark, 'rightBottom', 30, 0, 0)->save($oldpath); 
 		}
-		else
+		else*/
 		{
 		 	if($thumb->resize($img_import_w,$img_import_h)->save($oldpath))
 			{
@@ -713,71 +713,73 @@ class media_form_ui extends e_admin_form_ui
 		return "<div class='nowrap'>".$text."</div>";
 		
 	}
-	
+
+
+	private function getMediaType()
+	{
+		list($type,$extra) 	= explode("/",$this->getController()->getFieldVar('media_type'));
+		$category = $this->getController()->getFieldVar('media_category');
+		if(strpos($category, '_icon') === 0)
+		{
+			$type = 'icon';
+		}
+
+		return $type;
+	}
 
 	function media_preview($curVal, $mode, $attributes, $id=null)
 	{
-		
-		$attributes['type'] = 'image';
-		
-		switch($mode)
+		if($mode == 'filter' || $mode === 'batch' || $mode == 'inline')
 		{
-			case 'read':
-				if($this->getController()->getAction() === 'grid')
-				{
-					$tp = e107::getParser();
-					$img = $this->getController()->getFieldVar('media_url');
-					$size = 400;
-					return $tp->toImage($img, array('w'=>$size,'h'=>$size, 'crop'=>1));
-				}
-
-				$attributes['readParms'] = 'thumb=60&thumb_urlraw=0&thumb_aw=60';
-				$val 	= $this->getController()->getListModel()->get('media_url');	
-			break;
-
-			case 'write':
-				$attributes['readParms'] = 'thumb=180&thumb_urlraw=0&thumb_aw=180';
-				$val 	= $this->getController()->getModel()->get('media_url');		
-			break;
-
-			case 'filter':
-			case 'batch':
-				return '';
-			break;
+			return null;
 		}
 
-		return $this->renderValue('media_preview', $val, $attributes, $id);
+		$attributes['type'] = 'image';
+		$value = $this->getController()->getFieldVar('media_url');
+		$type = $this->getMediaType();
+
+		if($this->getController()->getAction() === 'grid')
+		{
+			$size = 250;
+			return "<div style='min-height:250px'>".e107::getMedia()->previewTag($value, array('type'=>$type, 'w'=>250, 'h'=>$size, 'crop'=>1))."</div>";
+		}
+
+		$size = ($mode === 'write') ? 400 : 180;
+
+		return e107::getMedia()->previewTag($value, array('type'=>$type, 'w'=>$size, 'h'=>$size));
+
 	}
 
 
 	function media_sef($curVal, $mode, $attributes, $id=null)
 	{
+		if($mode == 'filter' || $mode == 'batch')
+		{
+			return null;
+		}
+
 
 		$val = $this->getController()->getFieldVar('media_url');
+		$type = $this->getMediaType();
 
-		$parm = array('w'=>800);
-		$path = e107::getParser()->thumbUrl($val,$parm);
-
-		$base = '';
-		switch($mode)
+		switch($type)
 		{
-		/*	case 'read':
-				return ltrim($path, e_HTTP);
-			break;*/
+            case "application":
+			case "audio":
+			case "icon":
+            case "file":
+            case "video":
+				$path = e107::getParser()->replaceConstants($val, 'abs');
+				break;
 
-			case 'read':
-			case 'write':
-			//	$attributes['readParms'] = 'thumb=180&thumb_urlraw=0&thumb_aw=180';
-			//	$val 	= $this->getController()->getModel()->get('media_url');
-				$url = SITEURLBASE.$path;
-				return "<a href='".$url."' rel='external' title='".LAN_EFORM_010."'><small>".$url."</small></a>";
-			break;
-
-			case 'filter':
-			case 'batch':
-				return '';
-			break;
+			default:
+				$parm = array('w'=>800);
+				$path = e107::getParser()->thumbUrl($val,$parm);
+				// code to be executed if n is different from all labels;
 		}
+
+        $url = SITEURLBASE.$path;
+        return "<a href='".$url."' rel='external' title='".LAN_EFORM_010."'><small>".$url."</small></a>";
 
 
 	}
@@ -1864,7 +1866,7 @@ class media_admin_ui extends e_admin_ui
 			e107::getBB()->setClass($category);
 			$parms['width'] = (int) e107::getBB()->resizeWidth(); // resize the image according to prefs.
 			$parms['height'] = (int) e107::getBB()->resizeHeight();
-			e107::getBB()->clearclass();
+			e107::getBB()->clearClass();
 		}
 
 
@@ -2467,8 +2469,9 @@ class media_admin_ui extends e_admin_ui
 		{
 			$gd_version = "<span class='error'> ".IMALAN_55."</span>";
 		}
-		
-		if($pref['resize_method'] == "ImageMagick" && (!vartrue(e107::getFolder('imagemagick'))))
+
+        $folder1 = e107::getFolder('imagemagick');
+        if($pref['resize_method'] == "ImageMagick" && (!vartrue($folder1)))
 		{
 			
 			$mes->addWarning('Please add: <b>$IMAGEMAGICK_DIRECTORY="'.$pref['im_path'].'";</b> to your e107_config.php file');	
@@ -2476,7 +2479,8 @@ class media_admin_ui extends e_admin_ui
 		
 			
 		//$IM_NOTE = "";
-		$im_path = vartrue(e107::getFolder('imagemagick'));
+        $folder = e107::getFolder('imagemagick');
+        $im_path = vartrue($folder);
 		if($im_path != "")
 		{
 		  $im_file = $im_path.'convert';
@@ -3874,4 +3878,3 @@ if (isset($_POST['check_avatar_sizes']))
 //Just in case...
 if(!e_AJAX_REQUEST) require_once("footer.php"); 
 
-?>

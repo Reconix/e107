@@ -180,7 +180,7 @@ class news_front
 	 */
 	private function renderNewForumPosts()
 	{
-		if(e107::isInstalled('newforumposts_main') && !empty($this->pref['nfp_display']))
+		if(deftrue('THEME_LEGACY') && !empty($this->pref['nfp_display']))
 		{
 			$parms = array('layout'=>'main', 'display'=>$this->pref['nfp_amount']);
 
@@ -985,7 +985,7 @@ class news_front
 
 		$action = $currentNewsAction;
 
-		if(deftrue('BOOTSTRAP'))  // v2.x
+		if(!deftrue('THEME_LEGACY'))  // v2.x
 		{
 			$template = e107::getTemplate('news', 'news', 'list');
 		}
@@ -1197,12 +1197,11 @@ class news_front
 			$caption = null;
 			$render = false;
 
-			if(!empty($NEWSSTYLE))
+			if(deftrue('THEME_LEGACY') && !empty($NEWSSTYLE))
 			{
 				$template =  $NEWSSTYLE;
-
 			}
-			elseif(function_exists("news_style")) // BC
+			elseif(deftrue('THEME_LEGACY') && function_exists("news_style")) // BC
 			{
 				$template = news_style($news, 'extend', $param);
 			}
@@ -1608,9 +1607,9 @@ class news_front
 
 			require_once(THEME."news_template.php");
 
-			if(empty($ALTERNATECLASS1))
+			if(!empty($ALTERNATECLASS1))
 			{
-				return TRUE;
+				return true;
 			}
 
 			$newscolumns = (isset($NEWSCOLUMNS) ? $NEWSCOLUMNS : 1);
@@ -1619,7 +1618,9 @@ class news_front
 			$loop = 1;
 			$param = array();
 			$param['current_action'] = $action;
-			foreach($newsAr as $news) {
+
+			foreach($newsAr as $news)
+			{
 
 				if(is_array($ALTERNATECLASSES))
 				{
@@ -1631,7 +1632,8 @@ class news_front
 					$newsdata[$loop] .= $this->ix->render_newsitem($news, 'return', '', '', $param);
 				}
 				$loop ++;
-				if($loop > $newscolumns) {
+				if($loop > $newscolumns)
+				{
 					$loop = 1;
 				}
 			}

@@ -65,95 +65,85 @@ class signup_shortcodes extends e_shortcode
 	// TODO - template
 	function sc_signup_xup_login($parm)
 	{
-		$pref = e107::getPref('social_login_active');
-		$tp = e107::getParser();
-			
+		if (!e107::getUserProvider()->isSocialLoginEnabled()) return '';
+
 		$size = empty($parm['size']) ? '3x' : $parm['size'];
 		$class = empty($parm['class']) ?  'btn btn-primary' : $parm['class'] ;
 
-
-		if(!empty($pref))
-		{
-			$text = "";
-			$providers = e107::getPref('social_login'); 
-
-			foreach($providers as $p=>$v)
-			{
-				$p = strtolower($p);
-				if($v['enabled'] == 1)
-				{
-					
-				//		$text .= "<a href='".e107::getUrl()->create('system/xup/login?provider='.$p.'&back='.base64_encode(e_REQUEST_URL))."'><img class='e-tip' title='Register using your {$p} account' src='".e_IMAGE_ABS."xup/{$p}.png' alt='' /></a>";		
-				
-					$ic = strtolower($p);
-					
-					if($ic == 'live')
-					{
-						$ic = 'windows';
-					}
-					
-					// 'signup' Creates a new XUP user if not found, otherwise it logs the person in. 
-					
-					$button = (defset('FONTAWESOME')) ? $tp->toGlyph('fa-'.$ic, array('size'=>$size, 'fw'=>true)) : "<img class='e-tip' title='".$tp->lanVars(LAN_PLUGIN_SOCIAL_XUP_SIGNUP, $p)."' src='".e_IMAGE_ABS."xup/{$p}.png' alt='' />";
-					$text .= " <a title='".$tp->lanVars(LAN_PLUGIN_SOCIAL_XUP_SIGNUP, $p)." ' role='button' class='signup-xup  ".$class."' href='".e107::getUrl()->create('system/xup/signup?provider='.$p.'&back='.base64_encode(e_REQUEST_URL))."'>".$button."</a> ";
-				}
-				//TODO different icon options. see: http://zocial.smcllns.com/
-			}	
-			
-		//	$text .= "<hr />";
-			return $text;	
-		}	
+		return $this->generateXupLoginButtons("login", $size, $class);
 	}
 	
 	// TODO - template
 	function sc_signup_xup_signup($parm)
 	{
-		$pref = e107::getPref('social_login_active');
+		if (!e107::getUserProvider()->isSocialLoginEnabled()) return '';
+
+		$size = empty($parm['size']) ? '2x' : $parm['size'];
+		$class = empty($parm['class']) ?  'btn btn-primary' : $parm['class'] ;
+
+		if($size == '2x')
+		{
+			$class .= ' btn-lg';
+		}
+
+		return $this->generateXupLoginButtons("signup", $size, $class);
+	}
+
+	/**
+	 * @param string $type
+	 * @param $size
+	 * @param $class
+	 * @return string
+	 */
+	private function generateXupLoginButtons($type, $size, $class)
+	{
+		$text = "";
 		$tp = e107::getParser();
 
-
-		
-		if(!empty($pref))
+		$lan_plugin_social_xup = '';
+		switch ($type)
 		{
-			$text = "";
-			$providers = e107::pref('core', 'social_login'); 
-			
-			$size = empty($parm['size']) ? '2x' : $parm['size'];	
-			$class = empty($parm['class']) ?  'btn btn-primary' : $parm['class'] ; 
-			
-			if($size == '2x')
+			case "login":
+				$lan_plugin_social_xup = LAN_PLUGIN_SOCIAL_XUP_REG;
+				break;
+			case "signup":
+				$lan_plugin_social_xup = LAN_PLUGIN_SOCIAL_XUP_SIGNUP;
+				break;
+		}
+
+
+		$manager = new social_login_config(e107::getConfig());
+		$providers = $manager->getValidConfiguredProviderConfigs();
+
+		foreach ($providers as $p => $v)
+		{
+			if ($v['enabled'] == 1)
 			{
-				$class .= ' btn-lg';	
-			}
+				$ic = strtolower($p);
 
-
-			foreach($providers as $p=>$v)
-			{
-
-
-				$p = strtolower($p);
-				if($v['enabled'] == 1)
+				switch ($ic)
 				{
-					$ic = strtolower($p);
-					
-					if($ic == 'live')
-					{
+					case 'windowslive':
 						$ic = 'windows';
-					}
-
-					$button = (defset('FONTAWESOME')) ? "<span title='".$tp->lanVars(LAN_PLUGIN_SOCIAL_XUP_REG, $p)."'>".$tp->toGlyph('fa-'.$ic, array('size'=>$size, 'fw'=>true))."</span>" : "<img class='e-tip' title='".$tp->lanVars(LAN_PLUGIN_SOCIAL_XUP_SIGNUP, $p)."' src='".e_IMAGE_ABS."xup/{$p}.png' alt='' />";
-				
-					$text .= " <a class='signup-xup ".$class."' role='button' href='".e107::getUrl()->create('system/xup/signup?provider='.$p.'&back='.base64_encode(e_REQUEST_URL))."'>".$button."</a> ";		
+						break;
 				}
-				//TODO different icon options. see: http://zocial.smcllns.com/
-			}	
-			
-		//	$text .= "<hr />";
-			return $text;	
-		}	
+
+				if (defset('FONTAWESOME') && in_array($ic, e107::getMedia()->getGlyphs()))
+					$button = "<span title='" . $tp->lanVars($lan_plugin_social_xup, $p) . "'>" . $tp->toGlyph('fa-' . $ic, array('size' => $size, 'fw' => true)) . "</span>";
+				elseif (is_file(e107::getFolder('images') . "xup/{$ic}.png"))
+					$button = "<img class='e-tip' title='" . $tp->lanVars($lan_plugin_social_xup, $p) . "' src='" . e_IMAGE_ABS . "xup/{$ic}.png' alt='' />";
+				else
+					$button = "<span title='" . $tp->lanVars($lan_plugin_social_xup, $p) . "'>$p</span>";
+
+				$callback_url = e107::getUserProvider($p)->generateCallbackUrl(e_REQUEST_URL);
+				$text .= " <a title='" . $tp->lanVars($lan_plugin_social_xup, $p) . " ' role='button' class='signup-xup $class' href='$callback_url'>$button</a> ";
+			}
+			//TODO different icon options. see: http://zocial.smcllns.com/
+		}
+
+		return $text;
 	}
-	
-	
+
 	function sc_signup_form_open()
 	{
 		return "<form action='".e_SELF."' method='post' id='signupform' autocomplete='off'><div>".e107::getForm()->token()."</div>";
@@ -183,7 +173,7 @@ class signup_shortcodes extends e_shortcode
 			//	return $SIGNUP_TEXT." ";
 		}
 		 */
-		 
+		return null;
 	}
 	
 	
@@ -199,6 +189,8 @@ class signup_shortcodes extends e_shortcode
 			return e107::getForm()->text('username', $val,  $dis_name_len);
 
 		}
+
+		return null;
 	}
 	
 	/* example {SIGNUP_LOGINNAME} */
@@ -238,7 +230,7 @@ class signup_shortcodes extends e_shortcode
 	function sc_signup_realname($parm=null)
 	{
 		$pref = e107::getPref('signup_option_realname');
-		if($pref < 1){ return; }
+		if($pref < 1){ return null; }
 			
 		$options 				= array('size'=>30);
 		$options['required'] 	= ($pref==2) ? 1 : 0;
@@ -269,7 +261,8 @@ class signup_shortcodes extends e_shortcode
 
 		$options = array('size'=>30,'class'=>'e-password tbox','required'=>1);
 	//	$options['title'] = 'Password must contain at least 6 characters, including UPPER/lowercase and numbers';
-		$len = vartrue(e107::getPref('signup_pass_len'),6);
+	    $preLen = e107::getPref('signup_pass_len');
+		$len = vartrue($preLen,6);
 		$options['title'] = str_replace("[x]", $len, LAN_SIGNUP_107); // Password must contain  at least
 	//	$options['pattern'] = '(?=.*\d)(?=.*[a-z])(?=.*[A-Z])\w{'.$len.',}'; // at least one number, one lowercase and uppercase. 
 		$options['required'] = true;
@@ -330,6 +323,8 @@ class signup_shortcodes extends e_shortcode
 		{
 			return $SIGNUP_PASSWORD_LEN;
 		}
+
+		return null;
 	}
 	
 	/* example {SIGNUP_EMAIL} */
@@ -360,7 +355,7 @@ class signup_shortcodes extends e_shortcode
 	function sc_signup_email_confirm($parm=null)
 	{
 		$pref = e107::getPref('signup_option_email_confirm');
-		if($pref < 1){ return; }
+		if($pref < 1){ return null; }
 			
 		$options 				= array('size'=>30);
 		$options['required'] 	= ($pref==2) ? 1 : 0;
@@ -385,6 +380,8 @@ class signup_shortcodes extends e_shortcode
 		{
 			return $rs->form_radio("hideemail", 1, $default_email_setting==1)." <label for='hideemail1'>".LAN_YES."</label> &nbsp;&nbsp;".$rs->form_radio("hideemail",  0,$default_email_setting==0)." <label for='hideemail0'>".LAN_NO."</label>";
 		}
+
+		return null;
 	}
 
 
@@ -414,7 +411,7 @@ class signup_shortcodes extends e_shortcode
 
 
 
-	private function show_signup_class( $classnum, $current_value='', $nest_level=0)
+	private function show_signup_class( $classnum, $current_value='')
 	{
 		$tp = e107::getParser();
 		$uc = e107::getUserClass();
@@ -434,7 +431,7 @@ class signup_shortcodes extends e_shortcode
 	//	}
 
 		// code below is too unpredictable for reliable BC.
-
+/*
 		global $USERCLASS_SUBSCRIBE_ROW;
 
 		e107::getDebug()->log($USERCLASS_SUBSCRIBE_ROW);
@@ -445,17 +442,17 @@ class signup_shortcodes extends e_shortcode
 			'USERCLASS_ID'          => $classnum,
 			'USERCLASS_NAME'        => $tp->toHTML($uc->getName($classnum),false, 'defs'),
 			'USERCLASS_DESCRIPTION' => $tp->toHTML($uc->getDescription($classnum),false,'defs'),
-			'USERCLASS_INDENT'      => " style='text-indent:".(1.2*$nest_level)."em'",
+			'USERCLASS_INDENT'      => " style='text-indent:".(1.2 * $nest_level)."em'",
 			'USERCLASS_CHECKED'     => (in_array($classnum, $tmp) ? " checked='checked'" : '')
 		);
 
-		return $tp->simpleParse($USERCLASS_SUBSCRIBE_ROW, $shortcodes);
+		return $tp->simpleParse($USERCLASS_SUBSCRIBE_ROW, $shortcodes);*/
 
 	}
 	
 	
 	
-	function sc_signup_extended_user_fields()
+	function sc_signup_extended_user_fields($parm=null)
 	{ 
 		global $usere, $tp, $SIGNUP_EXTENDED_USER_FIELDS, $SIGNUP_EXTENDED_CAT;
 		$text = "";
@@ -489,8 +486,10 @@ class signup_shortcodes extends e_shortcode
 			continue;	
 		  }
 
+
 			foreach($extList as $ext)
 			{
+			     $opts = $parm;
 				if($ext['user_extended_struct_required'] == 1 || $ext['user_extended_struct_required'] == 2)
 				{
 					if(!$done_heading && ($cat['user_extended_struct_id'] > 0))
@@ -504,10 +503,17 @@ class signup_shortcodes extends e_shortcode
 						$done_heading = true;
 					}
 
+					$label = $tp->toHTML(deftrue($ext['user_extended_struct_text'], $ext['user_extended_struct_text']), false, 'emotes_off,defs');
+
+                    if(isset($opts['placeholder']))
+                    {
+                        $opts['placeholder'] = str_replace('[label]', $label, $opts['placeholder']);
+                    }
+
 					$replace = array(
-						$tp->toHTML(deftrue($ext['user_extended_struct_text'], $ext['user_extended_struct_text']), false, 'emotes_off,defs'),
+						$label,
 						($ext['user_extended_struct_required'] == 1 ? $this->sc_signup_is_mandatory('true') : ''),
-						$usere->user_extended_edit($ext, $_POST['ue']['user_' . $ext['user_extended_struct_name']])
+						$usere->renderElement($ext, $_POST['ue']['user_' . $ext['user_extended_struct_name']], $opts)
 					);
 
 					$text .= str_replace($search, $replace, $SIGNUP_EXTENDED_USER_FIELDS);
@@ -527,6 +533,8 @@ class signup_shortcodes extends e_shortcode
 			$frm = e107::getForm();
 			return $frm->bbarea('signature', '', 'signature','helpb', 'tiny');
 		}
+
+		return null;
 	}
 	
 	/* {SIGNUP_IMAGES}  */
@@ -539,6 +547,8 @@ class signup_shortcodes extends e_shortcode
 		{
 			return e107::getForm()->avatarpicker('avatar', '', $parm);
 		}
+
+		return null;
 	}
 	
 	
@@ -550,6 +560,8 @@ class signup_shortcodes extends e_shortcode
 			return e107::getSecureImg()->r_image()."<div>".e107::getSecureImg()->renderInput()."</div>"; 
 			// return $rs->form_hidden("rand_num", $sec_img->random_number). $sec_img->r_image()."<br />".$rs->form_text("code_verify", 20, "", 20);
 		}
+		unset($rs, $sec_img);
+		return null;
 	}
 	
 	function sc_signup_imagecode_label()
@@ -558,7 +570,9 @@ class signup_shortcodes extends e_shortcode
 		if($signup_imagecode)
 		{
 			return $sec_img->renderLabel(); 
-		}			
+		}
+
+		return null;
 	}
 	
 	
@@ -601,6 +615,8 @@ class signup_shortcodes extends e_shortcode
 
 			}
 		}
+
+        return null;
 
 	//	if((int) $val === 2)
 		{
@@ -645,11 +661,13 @@ class signup_shortcodes extends e_shortcode
 
 	}
 
-	/**
-	 * Create Privacy policy link
-	 * @example {SIGNUP_GDPR_PRIVACYPOLICY_LINK}
-	 * @example {SIGNUP_GDPR_PRIVACYPOLICY_LINK: class=label label-info}
-	 */
+    /**
+     * Create Privacy policy link
+     * @param null $parm
+     * @return string
+     * @example {SIGNUP_GDPR_PRIVACYPOLICY_LINK}
+     * @example {SIGNUP_GDPR_PRIVACYPOLICY_LINK: class=label label-info}
+     */
 	function sc_signup_gdpr_privacypolicy_link($parm=null)
 	{
 		$pp = e107::getPref('gdpr_privacypolicy', '');
@@ -659,15 +677,17 @@ class signup_shortcodes extends e_shortcode
 		}
 		$pp = e107::getParser()->replaceConstants($pp, 'full');
 		$class = (!empty($parm['class'])) ? $parm['class'] : '';
-		$text = sprintf('<span class="%s"><a href="%s" target="_blank">%s</a></span>', $class, $pp, LAN_SIGNUP_122);
-		return $text;
+		return sprintf('<span class="%s"><a href="%s" target="_blank">%s</a></span>', $class, $pp, LAN_SIGNUP_122);
+
 	}
 
-	/**
-	 * Create Terms and conditions link
-	 * @example {SIGNUP_GDPR_TERMSANDCONDITIONS_LINK}
-	 * @example {SIGNUP_GDPR_TERMSANDCONDITIONS_LINK: class=label label-info}
-	 */
+    /**
+     * Create Terms and conditions link
+     * @param null $parm
+     * @return string
+     * @example {SIGNUP_GDPR_TERMSANDCONDITIONS_LINK}
+     * @example {SIGNUP_GDPR_TERMSANDCONDITIONS_LINK: class=label label-info}
+     */
 	function sc_signup_gdpr_termsandconditions_link($parm=null)
 	{
 		$pp = e107::getPref('gdpr_termsandconditions', '');
@@ -677,8 +697,8 @@ class signup_shortcodes extends e_shortcode
 		}
 		$pp = e107::getParser()->replaceConstants($pp, 'full');
 		$class = (!empty($parm['class'])) ? $parm['class'] : '';
-		$text = sprintf('<span class="%s"><a href="%s" target="_blank">%s</a></span>', $class, $pp, LAN_SIGNUP_123);
-		return $text;
+		return sprintf('<span class="%s"><a href="%s" target="_blank">%s</a></span>', $class, $pp, LAN_SIGNUP_123);
+
 	}
 
 	/**
@@ -692,11 +712,11 @@ class signup_shortcodes extends e_shortcode
 			return '';
 		}
 
-		$text = e107::getParser()->lanVars(LAN_SIGNUP_124,
+		return e107::getParser()->lanVars(LAN_SIGNUP_124,
 			array($this->sc_signup_gdpr_privacypolicy_link(), $this->sc_signup_gdpr_termsandconditions_link()));
-		return $text;
+
 	}
 
 }
 
-?>
+

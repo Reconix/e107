@@ -119,7 +119,7 @@ class eurl_admin_ui extends e_admin_controller_ui
 			e107::getMessage()->addInfo("Mod-rewrite is disabled. To enable, please add the following line to your <b>e107_config.php</b> file:<br /><pre>define('e_MOD_REWRITE',true);</pre>");
 		}
 	
-		if(is_array($_POST['rebuild']))
+		if(isset($_POST['rebuild']) && is_array($_POST['rebuild']))
 		{
 			$table = key($_POST['rebuild']);
 			list($primary, $input, $output) = explode("::",$_POST['rebuild'][$table]);
@@ -242,8 +242,11 @@ class eurl_admin_ui extends e_admin_controller_ui
 		$pref = e107::getPref('e_url_alias');
 		$sefActive = e107::getPref('e_url_list');
 
+
+
 		if(empty($eUrl))
 		{
+			e107::getMessage()->addDebug("Unable to load e_url configurations.");
 			return false;
 		}
 
@@ -261,6 +264,7 @@ class eurl_admin_ui extends e_admin_controller_ui
 
 		foreach($eUrl as $plug=>$val)
 		{
+
 
 			$plg->load($plug);
 
@@ -287,6 +291,21 @@ class eurl_admin_ui extends e_admin_controller_ui
 			
 			foreach($val as $k=>$v)
 			{
+
+					if(!isset($v['alias']))
+					{
+						$v['alias'] = '';
+					}
+
+					if(!isset($v['regex']))
+					{
+						$v['regex'] = '';
+					}
+
+					if(!isset($v['redirect']))
+					{
+						$v['redirect'] = '';
+					}
 
 					$alias          = vartrue($pref[e_LAN][$plug][$k], $v['alias']);
 				//	$sefurl         = (!empty($alias)) ? str_replace('{alias}', $alias, $v['sef']) : $v['sef'];

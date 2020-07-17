@@ -30,16 +30,21 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 					var url = $this.attr('href');
 					var caption = $this.attr('data-modal-caption');
 					var height = ($(window).height() * 0.7) - 120;
-
+					var target = $this.attr('data-modal-target');
 
 					if(caption === undefined)
 					{
 						caption = '';
 					}
 
-					$('.modal-body').html('<div class="well"><iframe id="e-modal-iframe" width="100%" height="' + height + 'px" frameborder="0" scrolling="auto" style="display:block;background-color:transparent" allowtransparency="true" src="' + url + '"></iframe></div>');
-					$('.modal-caption').html(caption + ' <i id="e-modal-loading" class="fa fa-spin fa-spinner"></i>');
-					$('.modal').modal('show');
+					if(target === undefined)
+					{
+						target = '#uiModal';
+					}
+
+					$(target+' .modal-body').html('<div class="well"><iframe id="e-modal-iframe" width="100%" height="' + height + 'px" frameborder="0" scrolling="auto" style="display:block;background-color:transparent" allowtransparency="true" src="' + url + '"></iframe></div>');
+					$(target+' .modal-caption').html(caption + ' <i id="e-modal-loading" class="fa fa-spin fa-spinner"></i>');
+					$(target+'.modal').modal('show');
 
 					$("#e-modal-iframe").on("load", function ()
 					{
@@ -123,7 +128,7 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 					placement: placement,
 					container: 'body',
 					delay: {
-						show: 300,
+						show: 200,
 						hide: 600
 					}
 				});
@@ -497,7 +502,7 @@ $(document).ready(function()
 					clearInterval(progresspump);
 			        $("#"+target).closest('.progress').removeClass("active");
 
-			        $("#"+target).html("Done");
+
 			        
 			        if(hide !== 'undefined')
 			        {
@@ -508,7 +513,8 @@ $(document).ready(function()
 			        {
 						$('#'+show).show('slow');	
 			        }
-			      
+
+			         $("#"+target).html("Done");
 		        
 					}
 		    
@@ -771,6 +777,21 @@ $(document).ready(function()
 			//	$(selector).removeAttr("checked");
 			}
 		});
+
+
+    $("ul.col-selection input[type='checkbox']").click(function(evt){
+
+        if(this.checked)
+        {
+             $(this).closest("label").addClass( "active", 0 );
+        //    $(this).closest("tr.even").switchClass( "even", "highlight-even", 50 );
+        }
+        else
+        {
+            $(this).closest("label").removeClass( "active", 0 );
+        }
+
+    });
 		
 		// highlight checked row
 		$(".adminlist input[type='checkbox']").click(function(evt){
@@ -852,10 +873,22 @@ $(document).ready(function()
 
 
 		$('body').on('slid.bs.carousel', '.carousel', function(){
-		  var currentIndex = $(this).find('.active').index();
-		  var text = (currentIndex + 1);
-		  var id = $(this).attr('id') + '-index'; // admin-ui-carousel-index etc.
-		  $('#'+id).text(text);
+
+			var label = $(this).find('.carousel-item.active').attr('data-label');
+			var id = $(this).attr('id') + '-index'; // admin-ui-carousel-index etc.
+
+			if(label !== undefined)
+			{
+				$('#'+id).text(label);
+			}
+			else
+			{
+				var currentIndex = $(this).find('.active').index();
+				var text = (currentIndex + 1);
+
+				$('#'+id).text(text);
+			}
+
 
 			// this takes commented content for each carousel slide and enables it, one slide at a time as we scroll.
 

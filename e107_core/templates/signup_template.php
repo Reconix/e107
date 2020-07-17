@@ -37,17 +37,19 @@ $sc_style['SIGNUP_REALNAME']['pre'] = "
 $sc_style['SIGNUP_REALNAME']['post'] = "
 	</td>
 </tr>";
+$sc_style['SIGNUP_GDPR_INFO']['pre'] = "<tr style='vertical-align:top'><td class='forumheader' colspan='2'  style='text-align:center'>";
+$sc_style['SIGNUP_GDPR_INFO']['post'] = "</td>
+		</tr>";
 
 
 
-
-if(!defined($SIGNUP_PASSWORD_LEN))
+if(!isset($SIGNUP_PASSWORD_LEN))
 {
 	$SIGNUP_PASSWORD_LEN = "
 	<span class='smalltext'> (".LAN_SIGNUP_1." {$pref['signup_pass_len']} ".LAN_SIGNUP_2.")</span>";
 }
 
-if(!defined($SIGNUP_EXTENDED_USER_FIELDS))
+if(!isset($SIGNUP_EXTENDED_USER_FIELDS))
 {
 	$SIGNUP_EXTENDED_USER_FIELDS	= "
 	<tr>
@@ -134,7 +136,7 @@ $sc_style['SIGNUP_USERCLASS_SUBSCRIBE']['post'] = "</td>
 		</tr>";
 
 
-if(!defined($COPPA_TEMPLATE))
+if(!isset($COPPA_TEMPLATE))
 {
 	$COPPA_TEMPLATE = 
 	LAN_SIGNUP_77." <a target='_blank' href='http://www.ftc.gov/privacy/coppafaqs.shtm'>".LAN_SIGNUP_14."</a>. "
@@ -145,7 +147,7 @@ if(!defined($COPPA_TEMPLATE))
 	</div>";
 }
 
-if(!defined($COPPA_FAIL))
+if(!isset($COPPA_FAIL))
 {
 	$COPPA_FAIL = "<div style='text-align:center'>".LAN_SIGNUP_9."</div>";
 }
@@ -158,13 +160,13 @@ if(!defined($COPPA_FAIL))
 	//LAN_SIGNUP_85;
 }
 
-if(!defined($SIGNUP_BEGIN))
+if(!isset($SIGNUP_BEGIN))
 {
 	$SIGNUP_BEGIN = "
 	{SIGNUP_FORM_OPEN} {SIGNUP_ADMINOPTIONS} {SIGNUP_SIGNUP_TEXT}";
 }
 
-if(!defined($SIGNUP_BODY))
+if(!isset($SIGNUP_BODY))
 {
 	$SIGNUP_BODY = "
 	{SIGNUP_XUP}
@@ -189,16 +191,10 @@ if(!defined($SIGNUP_BODY))
 			{SIGNUP_SIGNATURE}
 			{SIGNUP_IMAGES}
 			{SIGNUP_IMAGECODE}
-			
+			{SIGNUP_GDPR_INFO}
 			<tr style='vertical-align:top'>
 				<td class='forumheader' colspan='2'  style='text-align:center'>
-					{SIGNUP_GDPR_INFO}
-				</td>
-			</tr>
-			
-			<tr style='vertical-align:top'>
-				<td class='forumheader' colspan='2'  style='text-align:center'>
-					<input class='button btn btn-success' type='submit' name='register' value=\"".LAN_SIGNUP_79."\" />
+					<input class='button btn btn-primary' type='submit' name='register' value=\"".LAN_SIGNUP_79."\" />
 					<br />
 				</td>
 			</tr>
@@ -207,7 +203,7 @@ if(!defined($SIGNUP_BODY))
 	{SIGNUP_FORM_CLOSE}";
 }
 
-if(!defined($SIGNUP_EXTENDED_CAT))
+if(!isset($SIGNUP_EXTENDED_CAT))
 {
 	$SIGNUP_EXTENDED_CAT = "
 	<tr>
@@ -217,7 +213,7 @@ if(!defined($SIGNUP_EXTENDED_CAT))
 	</tr>";
 }
 
-if(!defined($SIGNUP_END))
+if(!isset($SIGNUP_END))
 {
 	$SIGNUP_END = '';
 }
@@ -226,9 +222,12 @@ if(!defined($SIGNUP_END))
 
 
 // v2.x to-do
+
 $SIGNUP_TEMPLATE = array();
 $SIGNUP_TEMPLATE['start'] = $SIGNUP_BEGIN;
 $SIGNUP_TEMPLATE['end'] = $SIGNUP_END;
 $SIGNUP_TEMPLATE['body'] = $SIGNUP_BODY;
 $SIGNUP_TEMPLATE['extended-user-fields'] = $SIGNUP_EXTENDED_USER_FIELDS;
-$SIGNUP_TEMPLATE['coppa']= '';
+$SIGNUP_TEMPLATE['coppa'] = '';
+$SIGNUP_TEMPLATE['coppa-fail'] = '';
+

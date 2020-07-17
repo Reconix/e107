@@ -367,8 +367,6 @@ class e_bbcode
 			
 			e107::getDebug()->logCode(1, $code, $parm, print_a($info,true));
 		}
-		
-		global $e107_debug;
 
 		if (is_object($this->bbList[$code]))
 		{
@@ -735,6 +733,7 @@ class e_bbcode
 			print_a($arr);
 		}
 
+		$arr['img'] = isset($arr['img']) && is_array($arr['img']) ? $arr['img'] : [];
 		foreach($arr['img'] as $img)
 		{
 			if(/*substr($img['src'],0,4) == 'http' ||*/ strpos($img['src'], e_IMAGE_ABS.'emotes/')!==false) // dont resize external images or emoticons.
@@ -1013,4 +1012,3 @@ class e_bb_base
 	}
 }
 
-?>

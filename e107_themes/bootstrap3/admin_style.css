@@ -4,6 +4,7 @@ body#admin-admin .popover   { position: fixed }
 
 @media (max-width: 992px) {
     body { height: 100vh; overflow-y: auto!important; }
+    ul.nav-admin a.navbar-admin-button:after { content: attr(title) }
 }
 
 button, button:active                      { outline: 0; }
@@ -78,6 +79,9 @@ a.core-mainpanel-link-icon:hover { text-decoration: none; filter: none; }
 .admin-ui-grid img.fallback { opacity: 0.3; }
 .admin-ui-grid img.thumbnail { max-width: 100%; height:auto; }
 .admin-ui-grid .panel-footer { font-size:1em; /*height:30px; overflow:hidden*/}
+.admin-ui-grid .panel-footer a { overflow: hidden; white-space: nowrap; width: 88%; display: inline-block; }
+
+
 
 
 /*
@@ -176,7 +180,10 @@ table textarea.input-block-level,
 input.input-block-level,
 input.form-control.input-block-level,
 select.input-block-level                { width: 100% }
-table  label.checkbox                   { margin-left: 20px }
+
+.form-check { padding-bottom: 9px; margin:0 !important }
+td > label.checkbox  { margin-left: 20px !important }
+div.checkboxes { margin:0 }
 ul.checkboxes { display: inline-block; list-style: none; margin: 0; padding: 0;}
 
 #admin-ui-nav-menu i.fa-chevron-right   { margin-left: -10px }
@@ -219,6 +226,8 @@ td .file.well                              { margin-bottom:0 }
 
 #admin-ui-edit-db-language span.default,
 #admin-ui-list-db-language span.default  { color: white }
+
+
 
 td.options .btn-group                   {  display: flex; }
 
@@ -315,11 +324,11 @@ td .mediaselector-multi .mediaselector-container { margin-bottom: 20px }
 
 /* dropzone new in v2.1.9 */
 
-.dropzone { min-height: 100px; padding: 0 }
-.dropzone .dz-preview { display: block }
-.dropzone .dz-preview .dz-image { width: auto }
-.dropzone .dz-filename { margin-top: 30px; }
-.dz-message span {
+.mediaselector-preview.dropzone { min-height: 100px; padding: 0 }
+.mediaselector-preview.dropzone .dz-preview { display: block }
+.mediaselector-preview.dropzone .dz-preview .dz-image { width: auto }
+.mediaselector-preview.dropzone .dz-filename { margin-top: 30px; }
+.mediaselector-preview .dz-message span {
 	display: block;
 	margin-top: 35%;
 	text-align: center;
@@ -448,8 +457,11 @@ ul#e-status i		{
                                             -o-filter: grayscale(100%);
                                             filter: grayscale(100%);
                                             filter: gray; /* IE 6-9 */
+                                            opacity: 0.6
 											}
 
+ul.navbar-nav li ul.dropdown-menu > li.active a img,
+ul.navbar-nav li ul.dropdown-menu > li.active a i,
 ul.navbar-nav li ul.dropdown-menu a:hover i,
 ul.navbar-nav li ul.dropdown-menu a:hover img,
 ul#e-latest a:hover img,
@@ -462,6 +474,7 @@ ul#e-status a:hover i
                                             -moz-filter: none;
                                             -ms-filter: none;
                                             -o-filter: none;
+                                            opacity: 1;
 										     }
 
 td.options 									{ 	}
@@ -560,6 +573,15 @@ img.S32:hover 				{}
 
 .adminlist .col-selection-cont 				{ position: relative; float:right; }
 table.adminlist								{ margin-bottom: 0 }
+table.adminlist td .video-responsive        { height: auto; padding:0 }
+
+.admin-true-icon                            {  color: #51a351; font-weight:bold; font-size:1.2em; }
+.admin-false-icon                           {  color: #ee5f5b; font-weight:bold; font-size:1.2em; }
+
+ select.e-editable-boolean.admin-true-icon option[value='1'],
+ select.e-editable-boolean.admin-false-icon option[value='1']        {  color: #51a351; }
+ select.e-editable-boolean.admin-true-icon option[value='0'],
+ select.e-editable-boolean.admin-false-icon option[value='0']      {  color: #ee5f5b; }
 
 span.e-search input[type='text']				{ padding-left:15px; font-style: italic }
 
@@ -1098,11 +1120,14 @@ ul.col-selection 				            { padding:5px; text-align:left; background-colo
 ul.col-selection 							{ text-align:left;  overflow:visible; z-index:101;  background-color: rgb(23, 23, 23); }
 ul.col-selection > li a 					{ border-top: 1px solid rgb(51, 51, 51);  border-bottom: 1px solid rgb(32, 32, 32); }
 ul.col-selection > li a 					{ padding: 3px 0 0 5px; color: rgb(153, 153, 153); }
-ul.col-selection > li a label 				{ padding-left:0; display:block; line-height:25px; }
+ul.col-selection > li a label 				{ padding-left:20px; display:block; /*line-height:25px;*/ }
 ul.col-selection > li a:hover 				{ color: #FFF; background-image: linear-gradient(to bottom, #08C, #0077B3);}
 ul.col-selection 							{ background-color: rgb(39, 39, 39);}
 ul.col-selection ul.nav > li                  { padding:0 }
 ul.scroll-menu 								{ max-height:350px; overflow:auto;    }
+ul.col-selection li.col-selection-list      { padding: 5px; }
+ul.col-selection input                      { opacity:0; }
+ul.col-selection label.active:before        { font-family:FontAwesome;  margin-left:-20px ; margin-right:6px ; content: '\f00c'; color: #51a351; position:relative; }
 
 
 .nav ul li ul.dropdown-menu 				{ border-left:1px solid rgb(51, 51, 51); background-color: rgb(39, 39, 39); }
@@ -1643,6 +1668,11 @@ margin-right: 0;
 padding-top: 15px;
 margin-top: 0; }
 
+
+/*
+Optional: Display Admin Nav Button Labels.
+ul.nav-admin a.navbar-admin-button:after { content: attr(title) }
+ */
 
 /*
 

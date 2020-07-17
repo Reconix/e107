@@ -113,34 +113,34 @@ function deftrue($str, $default='')
 
 function e107_include($fname)
 {
-	global $e107_debug, $_E107;
-	$ret = (($e107_debug || isset($_E107['debug']) || deftrue('e_DEBUG')) ? include($fname) : @include($fname));
+	global $_E107;
+	$ret = (isset($_E107['debug']) || deftrue('e_DEBUG')) ? include($fname) : @include($fname);
 	return $ret;
 }
 
 function e107_include_once($fname)
 {
-	global $e107_debug, $_E107;
+	global $_E107;
 	if(is_readable($fname))
 	{
-		$ret = ($e107_debug || isset($_E107['debug']) || deftrue('e_DEBUG')) ? include_once($fname) : @include_once($fname);
+		$ret = (isset($_E107['debug']) || deftrue('e_DEBUG')) ? include_once($fname) : @include_once($fname);
 	}
 	return (isset($ret)) ? $ret : '';
 }
 
 function e107_require_once($fname)
 {
-	global $e107_debug, $_E107;
+	global $_E107;
 	
-	$ret = (($e107_debug || isset($_E107['debug']) || deftrue('e_DEBUG')) ? require_once($fname) : @require_once($fname));
+	$ret = ((isset($_E107['debug']) || deftrue('e_DEBUG')) ? require_once($fname) : @require_once($fname));
 	
 	return $ret;
 }
 
 function e107_require($fname)
 {
-	global $e107_debug, $_E107;
-	$ret = (($e107_debug || isset($_E107['debug']) || deftrue('e_DEBUG')) ? require($fname) : @require($fname));
+	global $_E107;
+	$ret = ((isset($_E107['debug']) || deftrue('e_DEBUG')) ? require($fname) : @require($fname));
 	return $ret;
 }
 
@@ -205,7 +205,7 @@ function array_diff_recursive($array1, $array2)
 
 	foreach($array1 as $key => $val) 
 	{
-    	if(array_key_exists($key, $array2)) 
+    	if(is_array($array2) && array_key_exists($key, $array2))
     	{
       		if(is_array($val)) 
       		{
@@ -457,11 +457,12 @@ class e_array {
 
 	     //   e107::getDebug()->log("Json data found");
 
-	        if(json_last_error() !=  JSON_ERROR_NONE && (e_DEBUG === true))
+	        if(json_last_error() !=  JSON_ERROR_NONE && e_DEBUG === true && !e107::isCli())
 	        {
 	            echo "<div class='alert alert-danger'><h4>e107::unserialize() Parser Error (json)</h4></div>";
 		        echo "<pre>";
 				debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
+				file_put_contents(e_LOG.'unserializeError_'.date('c').'.log', $ArrayData);
 				echo "</pre>";
 	        }
 
@@ -539,14 +540,13 @@ class e_array {
 			@eval($ArrayData);
 	        if (!isset($data) || !is_array($data))
 	        {
-	            trigger_error("Bad stored array data - <br /><br />".htmlentities($ArrayData), E_USER_ERROR);
-
 	            if(e_DEBUG === true)
 				{
 	                file_put_contents(e_LOG.'unserializeError_'.time().'.log', $sourceArrayData);
 				}
 
-	            return false;
+	            trigger_error("Bad stored array data - <br /><br />".htmlentities($ArrayData), E_USER_ERROR);
+
 	        }
 
 		}
@@ -572,7 +572,16 @@ class e_array {
 
         if($mode === 'json')
         {
-            return json_encode($ArrayData, JSON_PRETTY_PRINT);
+            //todo discuss - move to e_parse::toJSON() ?
+            $encoded =  json_encode($ArrayData, JSON_PRETTY_PRINT);
+            if(json_last_error() === JSON_ERROR_UTF8)
+            {
+                $ArrayData = e107::getParser()->toUTF8($ArrayData);
+                $encoded = json_encode($ArrayData, JSON_PRETTY_PRINT);
+                //todo log
+            }
+
+            return $encoded;
         }
 
         $Array = var_export($ArrayData, true);
@@ -584,6 +593,8 @@ class e_array {
 
         return $Array;        
     }
+
+
 
 
     /**
@@ -628,7 +639,7 @@ class e_array {
 	 * 
 	 * @param string $systemLocationFile relative to e_SYSTEM file path (without the extension)
 	 * @param string $extension [optional] file extension, default is 'php'
-	 * @return array or false when file not found (or on error)
+	 * @return array|false false when file not found (or on error)
 	 */
 	public function load($systemLocationFile, $extension = 'php')
 	{
@@ -642,16 +653,17 @@ class e_array {
 
 		return $this->read($content);
 	}
-	
-	/**
-	 * Serialize and store data to a local file inside SYSTEM folder
-	 * @example e107::getArrayStorage()->store($arrayData, 'import/somefile'); // -> e_SYSTEM/import/somefile.php
-	 * @example e107::getArrayStorage()->store($arrayData, 'somefile', 'weird'); // -> e_SYSTEM/somefile.weird
-	 * 
-	 * @param string $systemLocationFile relative to e_SYSTEM file path (without the extension)
-	 * @param string $extension [optional] file extension, default is 'php'
-	 * @return array or false when file not found (or on error)
-	 */
+
+    /**
+     * Serialize and store data to a local file inside SYSTEM folder
+     * @example e107::getArrayStorage()->store($arrayData, 'import/somefile'); // -> e_SYSTEM/import/somefile.php
+     * @example e107::getArrayStorage()->store($arrayData, 'somefile', 'weird'); // -> e_SYSTEM/somefile.weird
+     *
+     * @param array $array
+     * @param string $systemLocationFile relative to e_SYSTEM file path (without the extension)
+     * @param string $extension [optional] file extension, default is 'php'
+     * @return array|false when file not found (or on error)
+     */
 	public function store($array, $systemLocationFile, $extension = 'php')
 	{
 		if($extension) $extension = '.'.$extension;

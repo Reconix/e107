@@ -73,7 +73,7 @@ class online_shortcodes extends e_shortcode
 
 	function sc_online_tracking_disabled()
 	{
-		$url = e_ADMIN."users.php?mode=main&amp;action=prefs";
+		$url = e_ADMIN_ABS."users.php?mode=main&amp;action=prefs";
 
 		$srch = array("[","]");
 		$repl = array("<a href='".$url."'>", "</a>");
@@ -317,13 +317,17 @@ class online_shortcodes extends e_shortcode
 
 	function sc_online_member_page()
 	{
-		if(empty($this->currentMember['page']))
+		$currentMember = $this->currentMember;
+		if(empty($currentMember['page']))
 		{
 			return null;
 		}
 
-		global $ADMIN_DIRECTORY;
-		return (!strstr($this->currentMember['pinfo'], $ADMIN_DIRECTORY) ? "<a href='".$this->currentMember['pinfo']."'>".$this->currentMember['page']."</a>" : $this->currentMember['page']);
+		$ADMIN_DIRECTORY = e107::getFolder('admin');
+		$pinfo = (isset($currentMember['pinfo'])) ? $currentMember['pinfo'] : '';
+		return !strstr($pinfo, $ADMIN_DIRECTORY) ?
+			"<a href='".$pinfo."'>".$currentMember['page']."</a>" :
+			$currentMember['page'];
 	}
 }
 

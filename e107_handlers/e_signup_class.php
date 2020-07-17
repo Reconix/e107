@@ -17,17 +17,15 @@ if (!defined('e107_INIT')) { exit; }
  * @todo add all processing elements withing signup.php into this class.
  * @todo create unit tests for each of the methods.
  */
-class e_signup_class
+class e_signup
 {
 
 	private $testMode = false;
-	private $pref = array();
+	private $pref;
 
 	function __construct()
 	{
-		$pref = e107::pref('core');
-
-		$this->pref = $pref;
+		$this->pref = e107::pref('core');
 
 		$this->pref['user_reg_veri'] = intval($this->pref['user_reg_veri']);
 
@@ -410,7 +408,7 @@ class e_signup_class
 					e107::getEvent()->trigger('user_signup_activated', $row);
 					e107::getEvent()->trigger('userfull', $row);			// 'New' event
 
-					if (!empty($this->pref['autologinpostsignup']))
+					if (!empty($this->pref['autologinpostsignup']) && !e107::isCli())
 					{
 						require_once(e_HANDLER.'login.php');
 						$usr = new userlogin();

@@ -33,9 +33,6 @@ if(!deftrue('e_ADMIN_UI') && !deftrue('ADMIN_AREA'))
 	echo $content;
 }
 
-// Clean session shutdown
-e107::getSession()->shutdown();
-
 //
 // SHUTDOWN SEQUENCE
 //
@@ -305,8 +302,7 @@ if (is_array($pref['e_footer_list']))
 		
 		if(is_readable($fname))
 		{
-			
-			$ret = (!empty($e107_debug) || isset($_E107['debug'])) ? include_once($fname) : @include_once($fname);
+			$ret = (deftrue('e_DEBUG') || isset($_E107['debug'])) ? include_once($fname) : @include_once($fname);
 		}	
 	}
 
@@ -396,10 +392,6 @@ if($tmp1)
 	$tmp['replace'][] = $tmp1;
 }
 
-
-// Shutdown
-$e107->destruct();
-
 // New - see class2.php
 $ehd = new e_http_header;
 if($tmp)
@@ -418,8 +410,11 @@ $page = $ehd->getOutput();
 // real output
 echo $page;
 
-
 unset($In_e107_Footer);
+
+
+// Clean session shutdown
+e107::getSession()->shutdown();
+// Shutdown
+$e107->destruct();
 $e107_Clean_Exit = TRUE; // For registered shutdown function -- let it know all is well!
-
-
